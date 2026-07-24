@@ -14,9 +14,10 @@ export default function TerminalGuidePage() {
       <h1>Terminal & cURL</h1>
       <p>
         For shell scripts and one-off jobs, use{" "}
-        <code>POST /api/v1/transcribe</code>. You stream the audio file in a
-        single request; the server responds with percentage-style progress until
-        transcription finishes, then returns the result.
+        <code>POST /api/v1/transcribe</code>. You stream the raw audio bytes as
+        the request body (options go in the query string); the server streams the
+        upload straight to storage, then holds the connection open and streams
+        job progress back as SSE until the transcript is ready.
       </p>
 
       <EndpointBadge method="POST" path="/api/v1/transcribe" />
@@ -36,25 +37,22 @@ export default function TerminalGuidePage() {
         filename="transcribe.sh"
         code={`export SPEECHREVOLUTIONS_API_KEY=stt_...
 
-curl -N -X POST "${SITE.apiBase}/api/v1/transcribe" \\
+curl -N -X POST \\
+  "${SITE.apiBase}/api/v1/transcribe?output_type=json&word_timestamps=true&speaker_labels=true&nltk=true" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -F "file=@./meeting.mp3" \\
-  -F "output_type=json" \\
-  -F "word_timestamps=true" \\
-  -F "speaker_labels=true" \\
-  -F "nltk=true" \\
-  -F "tier=standard"`}
+  --data-binary @./meeting.mp3`}
       />
 
       <p>
         The <code>-N</code> flag disables buffering so progress events stream as
-        they arrive.
+        they arrive. <code>--data-binary</code> sends the file bytes unmodified
+        as the request body.
       </p>
 
-      <h2>Form fields</h2>
+      <h2>Query parameters</h2>
       <p>
-        Same options as <Link href="/api-reference/upload">upload</Link>, plus
-        the file body:
+        Options are passed in the query string (the request body is the raw
+        audio). Same options as <Link href="/api-reference/upload">upload</Link>:
       </p>
       <table>
         <thead>
@@ -66,14 +64,6 @@ curl -N -X POST "${SITE.apiBase}/api/v1/transcribe" \\
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>
-              <code>file</code>
-            </td>
-            <td>file</td>
-            <td>required</td>
-            <td>Audio/video bytes (multipart)</td>
-          </tr>
           <tr>
             <td>
               <code>output_type</code>

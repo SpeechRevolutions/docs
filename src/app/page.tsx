@@ -102,11 +102,10 @@ print(result.text)`,
           {
             label: "cURL",
             language: "bash",
-            code: `curl -N -X POST "${SITE.apiBase}/api/v1/transcribe" \\
+            code: `curl -N -X POST \\
+  "${SITE.apiBase}/api/v1/transcribe?output_type=json&speaker_labels=true" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -F "file=@meeting.mp3" \\
-  -F "output_type=json" \\
-  -F "speaker_labels=true"`,
+  --data-binary @meeting.mp3`,
           },
           {
             label: "JavaScript",

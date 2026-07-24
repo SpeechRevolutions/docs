@@ -82,13 +82,10 @@ console.log(result.text);`,
           {
             label: "cURL",
             language: "bash",
-            code: `curl -N -X POST "${SITE.apiBase}/api/v1/transcribe" \\
+            code: `curl -N -X POST \\
+  "${SITE.apiBase}/api/v1/transcribe?output_type=json&word_timestamps=true&speaker_labels=true&nltk=true" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -F "file=@audio.mp3" \\
-  -F "output_type=json" \\
-  -F "word_timestamps=true" \\
-  -F "speaker_labels=true" \\
-  -F "nltk=true"`,
+  --data-binary @audio.mp3`,
           },
         ]}
       />

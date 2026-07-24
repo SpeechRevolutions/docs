@@ -94,13 +94,17 @@ export default function ApiOverviewPage() {
         </tbody>
       </table>
 
-      <Callout title="Two upload styles" tone="info">
+      <Callout title="Upload styles" tone="info">
         <p>
-          <strong>SDK path:</strong> upload → progress → complete → SSE.
+          <strong>SDK path:</strong> upload → progress → complete → SSE
+          (multipart when available, else a single presigned PUT).
           <br />
-          <strong>Terminal path:</strong> one multipart stream to{" "}
-          <code>/transcribe</code> with percentage events on the same
-          connection.
+          <strong>Terminal path:</strong> one raw-body stream to{" "}
+          <code>/transcribe</code> with SSE progress on the same connection.
+          <br />
+          <strong>By URL:</strong> pass <code>audio_url</code> to{" "}
+          <code>/upload</code> and the platform fetches the audio itself — no
+          client upload.
         </p>
       </Callout>
     </>

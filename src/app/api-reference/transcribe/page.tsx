@@ -29,33 +29,33 @@ export default function TranscribeApiPage() {
 
       <h2>Request</h2>
       <p>
-        <code>multipart/form-data</code> with the audio file and option fields
-        (same semantics as <Link href="/api-reference/upload">upload</Link>):
+        The request <strong>body is the raw audio bytes</strong>; transcription
+        options are query parameters (same names and semantics as{" "}
+        <Link href="/api-reference/upload">upload</Link>). Sending the body raw
+        lets the server stream it straight to storage without buffering the whole
+        file.
       </p>
       <CodeBlock
         language="bash"
-        code={`curl -N -X POST "${SITE.apiBase}/api/v1/transcribe" \\
+        code={`curl -N -X POST \\
+  "${SITE.apiBase}/api/v1/transcribe?output_type=json&word_timestamps=true&speaker_labels=true&nltk=true&custom_vocabulary=AcmeCorp,Grok" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -F "file=@audio.mp3" \\
-  -F "output_type=json" \\
-  -F "word_timestamps=true" \\
-  -F "speaker_labels=true" \\
-  -F "nltk=true" \\
-  -F "custom_vocabulary=AcmeCorp,Grok"`}
+  --data-binary @audio.mp3`}
       />
 
       <h2>Behavior</h2>
       <ol>
-        <li>Client streams the full audio file in the request body.</li>
+        <li>Client streams the raw audio bytes as the request body.</li>
         <li>
-          Server processes the job and writes <strong>percentage-style</strong>{" "}
-          progress events on the same HTTP response (
-          <code>event: progress</code> with <code>percent</code>).
+          The server streams the upload to storage, enqueues the job, then
+          streams the job&apos;s SSE progress on the same response — identical in
+          shape to the <Link href="/api-reference/jobs">Jobs SSE stream</Link>{" "}
+          (<code>progress</code> events carrying <code>completed</code>/
+          <code>total</code>/<code>step</code>).
         </li>
         <li>
-          On success, emits <code>event: completed</code> with{" "}
-          <code>download_url</code> / job metadata (or attaches the result,
-          depending on <code>output_type</code>).
+          On success it emits a terminal <code>completed</code> event with a{" "}
+          <code>download_url</code>; fetch that to retrieve the result.
         </li>
       </ol>
 
@@ -63,13 +63,13 @@ export default function TranscribeApiPage() {
       <CodeBlock
         language="text"
         code={`event: progress
-data: {"percent": 0, "step": "upload"}
+data: {"completed": 0, "total": 8, "step": "preprocess"}
 
 event: progress
-data: {"percent": 35, "step": "transcribe"}
+data: {"completed": 3, "total": 8, "step": "chunk:0"}
 
 event: progress
-data: {"percent": 100, "step": "done"}
+data: {"completed": 8, "total": 8, "step": "aggregation"}
 
 event: completed
 data: {"job_id":"…","download_url":"https://…","output_type":"json"}`}
