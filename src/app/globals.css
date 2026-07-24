@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #ecfeff;
+  --color-brand-100: #cffafe;
+  --color-brand-200: #a5f3fc;
+  --color-brand-300: #67e8f9;
+  --color-brand-400: #22d3ee;
+  --color-brand-500: #3b82f6;
+  --color-brand-link: #38bdf8;
+  --color-brand-600: #5b4cf5;
+  --color-brand-700: #7c3aed;
+  --color-brand-800: #1e3a8a;
+  --color-brand-900: #172554;
+
+  --color-surface-950: #060912;
+  --color-surface-900: #0a0f1c;
+  --color-surface-850: #0e1424;
+  --color-surface-800: #131927;
+  --color-surface-700: #243047;
+
+  --color-page: #060912;
+  --color-header: #0c1220;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-page text-zinc-100 antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand-500/30 text-white;
+  }
+}
+
+/* Docs prose */
+.docs-prose h1 {
+  @apply text-3xl font-bold tracking-tight text-white sm:text-4xl;
+}
+
+.docs-prose h2 {
+  @apply mt-12 scroll-mt-24 border-t border-white/10 pt-10 text-xl font-semibold tracking-tight text-white;
+}
+
+.docs-prose h3 {
+  @apply mt-8 scroll-mt-24 text-lg font-semibold text-white;
+}
+
+.docs-prose p {
+  @apply mt-4 text-[15px] leading-7 text-zinc-400;
+}
+
+.docs-prose ul {
+  @apply mt-4 list-disc space-y-2 pl-5 text-[15px] leading-7 text-zinc-400;
+}
+
+.docs-prose ol {
+  @apply mt-4 list-decimal space-y-2 pl-5 text-[15px] leading-7 text-zinc-400;
+}
+
+.docs-prose a {
+  @apply text-brand-link underline-offset-4 hover:underline;
+}
+
+.docs-prose code:not(pre code) {
+  @apply rounded bg-white/10 px-1.5 py-0.5 font-mono text-[13px] text-cyan-200;
+}
+
+.docs-prose table {
+  @apply mt-6 w-full text-left text-sm;
+}
+
+.docs-prose th {
+  @apply border-b border-white/10 px-3 py-2 font-medium text-zinc-300;
+}
+
+.docs-prose td {
+  @apply border-b border-white/5 px-3 py-2.5 text-zinc-400;
+}
+
+.docs-prose strong {
+  @apply font-semibold text-zinc-200;
+}
+
+.docs-prose hr {
+  @apply my-10 border-white/10;
+}
