@@ -4,15 +4,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Using Zephyr with FastAPI",
+  title: "Using Speech Revolutions with FastAPI",
+  description:
+    "Wire Speech Revolutions into a FastAPI service: submit a job from an endpoint, stream progress into a per-job store from the async client's callbacks, expose a…",
 };
 
 export default function FastapiIntegrationPage() {
   return (
     <>
-      <h1>Using Zephyr with FastAPI</h1>
+      <h1>Using Speech Revolutions with FastAPI</h1>
       <p>
-        Wire Zephyr into a FastAPI service: submit a job from an endpoint,
+        Wire Speech Revolutions into a FastAPI service: submit a job from an endpoint,
         stream progress into a per-job store from the async client&apos;s
         callbacks, expose a <code>/progress/{`{job_id}`}</code> endpoint your
         frontend polls, and receive signed completion webhooks. Your API key
@@ -152,7 +154,7 @@ def progress(job_id: str):
 
       <h2>Signed webhook receiver</h2>
       <p>
-        For long jobs, pass a <code>callback_url</code> and let Zephyr POST you
+        For long jobs, pass a <code>callback_url</code> and let Speech Revolutions POST you
         on completion. The platform signs the raw body with HMAC-SHA256 in the{" "}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Verify against
         the exact bytes you received — not a re-serialized dict — with a
@@ -169,7 +171,7 @@ import os
 
 from fastapi import Request, HTTPException
 
-SIGNING_SECRET = os.environ["ZEPHYR_WEBHOOK_SECRET"]
+SIGNING_SECRET = os.environ["STT_WEBHOOK_SECRET"]
 
 
 def verify_signature(raw_body: bytes, signature_header: str) -> bool:
@@ -180,7 +182,7 @@ def verify_signature(raw_body: bytes, signature_header: str) -> bool:
     return hmac.compare_digest(expected, signature_header or "")
 
 
-@app.post("/webhooks/zephyr")
+@app.post("/webhooks/stt")
 async def receive(request: Request):
     raw = await request.body()  # verify against the exact bytes received
     if not verify_signature(raw, request.headers.get("X-SR-Signature", "")):

@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Generate subtitles automatically",
+  description:
+    "Speech Revolutions can hand you finished subtitle files, not just raw text. Set output_type to \"srt\" or \"vtt\" and the transcript comes back as a ready-to-ship caption…",
 };
 
 export default function SubtitlesTutorialPage() {
@@ -13,7 +15,7 @@ export default function SubtitlesTutorialPage() {
     <>
       <h1>Generate subtitles automatically</h1>
       <p>
-        Zephyr can hand you finished subtitle files, not just raw text. Set{" "}
+        Speech Revolutions can hand you finished subtitle files, not just raw text. Set{" "}
         <code>output_type</code> to <code>&quot;srt&quot;</code> or{" "}
         <code>&quot;vtt&quot;</code> and the transcript comes back as a
         ready-to-ship caption file — correctly numbered, time-cued, and
@@ -66,7 +68,7 @@ client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY
 
 result = client.transcribe(
     "talk.mp4",              # audio or video: local path, URL, bytes, or file object
-    output_type="srt",       # ask Zephyr for SubRip captions (use "vtt" for WebVTT)
+    output_type="srt",       # ask Speech Revolutions for SubRip captions (use "vtt" for WebVTT)
 )
 
 path = result.save("captions")  # writes captions.srt; returns the path
@@ -103,7 +105,7 @@ curl -X POST https://api.speechrevolutions.com/api/v1/upload \\
 
       <Callout title="Timestamps are already handled" tone="tip">
         <p>
-          When you ask for <code>srt</code> or <code>vtt</code>, Zephyr does the
+          When you ask for <code>srt</code> or <code>vtt</code>, Speech Revolutions does the
           cueing for you — you don&apos;t need to request{" "}
           <code>word_timestamps</code> or assemble cues from <code>.words</code>{" "}
           yourself. The file is ready to load into a player as-is.
@@ -170,14 +172,14 @@ curl -X POST https://api.speechrevolutions.com/api/v1/upload \\
       />
 
       <p>
-        <strong>Burning in</strong> happens outside Zephyr — Zephyr produces the
+        <strong>Burning in</strong> happens outside Speech Revolutions — Speech Revolutions produces the
         subtitle file; a video tool renders it into the frames. The common tool
         is <code>ffmpeg</code>, which reads your saved <code>.srt</code>:
       </p>
       <CodeBlock
         language="bash"
         filename="burn-in with ffmpeg"
-        code={`# ffmpeg is third-party tooling, not part of Zephyr — shown for completeness.
+        code={`# ffmpeg is third-party tooling, not part of Speech Revolutions — shown for completeness.
 ffmpeg -i talk.mp4 -vf "subtitles=captions.srt" talk-captioned.mp4`}
       />
 

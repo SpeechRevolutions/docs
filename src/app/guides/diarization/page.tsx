@@ -15,12 +15,12 @@ export default function DiarizationGuidePage() {
     <>
       <h1>Speaker diarization</h1>
       <p>
-        Diarization answers &quot;who spoke when.&quot; Zephyr labels who spoke
+        Diarization answers &quot;who spoke when.&quot; Speech Revolutions labels who spoke
         each segment and attaches a speaker to every word, so you can render a
         transcript as a back-and-forth conversation instead of one wall of text.
       </p>
 
-      <Callout title="Zephyr's strength" tone="tip">
+      <Callout title="Where Zephyr leads" tone="tip">
         <p>
           Diarization is a headline strength: on our public benchmark suite
           Zephyr ranks <strong>#1 on diarization error rate (DER)</strong> across

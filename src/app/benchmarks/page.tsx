@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Benchmarks & methodology",
+  description:
+    "Zephyr is evaluated with a fully reproducible, provider-agnostic suite: every benchmark is generated from public datasets using deterministic, seeded…",
 };
 
 export default function BenchmarksPage() {
@@ -13,7 +15,8 @@ export default function BenchmarksPage() {
     <>
       <h1>Benchmarks & methodology</h1>
       <p>
-        Zephyr is evaluated with a fully reproducible, provider-agnostic suite:
+        Zephyr, our speech-to-text engine, is evaluated with a fully reproducible,
+        provider-agnostic suite:
         every benchmark is generated from <strong>public datasets</strong> using
         deterministic, seeded scripts, and produces identical outputs regardless
         of provider. We publish the harness so you can verify the numbers on your

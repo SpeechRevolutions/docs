@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Batch-transcribe thousands of files",
+  description:
+    "You have a backlog — thousands of recordings sitting in a bucket — and you want them all transcribed. The naive approach, calling transcribe() in a loop…",
 };
 
 export default function BatchTutorialPage() {
@@ -32,7 +34,7 @@ export default function BatchTutorialPage() {
       </p>
       <p>
         <code>submit()</code> uploads the audio, enqueues the job, and returns a{" "}
-        <code>job_id</code> immediately — no connection held while Zephyr works.
+        <code>job_id</code> immediately — no connection held while Speech Revolutions works.
         Once you have the ids, the work is durable: you can collect the results
         minutes or hours later, survive a restart, and retry a single file
         without redoing the batch. The upload is the only part that needs
@@ -46,7 +48,7 @@ export default function BatchTutorialPage() {
           returned <code>job_id</code>s somewhere durable.{" "}
           <strong>Collect</strong> — fetch each transcript once its job
           completes, either by polling <code>get_job_status</code> /{" "}
-          <code>get_transcript</code> or by having Zephyr POST a{" "}
+          <code>get_transcript</code> or by having Speech Revolutions POST a{" "}
           <code>callback_url</code> when each job finishes.
         </p>
       </Callout>
@@ -150,7 +152,7 @@ console.log(\`submitted \${Object.keys(jobIds).length}/\${paths.length}; saved j
           Write the job ids to durable storage (a file, a table, a queue) as
           soon as you have them, and only then start collecting. The ids are
           your recovery point: if collection crashes, you re-read them and pick
-          up where you left off — you never re-upload. Zephyr regenerates a
+          up where you left off — you never re-upload. Speech Revolutions regenerates a
           job&apos;s download URL on demand, so results stay fetchable by id long
           after upload.
         </p>
@@ -214,7 +216,7 @@ if __name__ == "__main__":
       <h2>Step 2 (option B) — collect by webhook</h2>
       <p>
         At large scale, polling thousands of jobs is a lot of wasted requests.
-        Pass a <code>callback_url</code> when you submit, and Zephyr POSTs a
+        Pass a <code>callback_url</code> when you submit, and Speech Revolutions POSTs a
         signed notification the moment each job finishes — you fetch the
         transcript in the handler and never poll at all. Change one line in
         Step 1:
@@ -225,7 +227,7 @@ if __name__ == "__main__":
             label: "Python",
             language: "python",
             filename: "submit_with_webhook.py",
-            code: `# In submit_one(), add a callback_url so Zephyr notifies you on completion:
+            code: `# In submit_one(), add a callback_url so Speech Revolutions notifies you on completion:
 job_id = await client.submit(
     path,
     speaker_labels=True,

@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Python SDK",
+  description:
+    "Official Python client for the Speech Revolutions STT API. Ships a synchronous SpeechRevolutions client and an asyncio AsyncSpeechRevolutions client with the…",
 };
 
 export default function PythonSdkPage() {

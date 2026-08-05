@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Quickstart",
+  description:
+    "Get an API key, install an SDK (or use cURL), and transcribe a file.",
 };
 
 export default function QuickstartPage() {
@@ -66,7 +68,49 @@ const client = new SpeechRevolutions();
 const result = await client.transcribe("audio.mp3", {
   speakerLabels: true,
 });
-console.log(result.text);`,
+console.log(result.text);
+for (const u of result.utterances) {
+  console.log(\`\${u.speaker}: \${u.text}\`);
+}`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `go get github.com/speechrevolutions/go-sdk
+
+// then:
+import stt "github.com/speechrevolutions/go-sdk"
+
+client, _ := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
+ctx := context.Background()
+sl := true
+result, err := client.Transcribe(ctx, "audio.mp3", stt.TranscribeOptions{
+    SpeakerLabels: &sl,
+}, nil)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(result.Text())
+for _, u := range result.Utterances {
+    fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `dotnet add package SpeechRevolutions
+
+// then:
+using SpeechRevolutions;
+
+using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY
+var result = await client.TranscribeAsync("audio.mp3", new TranscribeOptions
+{
+    SpeakerLabels = true,
+});
+Console.WriteLine(result.Text);
+foreach (var u in result.Utterances)
+    Console.WriteLine($"{u.Speaker}: {u.Text}");`,
           },
         ]}
       />
@@ -126,6 +170,40 @@ result = client.transcribe(
 await client.transcribe("audio.mp3", {
   onProgress: (e) => console.log(e.percent, e.step),
 });`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `// console bars
+result, _ := client.Transcribe(ctx, "audio.mp3", stt.TranscribeOptions{
+    Progress: true,
+}, nil)
+
+// or a callback — the last argument
+onProgress := func(e stt.ProgressEvent) {
+    if pct, ok := e.Percent(); ok {
+        fmt.Printf("%.0f%% %s\\n", pct, e.Step)
+    }
+}
+result, _ = client.Transcribe(ctx, "audio.mp3", stt.TranscribeOptions{}, onProgress)`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `// console bars
+var result = await client.TranscribeAsync("audio.mp3", new TranscribeOptions
+{
+    Progress = true,
+});
+
+// or a callback
+var same = await client.TranscribeAsync(
+    "audio.mp3",
+    new TranscribeOptions
+    {
+        OnUploadProgress = e => Console.WriteLine($"upload {e.Percent:0}%"),
+    },
+    onProgress: e => Console.WriteLine($"{e.Percent:0}% {e.Step}"));`,
           },
         ]}
       />

@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev --turbopack -p 3003",
     "build": "next build",
-    "start": "next start -p 3003",
+    "_comment": "postbuild is run automatically by npm after build — do not chain it onto build too.",
+    "postbuild": "node scripts/generate-llms.mjs && pagefind --site out --output-subdir pagefind",
+    "start": "npx serve out -l 3003",
     "lint": "next lint"
   },
   "dependencies": {
@@ -14,6 +16,8 @@
     "next": "^15.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "server-only": "^0.0.1",
+    "shiki": "^4.4.1",
     "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
@@ -21,7 +25,10 @@
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",
+    "node-html-parser": "^9.0.1",
+    "pagefind": "^1.5.2",
     "tailwindcss": "^4.1.8",
+    "turndown": "^7.2.4",
     "typescript": "^5.8.3"
   }
 }

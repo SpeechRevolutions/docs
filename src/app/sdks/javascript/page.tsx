@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "JavaScript SDK",
+  description:
+    "Official JS/TS client for the Speech Revolutions STT API. Async-first (like the Deepgram / ElevenLabs JS clients) and runs on Node 18+ using native fetch.",
 };
 
 export default function JsSdkPage() {

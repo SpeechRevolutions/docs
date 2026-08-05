@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "API overview",
+  description:
+    "Base URL: https://api.speechrevolutions.com",
 };
 
 export default function ApiOverviewPage() {

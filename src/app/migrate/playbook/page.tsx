@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Switching STT APIs in under 30 minutes",
+  description:
+    "Changing speech-to-text providers sounds risky. It isn't — if you do it behind an interface, compare on your own audio, and roll out gradually with a…",
 };
 
 export default function MigrationPlaybookPage() {
@@ -88,7 +90,7 @@ export default function MigrationPlaybookPage() {
       <p>
         Don&apos;t sprinkle vendor SDK calls across your codebase. Put
         transcription behind one function that returns your own normalized shape.
-        Swapping providers then touches exactly one file. Zephyr&apos;s result
+        Swapping providers then touches exactly one file. The Speech Revolutions result
         object is already transcript-first (<code>.text</code>,{" "}
         <code>.words</code>, <code>.utterances</code>) and can emit a
         Deepgram-shaped dict via <code>to_deepgram()</code> if you&apos;re
@@ -143,7 +145,7 @@ export async function transcribe(audio: string) {
       <h2>5. Roll out incrementally</h2>
       <ul>
         <li>
-          <strong>Shadow</strong> — send a copy of production traffic to Zephyr,
+          <strong>Shadow</strong> — send a copy of production traffic to Speech Revolutions,
           compare, don&apos;t serve it yet.
         </li>
         <li>

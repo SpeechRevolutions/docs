@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Jobs API",
+  description:
+    "Used primarily by the SDK after /upload/complete to wait for a result, retrieve a job by id, or list recent jobs. These are the real user-cluster job…",
 };
 
 export default function JobsApiPage() {

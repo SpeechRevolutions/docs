@@ -5,18 +5,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Using Zephyr with Supabase",
+  title: "Using Speech Revolutions with Supabase",
+  description:
+    "If your users upload audio to Supabase Storage, you can transcribe it without downloading a byte: create a signed URL for the object, hand it to Speech Revolutions, and…",
 };
 
 export default function SupabaseIntegrationPage() {
   return (
     <>
-      <h1>Using Zephyr with Supabase</h1>
+      <h1>Using Speech Revolutions with Supabase</h1>
       <p>
         If your users upload audio to Supabase Storage, you can transcribe it
         without downloading a byte: create a signed URL for the object, hand it
-        to Zephyr, and write the transcript into a Postgres table. Optionally
-        stream progress to the browser over Supabase Realtime. All Zephyr and
+        to Speech Revolutions, and write the transcript into a Postgres table. Optionally
+        stream progress to the browser over Supabase Realtime. All Speech Revolutions and
         service-role keys stay server-side.
       </p>
 
@@ -72,17 +74,17 @@ const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
-const zephyr = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+const stt = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
 
 export async function transcribeFromStorage(id: string, storagePath: string) {
-  // 1. Signed URL so Zephyr can read the private object.
+  // 1. Signed URL so Speech Revolutions can read the private object.
   const { data, error } = await supabase.storage
     .from("audio")
     .createSignedUrl(storagePath, 3600); // seconds — outlast the transcription
   if (error) throw error;
 
-  // 2. Pass the URL straight to Zephyr (auto-detected as a URL).
-  const result = await zephyr.transcribe(data.signedUrl, {
+  // 2. Pass the URL straight to Speech Revolutions (auto-detected as a URL).
+  const result = await stt.transcribe(data.signedUrl, {
     speakerLabels: true,
     onProgress: (e) =>
       supabase
@@ -111,22 +113,22 @@ supabase = create_client(
     os.environ["SUPABASE_URL"],
     os.environ["SUPABASE_SERVICE_ROLE_KEY"],  # server-side only
 )
-zephyr = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+stt = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
 
 
 def transcribe_from_storage(row_id: str, storage_path: str) -> None:
-    # 1. Signed URL so Zephyr can read the private object.
+    # 1. Signed URL so Speech Revolutions can read the private object.
     signed = supabase.storage.from_("audio").create_signed_url(
         storage_path, 3600  # seconds — outlast the transcription
     )
 
-    # 2. Pass the URL straight to Zephyr (auto-detected as a URL).
+    # 2. Pass the URL straight to Speech Revolutions (auto-detected as a URL).
     def on_progress(e):
         supabase.table("transcriptions").update(
             {"percent": e.percent or 0}
         ).eq("id", row_id).execute()
 
-    result = zephyr.transcribe(
+    result = stt.transcribe(
         signed["signedURL"], speaker_labels=True, on_progress=on_progress
     )
 
@@ -148,7 +150,7 @@ def transcribe_from_storage(row_id: str, storage_path: str) -> None:
       <CodeBlock
         language="ts"
         filename="progress-subscription.ts"
-        code={`// Browser: anon key + RLS. No Zephyr key here.
+        code={`// Browser: anon key + RLS. No Speech Revolutions key here.
 const channel = supabase
   .channel("job")
   .on(

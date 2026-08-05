@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Output formats & subtitles",
   description:
-    "The six Zephyr output_type values — txt, json, srt, vtt, docx, pdf — the JSON schema, and generating subtitles and documents.",
+    "The six Speech Revolutions output_type values — txt, json, srt, vtt, docx, pdf — the JSON schema, and generating subtitles and documents.",
 };
 
 export default function OutputFormatsGuidePage() {

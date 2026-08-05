@@ -1,8 +1,6 @@
-"use client";
-
+import { CopyButton } from "@/components/CopyButton";
+import { highlight, resolveLang, showsLineNumbers } from "@/lib/highlight";
 import { cn } from "@/lib/utils";
-import { Check, Copy } from "lucide-react";
-import { useState } from "react";
 
 type CodeBlockProps = {
   code: string;
@@ -11,23 +9,18 @@ type CodeBlockProps = {
   className?: string;
 };
 
-export function CodeBlock({
+/**
+ * Server component: highlighting happens during `next build`, so the browser gets
+ * plain pre-rendered HTML and no highlighter bundle.
+ */
+export async function CodeBlock({
   code,
-  language = "bash",
+  language,
   filename,
   className,
 }: CodeBlockProps) {
-  const [copied, setCopied] = useState(false);
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch {
-      // ignore
-    }
-  }
+  const lang = resolveLang(language, filename);
+  const html = await highlight(code, lang);
 
   return (
     <div
@@ -36,31 +29,22 @@ export function CodeBlock({
         className,
       )}
     >
-      <div className="flex items-center justify-between border-b border-white/8 px-4 py-2">
+      {/* Chrome, not content — keeps "bash"/"Copy" out of search excerpts. */}
+      <div
+        data-pagefind-ignore
+        className="flex items-center justify-between border-b border-white/8 px-4 py-2"
+      >
         <span className="font-mono text-[11px] tracking-wide text-zinc-500 uppercase">
-          {filename ?? language}
+          {filename ?? language ?? lang}
         </span>
-        <button
-          type="button"
-          onClick={copy}
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
-        >
-          {copied ? (
-            <>
-              <Check className="h-3.5 w-3.5 text-emerald-400" />
-              Copied
-            </>
-          ) : (
-            <>
-              <Copy className="h-3.5 w-3.5" />
-              Copy
-            </>
-          )}
-        </button>
+        <CopyButton code={code} />
       </div>
-      <pre className="overflow-x-auto p-4 text-[13px] leading-6 text-zinc-200">
-        <code>{code}</code>
-      </pre>
+      <div
+        // Read by scripts/generate-llms.mjs — Shiki's output doesn't record the language.
+        data-lang={lang}
+        className={cn("code-surface", showsLineNumbers(lang) && "with-line-numbers")}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
     </div>
   );
 }

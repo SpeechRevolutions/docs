@@ -6,20 +6,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Migrating from Deepgram to Zephyr",
+  title: "Migrating from Deepgram to Speech Revolutions",
   description:
-    "Move a Deepgram Nova-3 integration to Zephyr: auth, endpoint mapping, response shapes, and the to_deepgram() escape hatch.",
+    "Move a Deepgram Nova-3 integration to Speech Revolutions: auth, endpoint mapping, response shapes, and the to_deepgram() escape hatch.",
 };
 
 export default function MigrateDeepgramPage() {
   return (
     <>
-      <h1>Migrating from Deepgram to Zephyr</h1>
+      <h1>Migrating from Deepgram to Speech Revolutions</h1>
       <p>
         Deepgram&apos;s pre-recorded API is a single synchronous{" "}
         <code>POST</code>: you send raw audio bytes to{" "}
         <code>/v1/listen</code> and get the full transcript back in one
-        response. Zephyr uses a short upload-then-wait flow, but the SDK hides it
+        response. Speech Revolutions uses a short upload-then-wait flow, but the SDK hides it
         behind one <code>transcribe()</code> call — so in practice the migration
         is a rename, not a rewrite. This guide maps every piece across, including
         a <code>to_deepgram()</code> helper that returns Deepgram-shaped JSON so
@@ -29,9 +29,9 @@ export default function MigrateDeepgramPage() {
       <Callout title="The one-line version" tone="tip">
         <p>
           Deepgram&apos;s <code>diarize=true</code> is supported verbatim —
-          Zephyr accepts <code>diarize</code> as an alias for{" "}
+          Speech Revolutions accepts <code>diarize</code> as an alias for{" "}
           <code>speaker_labels</code>. And <code>result.to_deepgram()</code>{" "}
-          reshapes Zephyr&apos;s output into the{" "}
+          reshapes the Speech Revolutions output into the{" "}
           <code>results.channels[0].alternatives[0]</code> structure you already
           parse.
         </p>
@@ -40,14 +40,14 @@ export default function MigrateDeepgramPage() {
       <h2>Authentication</h2>
       <p>
         Deepgram authenticates with an <code>Authorization: Token &lt;key&gt;</code>{" "}
-        header. Zephyr uses an <code>X-API-Key</code> header, and the SDKs read
+        header. Speech Revolutions uses an <code>X-API-Key</code> header, and the SDKs read
         it from the environment for you.
       </p>
       <table>
         <thead>
           <tr>
             <th>Deepgram</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -79,7 +79,7 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
 
       <h2>Endpoint &amp; method mapping</h2>
       <p>
-        Deepgram is one synchronous endpoint. Zephyr splits creation and
+        Deepgram is one synchronous endpoint. Speech Revolutions splits creation and
         retrieval, but the SDK&apos;s <code>transcribe()</code> drives the whole
         flow and blocks until the transcript is ready — the closest analogue to a
         single Deepgram call.
@@ -88,8 +88,8 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
         <thead>
           <tr>
             <th>Deepgram</th>
-            <th>Zephyr REST</th>
-            <th>Zephyr SDK</th>
+            <th>Speech Revolutions REST</th>
+            <th>Speech Revolutions SDK</th>
           </tr>
         </thead>
         <tbody>
@@ -131,11 +131,11 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       <h2>Upload differences</h2>
       <p>
         Deepgram takes raw audio bytes directly in the request body with a{" "}
-        <code>Content-Type</code> matching the file. Zephyr uploads through a
+        <code>Content-Type</code> matching the file. Speech Revolutions uploads through a
         presigned URL, which means large files stream straight to object storage
         instead of through the API — but the SDK does the presign, PUT, and
         complete handshake for you, so you still pass a path, URL, bytes, or file
-        object to <code>transcribe()</code>. Zephyr also reports real{" "}
+        object to <code>transcribe()</code>. Speech Revolutions also reports real{" "}
         <code>upload</code> and <code>transcribe</code> progress; Deepgram
         exposes no percentage for pre-recorded audio.
       </p>
@@ -144,14 +144,14 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       <p>
         Deepgram nests everything under{" "}
         <code>results.channels[0].alternatives[0]</code>, with word-level
-        speakers as integers. Zephyr returns a transcript-first object. Map it
+        speakers as integers. Speech Revolutions returns a transcript-first object. Map it
         like this:
       </p>
       <table>
         <thead>
           <tr>
             <th>Deepgram field</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -216,7 +216,7 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
       <h2>Diarization</h2>
       <p>
         Deepgram diarizes with <code>diarize=true</code>, tagging each word with
-        an integer speaker. Zephyr accepts the same <code>diarize</code> flag (an
+        an integer speaker. Speech Revolutions accepts the same <code>diarize</code> flag (an
         alias for <code>speaker_labels</code>), and additionally groups the words
         into <code>result.utterances</code> — ready-made speaker turns you would
         otherwise have to reconstruct from per-word integers. Diarization quality
@@ -228,14 +228,14 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
       <h2>Timestamps</h2>
       <p>
         Both return per-word start/end times in <strong>seconds</strong>. On
-        Zephyr word timestamps are on by default (<code>word_timestamps=true</code>
+        Speech Revolutions word timestamps are on by default (<code>word_timestamps=true</code>
         ); the values live on <code>result.words</code>.
       </p>
 
       <h2>Language selection</h2>
       <p>
         Deepgram takes a BCP-47 <code>language</code> query param, or{" "}
-        <code>detect_language=true</code> to auto-detect. Zephyr always
+        <code>detect_language=true</code> to auto-detect. Speech Revolutions always
         auto-detects, including code-switching mid-file — there&apos;s no
         language parameter to set. <code>result.languages</code> is a list of{" "}
         <code>{`{start, end, language}`}</code> segments covering the whole
@@ -267,9 +267,9 @@ for w in alt["words"]:
     print(w["speaker"], w["word"], w["start"], w["end"])`,
           },
           {
-            label: "After — Zephyr (Python)",
+            label: "After — Speech Revolutions (Python)",
             language: "python",
-            filename: "zephyr_transcribe.py",
+            filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions
 
 client = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY
@@ -284,9 +284,9 @@ for u in result.utterances:
     print(f"{u.speaker}: {u.text}")`,
           },
           {
-            label: "After — Zephyr (JavaScript)",
+            label: "After — Speech Revolutions (JavaScript)",
             language: "ts",
-            filename: "zephyr-transcribe.mjs",
+            filename: "stt-transcribe.mjs",
             code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
 
 const client = new SpeechRevolutions();
@@ -312,7 +312,7 @@ console.log(dg.results.channels[0].alternatives[0].transcript);`,
           HTTP calls need updating.
         </li>
         <li>
-          <strong>Speaker type changes.</strong> Zephyr speakers are strings
+          <strong>Speaker type changes.</strong> Speech Revolutions speakers are strings
           (<code>speaker_0</code>), not integers. Use{" "}
           <code>result.utterances</code> instead of grouping words yourself, or
           call <code>to_deepgram()</code> for the integer form.
@@ -324,7 +324,7 @@ console.log(dg.results.channels[0].alternatives[0].transcript);`,
         </li>
         <li>
           <strong>Keyword biasing.</strong> Deepgram&apos;s repeatable{" "}
-          <code>keyterm</code> becomes Zephyr&apos;s <code>custom_vocabulary</code>{" "}
+          <code>keyterm</code> becomes the <code>custom_vocabulary</code>{" "}
           list.
         </li>
       </ul>

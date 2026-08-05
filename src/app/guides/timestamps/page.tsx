@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Timestamps",
   description:
-    "Word-level start/end times in Zephyr transcripts: where they live in .words, the JSON shape, and how the SDK parses them.",
+    "Word-level start/end times in Speech Revolutions transcripts: where they live in .words, the JSON shape, and how the SDK parses them.",
 };
 
 export default function TimestampsGuidePage() {
@@ -15,7 +15,7 @@ export default function TimestampsGuidePage() {
     <>
       <h1>Timestamps</h1>
       <p>
-        Zephyr returns a start and end time for every word, in seconds from the
+        Speech Revolutions returns a start and end time for every word, in seconds from the
         beginning of the audio. Word timestamps are on by default
         (<code>word_timestamps=true</code>); leave them on and read them off the
         result. They power everything downstream — <a href="#subtitles">subtitle

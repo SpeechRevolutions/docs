@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Upload API",
+  description:
+    "Create a job, upload bytes to a presigned URL, then complete. This is what the official SDKs call.",
 };
 
 export default function UploadApiPage() {

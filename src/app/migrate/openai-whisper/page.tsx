@@ -6,22 +6,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Migrating from the OpenAI Whisper API to Zephyr",
+  title: "Migrating from the OpenAI Whisper API to Speech Revolutions",
   description:
-    "Move an OpenAI /v1/audio/transcriptions integration to Zephyr: auth, multipart vs presigned upload, the 25 MB limit, and getting word timestamps + diarization in one call.",
+    "Move an OpenAI /v1/audio/transcriptions integration to Speech Revolutions: auth, multipart vs presigned upload, the 25 MB limit, and getting word timestamps + diarization in one call.",
 };
 
 export default function MigrateOpenAIWhisperPage() {
   return (
     <>
-      <h1>Migrating from the OpenAI Whisper API to Zephyr</h1>
+      <h1>Migrating from the OpenAI Whisper API to Speech Revolutions</h1>
       <p>
         OpenAI&apos;s transcription API is a single synchronous multipart{" "}
         <code>POST</code> to <code>/v1/audio/transcriptions</code>. It&apos;s
         simple, but three constraints tend to push teams to migrate: a hard{" "}
         <strong>25 MB file limit</strong>, and — on the current{" "}
         <code>gpt-4o-transcribe</code> model — <strong>no word-level
-        timestamps</strong> and <strong>no speaker diarization</strong>. Zephyr
+        timestamps</strong> and <strong>no speaker diarization</strong>. Speech Revolutions
         returns transcript, word timestamps, and diarized speaker turns from a
         single call, with no file-size ceiling in the request body.
       </p>
@@ -32,7 +32,7 @@ export default function MigrateOpenAIWhisperPage() {
           model (via <code>response_format=verbose_json</code> +{" "}
           <code>timestamp_granularities</code>), and speaker labels require a
           separate <code>gpt-4o-transcribe-diarize</code> model —{" "}
-          <code>gpt-4o-transcribe</code> returns text only. Zephyr gives you{" "}
+          <code>gpt-4o-transcribe</code> returns text only. Speech Revolutions gives you{" "}
           <code>result.text</code>, <code>result.words</code> (with times), and{" "}
           <code>result.utterances</code> (speakers) together, every time.
         </p>
@@ -40,14 +40,14 @@ export default function MigrateOpenAIWhisperPage() {
 
       <h2>Authentication</h2>
       <p>
-        OpenAI uses <code>Authorization: Bearer &lt;key&gt;</code>. Zephyr uses{" "}
+        OpenAI uses <code>Authorization: Bearer &lt;key&gt;</code>. Speech Revolutions uses{" "}
         <code>X-API-Key</code>, read from the environment by the SDK.
       </p>
       <table>
         <thead>
           <tr>
             <th>OpenAI</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -75,8 +75,8 @@ export default function MigrateOpenAIWhisperPage() {
         <thead>
           <tr>
             <th>OpenAI</th>
-            <th>Zephyr REST</th>
-            <th>Zephyr SDK</th>
+            <th>Speech Revolutions REST</th>
+            <th>Speech Revolutions SDK</th>
           </tr>
         </thead>
         <tbody>
@@ -110,7 +110,7 @@ export default function MigrateOpenAIWhisperPage() {
         OpenAI expects the audio as a multipart <code>file</code> field in the
         request body, which is why the API rejects anything over{" "}
         <strong>25 MB</strong> — you have to pre-split or compress long recordings
-        yourself. Zephyr uploads through a presigned object-storage URL, so the
+        yourself. Speech Revolutions uploads through a presigned object-storage URL, so the
         bytes never pass through the API request body and there is no 25 MB
         request ceiling to work around. The SDK does the presign → PUT → complete
         handshake; you just pass a path, URL, or bytes.
@@ -126,13 +126,13 @@ export default function MigrateOpenAIWhisperPage() {
       <p>
         With <code>response_format=json</code>, OpenAI&apos;s{" "}
         <code>gpt-4o-transcribe</code> returns essentially <code>{`{ text }`}</code>
-        {" "}— no words, no segments, no speakers. Zephyr returns those too:
+        {" "}— no words, no segments, no speakers. Speech Revolutions returns those too:
       </p>
       <table>
         <thead>
           <tr>
             <th>OpenAI field</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -174,10 +174,9 @@ export default function MigrateOpenAIWhisperPage() {
         <code>gpt-4o-transcribe</code> cannot diarize — you would switch to the
         separate <code>gpt-4o-transcribe-diarize</code> model (true as of the
         models available on 2026-07-23; check OpenAI&apos;s current docs before
-        relying on this). Zephyr diarizes in the same call: set{" "}
+        relying on this). Speech Revolutions diarizes in the same call: set{" "}
         <code>speaker_labels</code> (on by default) and read{" "}
-        <code>result.utterances</code>. Diarization is one of Zephyr&apos;s
-        headline strengths; the <Link href="/benchmarks">benchmarks</Link> and{" "}
+        <code>result.utterances</code>. Diarization is one of Zephyr&apos;s headline strengths; the <Link href="/benchmarks">benchmarks</Link> and{" "}
         <a href={SITE.landingUrl}>comparison table</a> have the measured numbers.
       </p>
 
@@ -185,14 +184,14 @@ export default function MigrateOpenAIWhisperPage() {
       <p>
         On OpenAI, word timestamps mean dropping back to <code>whisper-1</code>{" "}
         with <code>response_format=verbose_json</code> and{" "}
-        <code>timestamp_granularities: [&quot;word&quot;]</code>. On Zephyr,{" "}
+        <code>timestamp_granularities: [&quot;word&quot;]</code>. On Speech Revolutions,{" "}
         <code>word_timestamps</code> is on by default and the times live on{" "}
         <code>result.words</code> in seconds — no model swap.
       </p>
 
       <h2>Language selection</h2>
       <p>
-        OpenAI takes an ISO-639-1 <code>language</code> hint. Zephyr always
+        OpenAI takes an ISO-639-1 <code>language</code> hint. Speech Revolutions always
         auto-detects, including code-switching mid-file — there&apos;s no
         language parameter to set. <code>result.languages</code> is a list of{" "}
         <code>{`{start, end, language}`}</code> segments covering the whole
@@ -203,7 +202,7 @@ export default function MigrateOpenAIWhisperPage() {
       <h2>Custom vocabulary</h2>
       <p>
         OpenAI&apos;s only biasing lever is the free-text <code>prompt</code>{" "}
-        (capped at roughly 224 tokens). Zephyr takes an explicit{" "}
+        (capped at roughly 224 tokens). Speech Revolutions takes an explicit{" "}
         <code>custom_vocabulary</code> list of domain terms.
       </p>
 
@@ -229,9 +228,9 @@ print(resp.text)
 # no word timestamps, no speakers from gpt-4o-transcribe`,
           },
           {
-            label: "After — Zephyr (Python)",
+            label: "After — Speech Revolutions (Python)",
             language: "python",
-            filename: "zephyr_transcribe.py",
+            filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions
 
 client = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY
@@ -244,9 +243,9 @@ for u in result.utterances:            # speaker turns
     print(f"{u.speaker}: {u.text}")`,
           },
           {
-            label: "After — Zephyr (JavaScript)",
+            label: "After — Speech Revolutions (JavaScript)",
             language: "ts",
-            filename: "zephyr-transcribe.mjs",
+            filename: "stt-transcribe.mjs",
             code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
 
 const client = new SpeechRevolutions();
@@ -262,11 +261,11 @@ for (const u of result.utterances) console.log(\`\${u.speaker}: \${u.text}\`);`,
       <h2>Common pitfalls</h2>
       <ul>
         <li>
-          <strong>Auth prefix.</strong> Drop <code>Bearer</code>; Zephyr uses the{" "}
+          <strong>Auth prefix.</strong> Drop <code>Bearer</code>; Speech Revolutions uses the{" "}
           <code>X-API-Key</code> header.
         </li>
         <li>
-          <strong>Expecting text only.</strong> Zephyr returns{" "}
+          <strong>Expecting text only.</strong> Speech Revolutions returns{" "}
           <code>words</code> and <code>utterances</code> by default — you no
           longer need a second model for timestamps or speakers.
         </li>

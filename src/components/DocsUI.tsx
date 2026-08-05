@@ -12,6 +12,10 @@ export function Callout({
 }) {
   return (
     <div
+      // Marks the block for the Markdown export, which turns it into a blockquote —
+      // the styling alone carries no meaning once the CSS is gone.
+      data-callout={tone}
+      data-callout-title={title}
       className={cn(
         "mt-6 rounded-xl border px-4 py-3 text-[14px] leading-6",
         tone === "info" && "border-brand-500/25 bg-brand-500/8 text-zinc-300",
