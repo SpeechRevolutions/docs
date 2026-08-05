@@ -4,15 +4,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Using Zephyr with Django",
+  title: "Using Speech Revolutions with Django",
+  description:
+    "Integrate Speech Revolutions into a Django app: a view that submits a file for transcription, a model that stores each job's status and progress, and a webhook view that…",
 };
 
 export default function DjangoIntegrationPage() {
   return (
     <>
-      <h1>Using Zephyr with Django</h1>
+      <h1>Using Speech Revolutions with Django</h1>
       <p>
-        Integrate Zephyr into a Django app: a view that submits a file for
+        Integrate Speech Revolutions into a Django app: a view that submits a file for
         transcription, a model that stores each job&apos;s status and progress,
         and a webhook view that verifies the signature and records the result.
         The API key stays in Django settings / the server environment — it never
@@ -38,7 +40,7 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
 
       <h2>A model to store status + progress</h2>
       <p>
-        Persist the Zephyr <code>job_id</code> plus a status and a{" "}
+        Persist the Speech Revolutions <code>job_id</code> plus a status and a{" "}
         <code>0–100</code> progress number. Store the download URL and transcript
         once the job completes.
       </p>
@@ -70,7 +72,7 @@ class TranscriptionJob(models.Model):
       <p>
         Take the uploaded file, call <code>submit()</code> to get a job id
         without blocking the request, and create the row. Pass a{" "}
-        <code>callback_url</code> so Zephyr notifies you when the job finishes —
+        <code>callback_url</code> so Speech Revolutions notifies you when the job finishes —
         the webhook view below fills in the result.
       </p>
       <CodeBlock
@@ -93,7 +95,7 @@ def start_transcription(request):
     job_id = client.submit(
         upload.read(),
         speaker_labels=True,
-        callback_url=request.build_absolute_uri("/webhooks/zephyr/"),
+        callback_url=request.build_absolute_uri("/webhooks/stt/"),
     )
 
     TranscriptionJob.objects.create(job_id=job_id)
@@ -122,7 +124,7 @@ def job_progress(request, job_id):
 
       <h2>Webhook view with signature verification</h2>
       <p>
-        Zephyr POSTs a signed JSON body to your <code>callback_url</code> on
+        Speech Revolutions POSTs a signed JSON body to your <code>callback_url</code> on
         completion or permanent failure. The signature is HMAC-SHA256 over the
         raw body in the <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header.
         Verify against <code>request.body</code> (the exact bytes) and exempt the
@@ -145,14 +147,14 @@ from .models import TranscriptionJob
 
 def verify_signature(raw_body: bytes, signature_header: str) -> bool:
     expected = "sha256=" + hmac.new(
-        settings.ZEPHYR_WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256
+        settings.STT_WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(expected, signature_header or "")
 
 
 @csrf_exempt
 @require_POST
-def zephyr_webhook(request):
+def stt_webhook(request):
     raw = request.body  # verify against the exact bytes received
     if not verify_signature(raw, request.headers.get("X-SR-Signature", "")):
         return HttpResponse(status=401)
@@ -185,12 +187,12 @@ def zephyr_webhook(request):
         filename="urls.py"
         code={`from django.urls import path
 from transcripts import views
-from transcripts.webhooks import zephyr_webhook
+from transcripts.webhooks import stt_webhook
 
 urlpatterns = [
     path("transcribe/", views.start_transcription),
     path("jobs/<str:job_id>/progress/", views.job_progress),
-    path("webhooks/zephyr/", zephyr_webhook),
+    path("webhooks/stt/", stt_webhook),
 ]`}
       />
 

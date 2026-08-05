@@ -6,29 +6,29 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Migrating from AssemblyAI to Zephyr",
+  title: "Migrating from AssemblyAI to Speech Revolutions",
   description:
-    "Move an AssemblyAI integration to Zephyr: auth, the upload-submit-poll flow, response fields, and millisecond vs second timestamps.",
+    "Move an AssemblyAI integration to Speech Revolutions: auth, the upload-submit-poll flow, response fields, and millisecond vs second timestamps.",
 };
 
 export default function MigrateAssemblyAIPage() {
   return (
     <>
-      <h1>Migrating from AssemblyAI to Zephyr</h1>
+      <h1>Migrating from AssemblyAI to Speech Revolutions</h1>
       <p>
         AssemblyAI already uses an async flow: upload the file to{" "}
         <code>/v2/upload</code>, submit a job to <code>/v2/transcript</code>, then
         poll <code>/v2/transcript/{`{id}`}</code> until{" "}
-        <code>status === &quot;completed&quot;</code>. Zephyr&apos;s model is the
+        <code>status === &quot;completed&quot;</code>. The Speech Revolutions model is the
         same shape, so if you&apos;re used to AssemblyAI&apos;s upload-then-poll
-        rhythm you&apos;ll feel at home. The Zephyr SDK collapses all three steps
+        rhythm you&apos;ll feel at home. The Speech Revolutions SDK collapses all three steps
         into one blocking <code>transcribe()</code>, or keeps them separate with{" "}
         <code>submit()</code> + <code>get_transcript()</code>.
       </p>
 
       <Callout title="Familiar ergonomics" tone="tip">
         <p>
-          Zephyr&apos;s <code>result.text</code> and{" "}
+          The Speech Revolutions <code>result.text</code> and{" "}
           <code>result.utterances</code> match AssemblyAI&apos;s{" "}
           <code>text</code> and speaker-utterance model directly, and the SDK
           accepts options either as keyword arguments or as a{" "}
@@ -39,14 +39,14 @@ export default function MigrateAssemblyAIPage() {
       <h2>Authentication</h2>
       <p>
         AssemblyAI sends the key in a bare <code>authorization</code> header (no{" "}
-        <code>Bearer</code> prefix). Zephyr uses <code>X-API-Key</code>, read from
+        <code>Bearer</code> prefix). Speech Revolutions uses <code>X-API-Key</code>, read from
         the environment by the SDK.
       </p>
       <table>
         <thead>
           <tr>
             <th>AssemblyAI</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -74,8 +74,8 @@ export default function MigrateAssemblyAIPage() {
         <thead>
           <tr>
             <th>AssemblyAI</th>
-            <th>Zephyr REST</th>
-            <th>Zephyr SDK</th>
+            <th>Speech Revolutions REST</th>
+            <th>Speech Revolutions SDK</th>
           </tr>
         </thead>
         <tbody>
@@ -117,7 +117,7 @@ export default function MigrateAssemblyAIPage() {
       <p>
         Note the ordering difference: AssemblyAI uploads first and gets an{" "}
         <code>upload_url</code> it then references in the transcript request.
-        Zephyr issues the presigned URL <em>first</em> (from{" "}
+        Speech Revolutions issues the presigned URL <em>first</em> (from{" "}
         <code>/api/v1/upload</code>), you PUT the bytes to it, then confirm with{" "}
         <code>/api/v1/upload/complete</code>. The SDK handles the ordering.
       </p>
@@ -127,8 +127,8 @@ export default function MigrateAssemblyAIPage() {
         Both platforms are async and both accept a hosted URL, so if you already
         pass <code>audio_url</code> pointing at your own storage, hand the same
         URL to <code>transcribe()</code>. For local files, AssemblyAI streams
-        bytes to <code>/v2/upload</code>; Zephyr streams them to a presigned
-        object-storage URL. Zephyr additionally surfaces live{" "}
+        bytes to <code>/v2/upload</code>; Speech Revolutions streams them to a presigned
+        object-storage URL. Speech Revolutions additionally surfaces live{" "}
         <code>upload</code> and <code>transcribe</code> progress you can render as
         a bar (see <Link href="/guides/live-progress">live progress</Link>),
         rather than polling a status field.
@@ -138,14 +138,14 @@ export default function MigrateAssemblyAIPage() {
       <p>
         AssemblyAI returns a flat object with <code>text</code> and a{" "}
         <code>words[]</code> array. Timestamps are in{" "}
-        <strong>milliseconds</strong>. Zephyr returns times in{" "}
+        <strong>milliseconds</strong>. Speech Revolutions returns times in{" "}
         <strong>seconds</strong>.
       </p>
       <table>
         <thead>
           <tr>
             <th>AssemblyAI field</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -187,7 +187,7 @@ export default function MigrateAssemblyAIPage() {
       </table>
       <Callout title="Watch the units" tone="warn">
         <p>
-          AssemblyAI timestamps are milliseconds; Zephyr timestamps are seconds.
+          AssemblyAI timestamps are milliseconds; Speech Revolutions timestamps are seconds.
           If you divide by 1000 anywhere, remove that step after migrating.
         </p>
       </Callout>
@@ -195,7 +195,7 @@ export default function MigrateAssemblyAIPage() {
       <h2>Diarization</h2>
       <p>
         AssemblyAI enables diarization with <code>speaker_labels: true</code>.
-        Zephyr uses the same <code>speaker_labels</code> flag (on by default) and
+        Speech Revolutions uses the same <code>speaker_labels</code> flag (on by default) and
         exposes the same <code>utterances</code> concept, so speaker-turn code
         ports almost verbatim. Zephyr&apos;s diarization accuracy leads the field
         in our testing — see the <Link href="/benchmarks">benchmarks</Link> and
@@ -205,14 +205,14 @@ export default function MigrateAssemblyAIPage() {
       <h2>Timestamps</h2>
       <p>
         Word timestamps are always available on both. The only change is the unit
-        (ms → seconds). Zephyr also measures well on timestamp precision; the{" "}
+        (ms → seconds). Speech Revolutions also measures well on timestamp precision; the{" "}
         <Link href="/benchmarks">benchmarks</Link> have the figures.
       </p>
 
       <h2>Language selection</h2>
       <p>
         AssemblyAI takes <code>language_code</code>, or{" "}
-        <code>language_detection: true</code> to auto-detect. Zephyr always
+        <code>language_detection: true</code> to auto-detect. Speech Revolutions always
         auto-detects, including code-switching mid-file — there&apos;s no
         language parameter to set. Read the detected language(s) back from{" "}
         <code>result.languages</code>, a list of{" "}
@@ -243,9 +243,9 @@ for w in transcript.words:
     print(w.text, w.start, w.end)  # start/end in milliseconds`,
           },
           {
-            label: "After — Zephyr (Python)",
+            label: "After — Speech Revolutions (Python)",
             language: "python",
-            filename: "zephyr_transcribe.py",
+            filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions, TranscribeOptions
 
 client = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY
@@ -262,9 +262,9 @@ for w in result.words:
     print(w.text, w.start, w.end)  # start/end in seconds`,
           },
           {
-            label: "After — Zephyr (JavaScript)",
+            label: "After — Speech Revolutions (JavaScript)",
             language: "ts",
-            filename: "zephyr-transcribe.mjs",
+            filename: "stt-transcribe.mjs",
             code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
 
 const client = new SpeechRevolutions();
@@ -309,12 +309,12 @@ if status.is_completed:
           <code>X-API-Key</code>.
         </li>
         <li>
-          <strong>Upload ordering.</strong> Zephyr presigns before you PUT bytes;
+          <strong>Upload ordering.</strong> Speech Revolutions presigns before you PUT bytes;
           AssemblyAI uploads then references a URL. Irrelevant if you use the SDK.
         </li>
         <li>
           <strong>Keyword biasing.</strong> AssemblyAI&apos;s{" "}
-          <code>word_boost</code> becomes Zephyr&apos;s{" "}
+          <code>word_boost</code> becomes{" "}
           <code>custom_vocabulary</code>.
         </li>
       </ul>

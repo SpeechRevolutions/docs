@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Go SDK",
+  description:
+    "Official Go client for the Speech Revolutions STT API.",
 };
 
 export default function GoSdkPage() {

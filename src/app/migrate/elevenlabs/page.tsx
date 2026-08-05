@@ -5,46 +5,46 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Migrating from ElevenLabs to Zephyr",
+  title: "Migrating from ElevenLabs to Speech Revolutions",
   description:
-    "Move an ElevenLabs Scribe integration to Zephyr: xi-api-key auth, multipart vs presigned upload, the spacing-token quirk, diarization, and timestamps.",
+    "Move an ElevenLabs Scribe integration to Speech Revolutions: xi-api-key auth, multipart vs presigned upload, the spacing-token quirk, diarization, and timestamps.",
 };
 
 export default function MigrateElevenLabsPage() {
   return (
     <>
-      <h1>Migrating from ElevenLabs to Zephyr</h1>
+      <h1>Migrating from ElevenLabs to Speech Revolutions</h1>
       <p>
         ElevenLabs&apos; Scribe speech-to-text is a single synchronous multipart{" "}
         <code>POST</code> to <code>/v1/speech-to-text</code>. Word timestamps come
         back by default and <code>diarize=true</code> adds a{" "}
-        <code>speaker_id</code> to each word. Zephyr covers the same ground —
+        <code>speaker_id</code> to each word. Speech Revolutions covers the same ground —
         transcript, per-word times, and speakers — and the SDK reduces it to one{" "}
         <code>transcribe()</code> call. This guide maps auth, upload, and the
         response shape (including a token quirk to watch for), and points to where
-        Zephyr measures ahead for Scribe migrators.
+        Speech Revolutions measures ahead for Scribe migrators.
       </p>
 
       <Callout title="What changes, what doesn't" tone="tip">
         <p>
-          Your <code>diarize</code> flag ports as-is (Zephyr accepts{" "}
+          Your <code>diarize</code> flag ports as-is (Speech Revolutions accepts{" "}
           <code>diarize</code> as an alias for <code>speaker_labels</code>), and{" "}
           <code>result.text</code> maps directly. The main cleanup is dropping
-          ElevenLabs&apos; <code>spacing</code> word-array tokens — Zephyr&apos;s{" "}
+          ElevenLabs&apos; <code>spacing</code> word-array tokens — the Speech Revolutions{" "}
           <code>result.words</code> are already words only.
         </p>
       </Callout>
 
       <h2>Authentication</h2>
       <p>
-        ElevenLabs authenticates with an <code>xi-api-key</code> header. Zephyr
+        ElevenLabs authenticates with an <code>xi-api-key</code> header. Speech Revolutions
         uses <code>X-API-Key</code>, read from the environment by the SDK.
       </p>
       <table>
         <thead>
           <tr>
             <th>ElevenLabs</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -72,8 +72,8 @@ export default function MigrateElevenLabsPage() {
         <thead>
           <tr>
             <th>ElevenLabs</th>
-            <th>Zephyr REST</th>
-            <th>Zephyr SDK</th>
+            <th>Speech Revolutions REST</th>
+            <th>Speech Revolutions SDK</th>
           </tr>
         </thead>
         <tbody>
@@ -106,9 +106,9 @@ export default function MigrateElevenLabsPage() {
       <h2>Upload differences</h2>
       <p>
         ElevenLabs takes the audio as a multipart <code>file</code> field with{" "}
-        <code>model_id</code> in the form body. Zephyr uploads through a presigned
+        <code>model_id</code> in the form body. Speech Revolutions uploads through a presigned
         object-storage URL, so bytes stream to storage rather than through the API
-        request — handled by the SDK when you pass a path, URL, or bytes. Zephyr
+        request — handled by the SDK when you pass a path, URL, or bytes. Speech Revolutions
         also reports live <code>upload</code> and <code>transcribe</code> progress
         (see <Link href="/guides/live-progress">live progress</Link>).
       </p>
@@ -119,14 +119,14 @@ export default function MigrateElevenLabsPage() {
         which entries have a <code>type</code> of <code>word</code> or{" "}
         <code>spacing</code>; the <code>spacing</code> entries are not real words.
         Speakers appear as <code>speaker_id</code> strings (e.g.{" "}
-        <code>speaker_0</code>). Zephyr&apos;s <code>result.words</code> contains
+        <code>speaker_0</code>). The Speech Revolutions <code>result.words</code> contains
         words only, with matching string speaker labels.
       </p>
       <table>
         <thead>
           <tr>
             <th>ElevenLabs field</th>
-            <th>Zephyr</th>
+            <th>Speech Revolutions</th>
           </tr>
         </thead>
         <tbody>
@@ -182,10 +182,10 @@ export default function MigrateElevenLabsPage() {
       <h2>Diarization</h2>
       <p>
         ElevenLabs diarizes with <code>diarize=true</code>, adding a{" "}
-        <code>speaker_id</code> per word. Zephyr uses the same <code>diarize</code>{" "}
+        <code>speaker_id</code> per word. Speech Revolutions uses the same <code>diarize</code>{" "}
         flag (alias for <code>speaker_labels</code>, on by default) and also groups
         words into <code>result.utterances</code>, so you don&apos;t reconstruct
-        turns from per-word ids. Diarization accuracy is a clear Zephyr strength —
+        turns from per-word ids. Diarization accuracy is a clear Speech Revolutions strength —
         it leads on every subset in our testing; see the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}
         <a href={SITE.landingUrl}>comparison table</a> for the measured DER.
@@ -194,7 +194,7 @@ export default function MigrateElevenLabsPage() {
       <h2>Timestamps</h2>
       <p>
         Both return per-word start/end times in seconds by default. Timestamp
-        precision is another area Zephyr measures well on for Scribe migrators —
+        precision is another area Speech Revolutions measures well on for Scribe migrators —
         the <Link href="/benchmarks">benchmarks</Link> report the median
         word-boundary error side by side, so you can compare rather than take our
         word for it.
@@ -202,7 +202,7 @@ export default function MigrateElevenLabsPage() {
 
       <h2>Language selection</h2>
       <p>
-        ElevenLabs takes <code>language_code</code>. Zephyr always
+        ElevenLabs takes <code>language_code</code>. Speech Revolutions always
         auto-detects, including code-switching mid-file — there&apos;s no
         language parameter to set. <code>result.languages</code> is a list of{" "}
         <code>{`{start, end, language}`}</code> segments covering the whole
@@ -234,9 +234,9 @@ for w in resp.words:
         print(w.speaker_id, w.text, w.start, w.end)`,
           },
           {
-            label: "After — Zephyr (Python)",
+            label: "After — Speech Revolutions (Python)",
             language: "python",
-            filename: "zephyr_transcribe.py",
+            filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions
 
 client = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY
@@ -249,9 +249,9 @@ for u in result.utterances:                     # pre-grouped speaker turns
     print(f"{u.speaker}: {u.text}")`,
           },
           {
-            label: "After — Zephyr (JavaScript)",
+            label: "After — Speech Revolutions (JavaScript)",
             language: "ts",
-            filename: "zephyr-transcribe.mjs",
+            filename: "stt-transcribe.mjs",
             code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
 
 const client = new SpeechRevolutions();
@@ -272,7 +272,7 @@ for (const u of result.utterances) {
           <code>X-API-Key</code>.
         </li>
         <li>
-          <strong>Spacing tokens.</strong> Zephyr&apos;s <code>words</code> omit
+          <strong>Spacing tokens.</strong> The Speech Revolutions <code>words</code> array omits
           them — remove any <code>type</code> filtering.
         </li>
         <li>
@@ -281,7 +281,7 @@ for (const u of result.utterances) {
         </li>
         <li>
           <strong>No keyword API on ElevenLabs.</strong> If you needed domain-term
-          biasing and couldn&apos;t get it, Zephyr adds{" "}
+          biasing and couldn&apos;t get it, Speech Revolutions adds{" "}
           <code>custom_vocabulary</code>.
         </li>
       </ul>

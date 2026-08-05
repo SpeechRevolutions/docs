@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "C# SDK",
+  description:
+    "Official C# client for the Speech Revolutions STT API. Async-first, targets net8.0, in the style of the Deepgram / ElevenLabs .NET clients.",
 };
 
 export default function CsharpSdkPage() {

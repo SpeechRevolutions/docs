@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Cookbook",
   description:
-    "Short, copy-pasteable Zephyr recipes: files and URLs, submit + poll, batching, webhooks, retries, speaker labels, multilingual, and subtitles.",
+    "Short, copy-pasteable Speech Revolutions recipes: files and URLs, submit + poll, batching, webhooks, retries, speaker labels, multilingual, and subtitles.",
 };
 
 export default function CookbookPage() {
@@ -14,7 +14,7 @@ export default function CookbookPage() {
     <>
       <h1>Cookbook</h1>
       <p>
-        Short, copy-pasteable recipes for common Zephyr tasks. Each one is a
+        Short, copy-pasteable recipes for common Speech Revolutions tasks. Each one is a
         complete snippet in Python and JavaScript. Every client reads your key
         from <code>SPEECHREVOLUTIONS_API_KEY</code> (or <code>STT_API_KEY</code>)
         — see any SDK page for install and auth:{" "}
@@ -471,7 +471,7 @@ for (const u of result.utterances) {
 
       <h2 id="multilingual">Multilingual audio</h2>
       <p>
-        There is no language flag to set. Zephyr detects the spoken language and
+        There is no language flag to set. Speech Revolutions detects the spoken language and
         transcribes it, including audio that switches languages mid-file. Just
         call <code>transcribe()</code> as usual. For domain-specific names and
         jargon, pass <code>custom_vocabulary</code> to bias the model toward those

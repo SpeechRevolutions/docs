@@ -5,15 +5,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Using Zephyr with Next.js",
+  title: "Using Speech Revolutions with Next.js",
+  description:
+    "Call Speech Revolutions from the server side of your Next.js app — a Route Handler or a Server Action — so your API key never ships to the browser. This guide wires up a…",
 };
 
 export default function NextjsIntegrationPage() {
   return (
     <>
-      <h1>Using Zephyr with Next.js</h1>
+      <h1>Using Speech Revolutions with Next.js</h1>
       <p>
-        Call Zephyr from the server side of your Next.js app — a Route Handler
+        Call Speech Revolutions from the server side of your Next.js app — a Route Handler
         or a Server Action — so your API key never ships to the browser. This
         guide wires up a file upload, live progress you can poll from the
         client, and a webhook Route Handler for completion callbacks.
@@ -47,12 +49,12 @@ SPEECHREVOLUTIONS_API_KEY=stt_...`}
       </p>
       <CodeBlock
         language="ts"
-        filename="lib/zephyr.ts"
+        filename="lib/stt.ts"
         code={`import "server-only";
 import { SpeechRevolutions } from "@speechrevolutions/stt";
 
 // Reads SPEECHREVOLUTIONS_API_KEY / STT_API_KEY from the server environment.
-export const zephyr = new SpeechRevolutions();`}
+export const stt = new SpeechRevolutions();`}
       />
 
       <h2>Upload a user file from a Route Handler</h2>
@@ -66,7 +68,7 @@ export const zephyr = new SpeechRevolutions();`}
         language="ts"
         filename="app/api/transcribe/route.ts"
         code={`import { NextRequest, NextResponse } from "next/server";
-import { zephyr } from "@/lib/zephyr";
+import { stt } from "@/lib/stt";
 
 export const runtime = "nodejs"; // the SDK needs the Node runtime, not edge
 
@@ -79,7 +81,7 @@ export async function POST(req: NextRequest) {
 
   // Pass the raw bytes (a Buffer) to the SDK — blocks until done.
   const bytes = Buffer.from(await file.arrayBuffer());
-  const result = await zephyr.transcribe(bytes, { speakerLabels: true });
+  const result = await stt.transcribe(bytes, { speakerLabels: true });
 
   return NextResponse.json({ text: result.text });
 }`}
@@ -94,12 +96,12 @@ export async function POST(req: NextRequest) {
         language="ts"
         filename="app/actions.ts"
         code={`"use server";
-import { zephyr } from "@/lib/zephyr";
+import { stt } from "@/lib/stt";
 
 export async function transcribeAction(formData: FormData) {
   const file = formData.get("file") as File;
   const bytes = Buffer.from(await file.arrayBuffer());
-  const result = await zephyr.transcribe(bytes, { speakerLabels: true });
+  const result = await stt.transcribe(bytes, { speakerLabels: true });
   return { text: result.text };
 }`}
       />
@@ -121,7 +123,7 @@ export async function transcribeAction(formData: FormData) {
             language: "ts",
             filename: "app/api/jobs/route.ts",
             code: `import { NextRequest, NextResponse } from "next/server";
-import { zephyr } from "@/lib/zephyr";
+import { stt } from "@/lib/stt";
 import { randomUUID } from "node:crypto";
 
 export const runtime = "nodejs";
@@ -142,7 +144,7 @@ export async function POST(req: NextRequest) {
   JOBS.set(jobId, { phase: "starting", percent: 0 });
 
   // Fire and forget — return the id immediately; the callbacks update the map.
-  zephyr
+  stt
     .transcribe(bytes, {
       onUploadProgress: (e) =>
         JOBS.set(jobId, { phase: "upload", percent: (e.percent ?? 0) * 0.15 }),
@@ -235,20 +237,20 @@ export function Upload() {
       <h2>Webhook Route Handler</h2>
       <p>
         For long jobs, skip polling entirely: pass a <code>callbackUrl</code>{" "}
-        when you submit and let Zephyr POST you when the job finishes. The
+        when you submit and let Speech Revolutions POST you when the job finishes. The
         platform signs the raw body with HMAC-SHA256 in the{" "}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Read the raw
         bytes — not a re-serialized object — and compare in constant time.
       </p>
       <CodeBlock
         language="ts"
-        filename="app/api/webhooks/zephyr/route.ts"
+        filename="app/api/webhooks/stt/route.ts"
         code={`import { NextRequest, NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const runtime = "nodejs";
 
-const SECRET = process.env.ZEPHYR_WEBHOOK_SECRET!; // your signing secret
+const SECRET = process.env.STT_WEBHOOK_SECRET!; // your signing secret
 
 function verify(raw: string, header: string | null): boolean {
   const expected = "sha256=" + createHmac("sha256", SECRET).update(raw).digest("hex");

@@ -4,6 +4,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Features & formats",
+  description:
+    "Every request can enable the full feature set — there are no paid add-ons.",
 };
 
 export default function FeaturesPage() {

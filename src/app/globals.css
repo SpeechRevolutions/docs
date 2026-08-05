@@ -40,6 +40,71 @@
   }
 }
 
+/* Thin scrollbar for the docs rails.
+ *
+ * The platform default is ~15px and opaque, which on a 16rem sidebar reads as a
+ * structural column rather than a control. Thin, translucent, and brightening on
+ * hover keeps it grabbable without competing with the nav itself. */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.14) transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.14);
+  border-radius: 9999px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.28);
+}
+
+/* Code blocks
+ *
+ * Shiki runs at build time and emits `<pre class="shiki">` with inline colours plus
+ * `--shiki-light` custom properties. We render dark today; a light theme is a matter of
+ * switching which variable the rules below read, with no re-highlight.
+ */
+.code-surface {
+  @apply overflow-x-auto;
+}
+
+.code-surface .shiki {
+  /* Shiki inlines the theme's own background — we want the container's navy instead. */
+  background-color: transparent !important;
+  @apply p-4 text-[13px] leading-6;
+}
+
+.code-surface .shiki code {
+  @apply grid;
+}
+
+.code-surface .shiki .line {
+  /* Empty lines collapse to zero height inside a grid without this. */
+  min-height: 1.5rem;
+}
+
+.code-surface.with-line-numbers .shiki code {
+  counter-reset: shiki-line;
+}
+
+.code-surface.with-line-numbers .shiki .line::before {
+  counter-increment: shiki-line;
+  content: counter(shiki-line);
+  @apply mr-4 inline-block w-6 text-right text-zinc-600 tabular-nums;
+  /* Keep the gutter out of the selection when copying by hand. */
+  user-select: none;
+}
+
 /* Docs prose */
 .docs-prose h1 {
   @apply text-3xl font-bold tracking-tight text-white sm:text-4xl;
@@ -78,11 +143,21 @@
 }
 
 .docs-prose th {
-  @apply border-b border-white/10 px-3 py-2 font-medium text-zinc-300;
+  @apply border-b border-white/10 px-3 py-2 align-bottom font-medium text-zinc-300;
 }
 
+/* `align-top` matters for merged cells: a `rowSpan` cell defaults to vertical-align
+ * middle, which centres its text on the row divider drawn by its neighbours — the
+ * content then reads as cutting straight through the rule. Top alignment also keeps
+ * multi-line cells lined up with their shorter neighbours. */
 .docs-prose td {
-  @apply border-b border-white/5 px-3 py-2.5 text-zinc-400;
+  @apply border-b border-white/5 px-3 py-2.5 align-top text-zinc-400;
+}
+
+/* A cell spanning N rows owns the dividers it crosses; drawing its own bottom border
+ * would double up with the last spanned row's. */
+.docs-prose td[rowspan] {
+  @apply border-b-0;
 }
 
 .docs-prose strong {

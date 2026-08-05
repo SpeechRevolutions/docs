@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Live progress for web apps",
+  description:
+    "You're building a transcription app and want to show each user a live progress bar while their file is transcribed. The SDK surfaces progress through two…",
 };
 
 export default function LiveProgressGuidePage() {

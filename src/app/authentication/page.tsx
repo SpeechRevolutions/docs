@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Authentication",
+  description:
+    "Every request requires an API key via the X-API-Key header.",
 };
 
 export default function AuthPage() {

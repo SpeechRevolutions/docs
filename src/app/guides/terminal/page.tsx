@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terminal & cURL",
+  description:
+    "For shell scripts and one-off jobs, use POST /api/v1/transcribe. You stream the raw audio bytes as the request body (options go in the query string); the…",
 };
 
 export default function TerminalGuidePage() {

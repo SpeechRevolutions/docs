@@ -5,6 +5,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Build a meeting-transcription app",
+  description:
+    "This tutorial wires the whole thing together: a user uploads a meeting recording, watches a live progress bar, and ends up with a clean, speaker-labeled…",
 };
 
 export default function MeetingAppTutorialPage() {
@@ -27,15 +29,15 @@ export default function MeetingAppTutorialPage() {
         <p>
           A backend endpoint that accepts a recording and transcribes it with{" "}
           <code>speaker_labels</code> on; a progress endpoint your frontend
-          polls while the job runs; and a transcript view that renders Zephyr&apos;s{" "}
+          polls while the job runs; and a transcript view that renders the Speech Revolutions{" "}
           <code>.utterances</code> as timestamped speaker turns. No spinner —
-          a real bar, because Zephyr reports progress for pre-recorded audio.
+          a real bar, because Speech Revolutions reports progress for pre-recorded audio.
         </p>
       </Callout>
 
       <h2>The shape of the result</h2>
       <p>
-        When you pass <code>speaker_labels=True</code>, Zephyr labels who spoke
+        When you pass <code>speaker_labels=True</code>, Speech Revolutions labels who spoke
         each segment, and the SDK parses the response into a transcript object
         with an <code>.utterances</code> list. Each utterance is one contiguous
         speaker turn:
@@ -300,7 +302,7 @@ export function MeetingView({ jobId }: { jobId: string }) {
       />
 
       <p>
-        That&apos;s the whole loop: upload, a real progress bar while Zephyr
+        That&apos;s the whole loop: upload, a real progress bar while Speech Revolutions
         works, and a speaker-labeled transcript rendered from{" "}
         <code>.utterances</code>. From here you might persist meetings, add
         search across turns, or export the transcript — see the{" "}

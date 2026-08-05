@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Introduction",
+  description:
+    "Production speech-to-text for developers. Transcribe audio with speaker labels, word timestamps, and multiple output formats, via SDK or one terminal command.",
 };
 
 export default function DocsHomePage() {
@@ -18,31 +20,49 @@ export default function DocsHomePage() {
         single terminal command.
       </p>
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+      <p>
+        New here? Start with the{" "}
+        <Link href="/getting-started">Quickstart</Link> — first transcript in
+        under a minute. Or pick your language:
+      </p>
+
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {[
           {
-            href: "/getting-started",
-            title: "Quickstart",
-            body: "Transcribe your first file in under a minute.",
-          },
-          {
-            href: "/guides/terminal",
-            title: "Terminal & cURL",
-            body: "Stream a file to POST /api/v1/transcribe.",
-          },
-          {
             href: "/sdks/python",
-            title: "Python SDK",
-            body: "Sync and async clients with a one-line transcribe API.",
+            title: "Python",
+            body: "Sync and async clients, one-line transcribe.",
+            install: "pip install speechrevolutions",
+          },
+          {
+            href: "/sdks/javascript",
+            title: "JavaScript",
+            body: "TypeScript types, Node and edge runtimes.",
+            install: "npm install @speechrevolutions/stt",
+          },
+          {
+            href: "/sdks/go",
+            title: "Go",
+            body: "Context-aware, cancellable on every call.",
+            install: "go get github.com/speechrevolutions/go-sdk",
+          },
+          {
+            href: "/sdks/csharp",
+            title: "C#",
+            body: "Async-first client targeting net8.0.",
+            install: "dotnet add package SpeechRevolutions",
           },
         ].map((card) => (
           <Link
             key={card.href}
             href={card.href}
-            className="rounded-xl border border-white/10 bg-white/[0.03] p-4 no-underline transition-colors hover:border-brand-500/30 hover:bg-brand-500/5"
+            className="flex flex-col rounded-xl border border-white/10 bg-white/[0.03] p-4 no-underline transition-colors hover:border-brand-500/30 hover:bg-brand-500/5"
           >
             <p className="text-sm font-semibold text-white">{card.title}</p>
-            <p className="mt-1 text-sm text-zinc-400">{card.body}</p>
+            <p className="mt-1 flex-1 text-sm text-zinc-400">{card.body}</p>
+            <code className="mt-3 block truncate rounded-md bg-black/30 px-2 py-1.5 font-mono text-[11px] text-zinc-500">
+              {card.install}
+            </code>
           </Link>
         ))}
       </div>
@@ -100,14 +120,6 @@ result = client.transcribe("meeting.mp3", speaker_labels=True)
 print(result.text)`,
           },
           {
-            label: "cURL",
-            language: "bash",
-            code: `curl -N -X POST \\
-  "${SITE.apiBase}/api/v1/transcribe?output_type=json&speaker_labels=true" \\
-  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  --data-binary @meeting.mp3`,
-          },
-          {
             label: "JavaScript",
             language: "ts",
             code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
@@ -118,11 +130,49 @@ const result = await client.transcribe("meeting.mp3", {
 });
 console.log(result.text);`,
           },
+          {
+            label: "Go",
+            language: "go",
+            code: `client, _ := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
+sl := true
+result, err := client.Transcribe(context.Background(), "meeting.mp3", stt.TranscribeOptions{
+    SpeakerLabels: &sl,
+}, nil)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(result.Text())`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `using SpeechRevolutions;
+
+using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY
+var result = await client.TranscribeAsync("meeting.mp3", new TranscribeOptions
+{
+    SpeakerLabels = true,
+});
+Console.WriteLine(result.Text);`,
+          },
+          {
+            label: "cURL",
+            language: "bash",
+            code: `curl -N -X POST \\
+  "${SITE.apiBase}/api/v1/transcribe?output_type=json&speaker_labels=true" \\
+  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
+  --data-binary @meeting.mp3`,
+          },
         ]}
       />
 
       <h2>What you get</h2>
       <ul>
+        <li>
+          <strong>Zephyr</strong>, our speech-to-text engine — ranked{" "}
+          <Link href="/benchmarks">#1 on diarization error rate</Link> across every
+          subset of our public benchmark suite
+        </li>
         <li>Speaker diarization and word-level timestamps</li>
         <li>
           Output formats: <code>txt</code>, <code>json</code>, <code>srt</code>,{" "}

@@ -6,6 +6,8 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Transcribe API",
+  description:
+    "One-shot streaming upload for shells and simple scripts. Same transcription options as upload — no separate progress/complete steps.",
 };
 
 export default function TranscribeApiPage() {
