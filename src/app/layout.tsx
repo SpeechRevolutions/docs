@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo, Geist, Geist_Mono } from "next/font/google";
 import { DocsShell } from "@/components/DocsShell";
 import { SITE } from "@/lib/constants";
 import "./globals.css";
@@ -12,6 +12,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+/** Display face for headings — see landing/src/app/layout.tsx for the pairing. */
+const archivo = Archivo({
+  variable: "--font-archivo",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -53,8 +60,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans`}>
+    // Font variables belong on <html>: Tailwind's @theme emits --font-sans on
+    // :root, and a var() there cannot see a property defined on a descendant.
+    // On <body> they resolved to nothing and the page fell back to system fonts.
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable}`}
+    >
+      <body className="font-sans">
         <DocsShell>{children}</DocsShell>
       </body>
     </html>

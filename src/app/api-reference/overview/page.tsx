@@ -1,5 +1,5 @@
 import { Callout } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
+import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -18,6 +18,51 @@ export default function ApiOverviewPage() {
       </p>
       <p>
         Auth: <code>X-API-Key: &lt;key&gt;</code>
+      </p>
+
+      <h2>Limits</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Limit</th>
+            <th>Value</th>
+            <th>Applies to</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Maximum file size</td>
+            <td>
+              <code>{LIMITS.sdkUploadMax}</code>
+            </td>
+            <td>
+              SDK upload flow (<code>/api/v1/upload</code> + presigned PUT or
+              multipart)
+            </td>
+          </tr>
+          <tr>
+            <td>Maximum file size</td>
+            <td>
+              <code>{LIMITS.apiUploadMax}</code>
+            </td>
+            <td>
+              Direct REST upload (<code>/api/v1/transcribe</code>)
+            </td>
+          </tr>
+          <tr>
+            <td>Audio retention</td>
+            <td>
+              <code>{LIMITS.dataRetentionMinutes} minutes</code>
+            </td>
+            <td>Uploaded audio is deleted after processing</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        A file larger than the limit for its path is rejected at job creation,
+        before any upload starts. Send anything above{" "}
+        <code>{LIMITS.apiUploadMax}</code> through an SDK rather than the REST
+        endpoint.
       </p>
 
       <h2>Endpoints</h2>

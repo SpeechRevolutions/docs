@@ -24,6 +24,8 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-archivo), var(--font-geist-sans), ui-sans-serif,
+    system-ui, sans-serif;
 }
 
 @layer base {
@@ -166,4 +168,14 @@
 
 .docs-prose hr {
   @apply my-10 border-white/10;
+}
+
+@layer base {
+  /* Headings carry the display face; body copy stays on the sans. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.018em;
+  }
 }
