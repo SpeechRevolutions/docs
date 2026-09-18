@@ -131,6 +131,81 @@ export async function transcribe(audio: string) {
   };
 }`,
           },
+          {
+            label: "Go",
+            language: "go",
+            code: `// transcription.go — the ONE place your app calls
+package transcription
+
+import (
+	"context"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+type Speaker struct {
+	Speaker string \`json:"speaker"\`
+	Text    string \`json:"text"\`
+}
+
+type Result struct {
+	Text     string           \`json:"text"\`
+	Speakers []Speaker        \`json:"speakers"\`
+	Words    []stt.Word       \`json:"words"\`
+}
+
+var client *stt.Client // built once with SPEECHREVOLUTIONS_API_KEY
+
+func Transcribe(ctx context.Context, audio string) (*Result, error) {
+	r, err := client.Transcribe(ctx, audio, stt.TranscribeOptions{
+		SpeakerLabels:  stt.Bool(true),
+		WordTimestamps: stt.Bool(true),
+	}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	speakers := make([]Speaker, 0, len(r.Utterances))
+	for _, u := range r.Utterances {
+		speakers = append(speakers, Speaker{Speaker: u.Speaker, Text: u.Text})
+	}
+	return &Result{Text: r.Text(), Speakers: speakers, Words: r.Words}, nil
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `// Transcription.cs — the ONE place your app calls
+using SpeechRevolutions;
+
+public record SpeakerTurn(string? Speaker, string Text);
+
+public record TranscriptionResult(
+    string Text,
+    IReadOnlyList<SpeakerTurn> Speakers,
+    IReadOnlyList<Word> Words);
+
+public sealed class Transcription : IDisposable
+{
+    private readonly SttClient _client = new(); // SPEECHREVOLUTIONS_API_KEY
+
+    public async Task<TranscriptionResult> TranscribeAsync(string audio)
+    {
+        var r = await _client.TranscribeAsync(audio, new TranscribeOptions
+        {
+            SpeakerLabels = true,
+            WordTimestamps = true,
+        });
+
+        return new TranscriptionResult(
+            r.Text,
+            r.Utterances.Select(u => new SpeakerTurn(u.Speaker, u.Text)).ToList(),
+            r.Words);
+    }
+
+    public void Dispose() => _client.Dispose();
+}`,
+          },
         ]}
       />
 
@@ -177,9 +252,21 @@ export async function transcribe(audio: string) {
 export SPEECHREVOLUTIONS_API_KEY=stt_...`,
           },
           {
-            label: "Node",
+            label: "JavaScript",
             language: "bash",
             code: `npm install @speechrevolutions/stt
+export SPEECHREVOLUTIONS_API_KEY=stt_...`,
+          },
+          {
+            label: "Go",
+            language: "bash",
+            code: `go get github.com/speechrevolutions/go-sdk
+export SPEECHREVOLUTIONS_API_KEY=stt_...`,
+          },
+          {
+            label: "C#",
+            language: "bash",
+            code: `dotnet add package SpeechRevolutions
 export SPEECHREVOLUTIONS_API_KEY=stt_...`,
           },
         ]}
@@ -203,6 +290,33 @@ print(result.text)`,
 const client = new SpeechRevolutions();
 const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 console.log(result.text);`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `client, err := stt.NewClient("")
+if err != nil {
+	log.Fatal(err)
+}
+
+result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	SpeakerLabels: stt.Bool(true),
+}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(result.Text())`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `using SpeechRevolutions;
+
+using var client = new SttClient();
+var result = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { SpeakerLabels = true });
+
+Console.WriteLine(result.Text);`,
           },
         ]}
       />

@@ -171,6 +171,169 @@ export async function transcribeMeeting(audio, meeting) {
   meeting.percent = 100;
 }`,
           },
+          {
+            label: "Go",
+            language: "go",
+            filename: "meeting_app.go",
+            code: `package main
+
+import (
+	"context"
+	"math"
+	"sync"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+// Give upload the first slice of the bar; transcription fills the rest.
+const uploadWeight = 0.15
+
+// Turn is one speaker turn, as the frontend wants it.
+type Turn struct {
+	Speaker string  \`json:"speaker"\`
+	Text    string  \`json:"text"\`
+	Start   float64 \`json:"start"\`
+	End     float64 \`json:"end"\`
+}
+
+// Meeting is everything the frontend needs for one meeting, kept in memory.
+type Meeting struct {
+	mu      sync.Mutex
+	Phase   string  // "upload" | "transcribe" | "done" | "failed"
+	Percent float64 // overall 0–100
+	Turns   []Turn  // speaker turns, filled when done
+}
+
+func (m *Meeting) bar(phase string, overall float64) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.Phase = phase
+	m.Percent = math.Max(m.Percent, math.Round(overall*10)/10) // never go backwards
+}
+
+func (m *Meeting) OnUpload(e stt.ProgressEvent) {
+	pct, _ := e.Percent()
+	m.bar("upload", pct*uploadWeight)
+}
+
+func (m *Meeting) OnTranscribe(e stt.ProgressEvent) {
+	pct, _ := e.Percent()
+	m.bar("transcribe", uploadWeight*100+pct*(1-uploadWeight))
+}
+
+func (m *Meeting) Snapshot() (string, float64, []Turn) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.Phase, m.Percent, m.Turns
+}
+
+func TranscribeMeeting(ctx context.Context, c *stt.Client, audio string, m *Meeting) error {
+	result, err := c.Transcribe(ctx, audio, stt.TranscribeOptions{
+		SpeakerLabels:    stt.Bool(true), // <- label who spoke each segment
+		OnUploadProgress: m.OnUpload,
+	}, m.OnTranscribe)
+	if err != nil {
+		m.bar("failed", 0)
+		return err
+	}
+
+	// Turn the SDK's utterances into plain structs for the UI.
+	turns := make([]Turn, 0, len(result.Utterances))
+	for _, u := range result.Utterances {
+		t := Turn{Speaker: u.Speaker, Text: u.Text}
+		if u.Start != nil {
+			t.Start = *u.Start
+		}
+		if u.End != nil {
+			t.End = *u.End
+		}
+		turns = append(turns, t)
+	}
+
+	m.mu.Lock()
+	m.Turns = turns
+	m.mu.Unlock()
+	m.bar("done", 100)
+	return nil
+}
+
+func main() {}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Meeting.cs",
+            code: `using SpeechRevolutions;
+
+/// <summary>One speaker turn, as the frontend wants it.</summary>
+public record Turn(string? Speaker, string Text, double Start, double End);
+
+/// <summary>Everything the frontend needs for one meeting, kept in memory.</summary>
+public sealed class Meeting
+{
+    // Give upload the first slice of the bar; transcription fills the rest.
+    private const double UploadWeight = 0.15;
+
+    private readonly object _lock = new();
+
+    public string Phase { get; private set; } = "starting"; // upload|transcribe|done|failed
+    public double Percent { get; private set; }             // overall 0–100
+    public IReadOnlyList<Turn> Turns { get; private set; } = Array.Empty<Turn>();
+
+    public void Bar(string phase, double overall)
+    {
+        lock (_lock)
+        {
+            Phase = phase;
+            Percent = Math.Max(Percent, Math.Round(overall, 1)); // never go backwards
+        }
+    }
+
+    public void OnUpload(ProgressEvent e) =>
+        Bar("upload", (e.Percent ?? 0) * UploadWeight);
+
+    public void OnTranscribe(ProgressEvent e) =>
+        Bar("transcribe", UploadWeight * 100 + (e.Percent ?? 0) * (1 - UploadWeight));
+
+    public object Snapshot()
+    {
+        lock (_lock) return new { phase = Phase, percent = Percent, turns = Turns };
+    }
+
+    public void SetTurns(IReadOnlyList<Turn> turns)
+    {
+        lock (_lock) Turns = turns;
+    }
+}
+
+public static class Meetings
+{
+    public static async Task TranscribeAsync(SttClient client, string audio, Meeting meeting)
+    {
+        try
+        {
+            var result = await client.TranscribeAsync(audio,
+                new TranscribeOptions
+                {
+                    SpeakerLabels = true, // <- label who spoke each segment
+                    OnUploadProgress = meeting.OnUpload,
+                },
+                meeting.OnTranscribe);
+
+            // Turn the SDK's utterances into plain records for the UI.
+            meeting.SetTurns(result.Utterances
+                .Select(u => new Turn(u.Speaker, u.Text, u.Start ?? 0, u.End ?? 0))
+                .ToList());
+            meeting.Bar("done", 100);
+        }
+        catch
+        {
+            meeting.Bar("failed", 0);
+            throw;
+        }
+    }
+}`,
+          },
         ]}
       />
 
@@ -226,6 +389,73 @@ app.get("/meetings/:jobId", (req, res) => {
   res.json(meetings.get(req.params.jobId).snapshot());
   // -> { phase: "done", percent: 100, turns: [{ speaker: "A", text, start, end }, ...] }
 });`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "net/http",
+            code: `// net/http. Method patterns and r.PathValue need Go 1.22+.
+var (
+	meetingsMu sync.Mutex
+	meetings   = map[string]*Meeting{}
+)
+
+http.HandleFunc("POST /meetings", func(w http.ResponseWriter, r *http.Request) {
+	buf := make([]byte, 16)
+	rand.Read(buf) // crypto/rand — no third-party uuid needed
+	jobID := hex.EncodeToString(buf)
+	m := &Meeting{Phase: "starting"}
+
+	meetingsMu.Lock()
+	meetings[jobID] = m
+	meetingsMu.Unlock()
+
+	go TranscribeMeeting(context.Background(), client, r.FormValue("url"), m)
+
+	json.NewEncoder(w).Encode(map[string]string{"job_id": jobID}) // returns immediately
+})
+
+http.HandleFunc("GET /meetings/{job_id}", func(w http.ResponseWriter, r *http.Request) {
+	meetingsMu.Lock()
+	m, ok := meetings[r.PathValue("job_id")]
+	meetingsMu.Unlock()
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	phase, percent, turns := m.Snapshot()
+	json.NewEncoder(w).Encode(map[string]any{
+		"phase": phase, "percent": percent, "turns": turns,
+	})
+	// -> {"phase":"transcribe","percent":63.5,"turns":[]}
+	//    ...and once done: "turns":[{"speaker":"A","text":"...","start":0.4,"end":5.1}, ...]
+})`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "ASP.NET Core",
+            code: `// ASP.NET Core minimal API.
+var meetings = new System.Collections.Concurrent.ConcurrentDictionary<string, Meeting>();
+
+app.MapPost("/meetings", (StartMeeting req) =>
+{
+    var jobId = Guid.NewGuid().ToString("n");
+    var meeting = new Meeting();
+    meetings[jobId] = meeting;
+
+    _ = Meetings.TranscribeAsync(client, req.Url, meeting); // runs in the background
+
+    return Results.Ok(new { jobId });                       // returns immediately
+});
+
+app.MapGet("/meetings/{jobId}", (string jobId) =>
+    meetings.TryGetValue(jobId, out var meeting)
+        ? Results.Ok(meeting.Snapshot())
+        : Results.NotFound());
+// -> { phase: "done", percent: 100, turns: [{ speaker: "A", text, start, end }, ...] }
+
+public record StartMeeting(string Url);`,
           },
         ]}
       />

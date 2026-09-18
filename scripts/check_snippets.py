@@ -50,6 +50,41 @@ GO_BIN = shutil.which("go") or os.path.expanduser("~/.local/go/bin/go")
 DOTNET = shutil.which("dotnet") or os.path.expanduser("~/.local/dotnet/dotnet")
 TSC = os.path.join(REPO, "node_modules", ".bin", "tsc")
 
+# Third-party packages a snippet may legitimately need (the S3 integration uses
+# the official AWS SDKs). Added to the scratch project only when something
+# actually imports them, so the common case stays offline and fast.
+# Pinned: the current AWS releases require a newer Go toolchain than the one
+# the SDK targets, and the pin is about compiling the snippet, not about what a
+# reader should depend on.
+# import path -> (qualifier that proves it is needed, module@version to fetch).
+# The module and the import path differ for aws-sdk-go-v2's root `aws` package.
+GO_EXTRA = {
+    "github.com/aws/aws-sdk-go-v2/config":
+        ("config.", "github.com/aws/aws-sdk-go-v2/config@v1.27.43"),
+    "github.com/aws/aws-sdk-go-v2/service/s3":
+        ("s3.", "github.com/aws/aws-sdk-go-v2/service/s3@v1.66.0"),
+    "github.com/aws/aws-sdk-go-v2/aws":
+        ("aws.", "github.com/aws/aws-sdk-go-v2@v1.32.2"),
+}
+CS_EXTRA = {"AWSSDK.S3": "Amazon.S3"}
+
+# Names a page establishes in its first block and keeps using in later ones,
+# where the names are specific to that page rather than to the SDK.
+PAGE_PRELUDE = {
+    "/integrations/s3": {
+        "go": ('cfg, _ := config.LoadDefaultConfig(ctx)\n'
+               's3c := s3.NewFromConfig(cfg)\n'
+               'sttc := client\n'
+               'srcBucket, outBucket, key := "my-audio", "my-transcripts", "a.mp3"\n'
+               '_, _, _, _ = s3c, sttc, srcBucket, outBucket\n_ = key\n'),
+        "csharp_usings": ["using Amazon.S3;", "using Amazon.S3.Model;"],
+        "csharp": ('using var s3 = new Amazon.S3.AmazonS3Client();\n'
+                   'const string SrcBucket = "my-audio";\n'
+                   'const string OutBucket = "my-transcripts";\n'
+                   'var key = "a.mp3";\n'),
+    },
+}
+
 # package path -> the qualifier that proves a fragment needs it
 GO_IMPORTS = {
     "context": "context.", "fmt": "fmt.", "log": "log.", "time": "time.",
@@ -57,7 +92,7 @@ GO_IMPORTS = {
     "sort": "sort.", "sync": "sync.", "bytes": "bytes.", "bufio": "bufio.",
     "net/http": "http.", "net/url": "url.", "path/filepath": "filepath.",
     "encoding/json": "json.", "encoding/hex": "hex.", "encoding/base64": "base64.",
-    "crypto/hmac": "hmac.", "crypto/sha256": "sha256.", "crypto/subtle": "subtle.",
+    "crypto/hmac": "hmac.", "crypto/rand": "rand.", "crypto/sha256": "sha256.", "crypto/subtle": "subtle.",
     "mime/multipart": "multipart.", "strconv": "strconv.", "math": "math.",
 }
 
@@ -69,12 +104,14 @@ GO_PAGE_SCOPE = {
     "result": 'result, rerr := client.Transcribe(ctx, "a.mp3", stt.TranscribeOptions{}, nil)\n'
               "if rerr != nil {\n\tlog.Fatal(rerr)\n}\n_ = result\n",
     "jobID": 'jobID := "00000000-0000-0000-0000-000000000000"\n_ = jobID\n',
+    "path": 'path := "meeting.mp3"\n_ = path\n',
     "status": "",   # defined alongside jobID usage in practice
 }
 
 CS_PAGE_SCOPE = {
     "result": 'var result = await client.TranscribeAsync("a.mp3");\n',
     "jobId": 'var jobId = "00000000-0000-0000-0000-000000000000";\n',
+    "path": 'var path = "meeting.mp3";\n',
 }
 
 DECLARED = re.compile(r"^([a-zA-Z_][\w]*(?:\s*,\s*[a-zA-Z_][\w]*)*)\s*:=", re.M)
@@ -154,13 +191,15 @@ class Result:
 
 # --------------------------------------------------------------------------- go
 
-def go_program(code: str, context: str = "") -> str:
-    if re.match(r"^\s*package\s+\w+", code):
+def go_program(code: str, context: str = "", page: str = "") -> str:
+    if re.match(r"^(?:\s*(?://.*)?\n)*\s*package\s+\w+", code):
         return code
 
-    scan = context + "\n" + code
+    scan = context + "\n" + code + "\n" + PAGE_PRELUDE.get(page, {}).get("go", "")
     needed = [p for p, q in GO_IMPORTS.items()
               if re.search(r"(?<![\w.])" + re.escape(q), scan)]
+    third = [p for p, (q, _m) in GO_EXTRA.items()
+             if re.search(r"(?<![\w.])" + re.escape(q), scan)]
     body = "\n".join("\t" + line if line.strip() else "" for line in code.splitlines())
 
     # Go rejects unused variables; blank-assign everything the fragment declares
@@ -178,6 +217,8 @@ def go_program(code: str, context: str = "") -> str:
             needed.append(forced)
     needed.sort()
     imports = "\n".join(f'\t"{p}"' for p in needed)
+    if third:
+        imports += "\n\n" + "\n".join(f'\t"{p}"' for p in sorted(third))
     scope = ""
     for name, decl in (GO_PAGE_SCOPE.items() if not owns_client else []):
         if not decl or name in names:
@@ -185,6 +226,7 @@ def go_program(code: str, context: str = "") -> str:
         if re.search(r"(?<![\w.])" + name + r"(?![\w])", code):
             scope += "".join("\t" + l + "\n" for l in decl.splitlines())
     prelude = "\tctx := context.Background()\n\t_ = ctx\n"
+    extra = PAGE_PRELUDE.get(page, {}).get("go", "") if not owns_client else ""
     if not owns_client:
         prelude += (
             '\tclient, err := stt.NewClient("k")\n'
@@ -201,7 +243,8 @@ def go_program(code: str, context: str = "") -> str:
         '\tstt "github.com/speechrevolutions/go-sdk"\n'
         ")\n\n"
         "func main() {\n"
-        + prelude + scope + body + "\n" + drains +
+        + prelude + "".join("\t" + l + "\n" for l in extra.splitlines())
+        + scope + body + "\n" + drains +
         "}\n"
         + ("\n" + context + "\n" if context else "")
     )
@@ -219,13 +262,20 @@ def check_go(snips: list[Snippet], res: Result) -> None:
         "require github.com/speechrevolutions/go-sdk v0.0.0\n\n"
         f"replace github.com/speechrevolutions/go-sdk => {GO_SDK}\n"
     )
+    env0 = {**os.environ, "GOFLAGS": "-mod=mod", "GOTOOLCHAIN": "local"}
+    all_code = "\n".join(s.code for s in snips)
+    for _path, (q, module) in GO_EXTRA.items():
+        if re.search(r"(?<![\w.])" + re.escape(q), all_code):
+            subprocess.run([GO_BIN, "get", module], cwd=work, env=env0,
+                           capture_output=True, timeout=300)
     dirs = {}
     seen: dict[str, list[str]] = {}
     for i, s in enumerate(snips):
         d = os.path.join(work, f"s{i}")
         os.makedirs(d)
         context = "\n\n".join(seen.get(s.page, []))
-        io.open(os.path.join(d, "main.go"), "w").write(go_program(s.code, context))
+        io.open(os.path.join(d, "main.go"), "w").write(
+            go_program(s.code, context, s.page))
         decls = go_toplevel_decls(s.code)
         if decls:
             seen.setdefault(s.page, []).append(decls)
@@ -247,12 +297,14 @@ def check_go(snips: list[Snippet], res: Result) -> None:
 
 # ------------------------------------------------------------------------ csharp
 
-def cs_program(code: str, context: str = "") -> str:
+def cs_program(code: str, context: str = "", page: str = "") -> str:
     lines = code.splitlines()
     head, rest = [], []
     for i, line in enumerate(lines):
         if USING_DIRECTIVE.match(line):
             head.append(line.strip())
+        elif line.strip().startswith("//") and not rest:
+            head.append(line)
         elif line.strip() == "":
             (head if not rest else rest).append(line)
         else:
@@ -262,7 +314,8 @@ def cs_program(code: str, context: str = "") -> str:
         rest = []
 
     body = "\n".join(rest)
-    for u in ("using SpeechRevolutions;", "using System.Net;", "using System.Text;"):
+    for u in (["using SpeechRevolutions;", "using System.Net;", "using System.Text;"]
+              + PAGE_PRELUDE.get(page, {}).get("csharp_usings", [])):
         if u not in head:
             head.append(u)
 
@@ -274,6 +327,8 @@ def cs_program(code: str, context: str = "") -> str:
         declared = re.search(r"(?:var|string|int)\s+" + name + r"\b", body)
         if used and not declared:
             prelude += decl
+    if prelude:
+        prelude += PAGE_PRELUDE.get(page, {}).get("csharp", "")
     if re.search(r"(?<![\w.])app\.Map", body) and "WebApplication" not in body:
         prelude += "var app = WebApplication.Create();\n"
     tail = ("\n\n" + context) if context else ""
@@ -298,6 +353,10 @@ def check_csharp(snips: list[Snippet], res: Result) -> None:
                        env=env, capture_output=True, timeout=300)
         subprocess.run([DOTNET, "add", d, "reference", CS_SDK],
                        env=env, capture_output=True, timeout=300)
+        for pkg, ns in CS_EXTRA.items():
+            if any(ns in sn.code for sn in snips):
+                subprocess.run([DOTNET, "add", d, "package", pkg],
+                               env=env, capture_output=True, timeout=600)
         ls = os.path.join(d, "Properties", "launchSettings.json")
         if os.path.exists(ls):
             os.remove(ls)
@@ -309,7 +368,8 @@ def check_csharp(snips: list[Snippet], res: Result) -> None:
                 else "console")
         d = projects[kind]
         context = "\n\n".join(seen.get(s.page, []))
-        io.open(os.path.join(d, "Program.cs"), "w").write(cs_program(s.code, context))
+        io.open(os.path.join(d, "Program.cs"), "w").write(
+            cs_program(s.code, context, s.page))
         decls = cs_toplevel_decls(s.code)
         if decls:
             seen.setdefault(s.page, []).append(decls)

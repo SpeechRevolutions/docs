@@ -116,6 +116,130 @@ export async function transcribeS3Object(key: string): Promise<string> {
   return outKey;
 }`,
           },
+          {
+            label: "Go",
+            language: "go",
+            filename: "transcribe_s3.go",
+            code: `package main
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"log"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+const (
+	srcBucket = "my-audio"
+	outBucket = "my-transcripts"
+)
+
+func transcribeS3Object(
+	ctx context.Context, s3c *s3.Client, sttc *stt.Client, key string,
+) (string, error) {
+	// 1. Presign a short-lived GET so Speech Revolutions can read the object.
+	presign := s3.NewPresignClient(s3c)
+	req, err := presign.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(srcBucket),
+		Key:    aws.String(key),
+	}, s3.WithPresignExpires(time.Hour)) // outlast the transcription
+	if err != nil {
+		return "", err
+	}
+
+	// 2. Pass the URL straight to Speech Revolutions (auto-detected as a URL).
+	result, err := sttc.Transcribe(ctx, req.URL, stt.TranscribeOptions{
+		SpeakerLabels: stt.Bool(true),
+	}, nil)
+	if err != nil {
+		return "", err
+	}
+
+	// 3. Store the JSON result back to S3.
+	body, err := json.Marshal(result.ToDict())
+	if err != nil {
+		return "", err
+	}
+	outKey := strings.TrimSuffix(key, filepath.Ext(key)) + ".json"
+	_, err = s3c.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(outBucket),
+		Key:         aws.String(outKey),
+		Body:        bytes.NewReader(body),
+		ContentType: aws.String("application/json"),
+	})
+	return outKey, err
+}
+
+func main() {
+	ctx := context.Background()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sttc, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	key, err := transcribeS3Object(ctx, s3.NewFromConfig(cfg), sttc, "meeting.mp3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("wrote", key)
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "TranscribeS3.cs",
+            code: `using System.Text;
+using System.Text.Json;
+using Amazon.S3;
+using Amazon.S3.Model;
+using SpeechRevolutions;
+
+const string SrcBucket = "my-audio";
+const string OutBucket = "my-transcripts";
+
+using var s3 = new AmazonS3Client();
+using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+
+async Task<string> TranscribeS3ObjectAsync(string key)
+{
+    // 1. Presign a short-lived GET so Speech Revolutions can read the object.
+    var audioUrl = await s3.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+    {
+        BucketName = SrcBucket,
+        Key = key,
+        Expires = DateTime.UtcNow.AddHours(1), // outlast the transcription
+    });
+
+    // 2. Pass the URL straight to Speech Revolutions (auto-detected as a URL).
+    var result = await client.TranscribeAsync(audioUrl,
+        new TranscribeOptions { SpeakerLabels = true });
+
+    // 3. Store the JSON result back to S3.
+    var outKey = Path.ChangeExtension(key, ".json");
+    await s3.PutObjectAsync(new PutObjectRequest
+    {
+        BucketName = OutBucket,
+        Key = outKey,
+        ContentBody = JsonSerializer.Serialize(result.ToDict()),
+        ContentType = "application/json",
+    });
+    return outKey;
+}
+
+Console.WriteLine(await TranscribeS3ObjectAsync("meeting.mp3"));`,
+          },
         ]}
       />
 
@@ -166,6 +290,51 @@ const jobId = await client.submit(audioUrl, {
 //   const result = await client.getTranscript(event.job_id);
 //   await s3.send(new PutObjectCommand({ Bucket: OUT_BUCKET, Key: outKey,
 //     Body: JSON.stringify(result.toDict()) }));`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "submit_s3.go",
+            code: `presign := s3.NewPresignClient(s3c)
+req, err := presign.PresignGetObject(ctx, &s3.GetObjectInput{
+	Bucket: aws.String(srcBucket),
+	Key:    aws.String(key),
+}, s3.WithPresignExpires(time.Hour))
+if err != nil {
+	log.Fatal(err)
+}
+
+jobID, err := sttc.Submit(ctx, req.URL, stt.TranscribeOptions{
+	SpeakerLabels: stt.Bool(true),
+	CallbackURL:   "https://you.example.com/webhooks/stt",
+})
+// In the webhook handler (after verifying X-SR-Signature):
+//   result, _ := sttc.GetTranscript(ctx, event.JobID, stt.OutputJSON)
+//   body, _ := json.Marshal(result.ToDict())
+//   s3c.PutObject(ctx, &s3.PutObjectInput{Bucket: aws.String(outBucket),
+//       Key: aws.String(outKey), Body: bytes.NewReader(body)})`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "SubmitS3.cs",
+            code: `var audioUrl = await s3.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+{
+    BucketName = SrcBucket,
+    Key = key,
+    Expires = DateTime.UtcNow.AddHours(1),
+});
+
+var jobId = await client.SubmitAsync(audioUrl, new TranscribeOptions
+{
+    SpeakerLabels = true,
+    CallbackUrl = "https://you.example.com/webhooks/stt",
+});
+// In the webhook handler (after verifying X-SR-Signature):
+//   var result = await client.GetTranscriptAsync(evt.JobId);
+//   await s3.PutObjectAsync(new PutObjectRequest {
+//       BucketName = OutBucket, Key = outKey,
+//       ContentBody = JsonSerializer.Serialize(result.ToDict()) });`,
           },
         ]}
       />

@@ -100,6 +100,60 @@ curl -X POST https://api.speechrevolutions.com/api/v1/upload \\
   -H "Content-Type: application/json" \\
   -d '{"file_size": 5242880, "output_type": "srt"}'`,
           },
+          {
+            label: "Go",
+            language: "go",
+            filename: "subtitles.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+func main() {
+	client, err := stt.NewClient("") // reads SPEECHREVOLUTIONS_API_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := client.Transcribe(context.Background(),
+		"talk.mp4", // audio or video: local path, URL, or bytes
+		stt.TranscribeOptions{
+			OutputType: stt.OutputSRT, // SubRip captions (use OutputVTT for WebVTT)
+		}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	path, err := result.Save("captions") // writes captions.srt; returns the path
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Wrote %s\\n", path)
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Subtitles.cs",
+            code: `using SpeechRevolutions;
+
+using var client = new SttClient(); // reads SPEECHREVOLUTIONS_API_KEY
+
+var result = await client.TranscribeAsync(
+    "talk.mp4",  // audio or video: local path, URL, or bytes
+    new TranscribeOptions
+    {
+        OutputType = OutputType.Srt, // SubRip captions (use Vtt for WebVTT)
+    });
+
+var path = await result.SaveAsync("captions"); // writes captions.srt
+Console.WriteLine($"Wrote {path}");`,
+          },
         ]}
       />
 

@@ -137,6 +137,165 @@ def transcribe_from_storage(row_id: str, storage_path: str) -> None:
         {"status": "completed", "percent": 100, "text": result.text}
     ).eq("id", row_id).execute()`,
           },
+          {
+            label: "Go",
+            language: "go",
+            filename: "transcribe_supabase.go",
+            code: `package main
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+// Supabase ships client libraries for JavaScript and Python, not Go, so this
+// calls the same REST endpoints those libraries wrap. Server-side: the service
+// role key, never shipped to a client.
+var (
+	supabaseURL = os.Getenv("SUPABASE_URL")
+	serviceKey  = os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
+)
+
+func supabaseDo(ctx context.Context, method, path string, body any) (*http.Response, error) {
+	var buf bytes.Buffer
+	if body != nil {
+		if err := json.NewEncoder(&buf).Encode(body); err != nil {
+			return nil, err
+		}
+	}
+	req, err := http.NewRequestWithContext(ctx, method, supabaseURL+path, &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("apikey", serviceKey)
+	req.Header.Set("Authorization", "Bearer "+serviceKey)
+	req.Header.Set("Content-Type", "application/json")
+	return http.DefaultClient.Do(req)
+}
+
+// signedURL asks Storage for a short-lived URL to a private object.
+func signedURL(ctx context.Context, bucket, path string, expiresIn int) (string, error) {
+	resp, err := supabaseDo(ctx, http.MethodPost,
+		"/storage/v1/object/sign/"+bucket+"/"+path,
+		map[string]int{"expiresIn": expiresIn})
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var out struct {
+		SignedURL string \`json:"signedURL"\`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return "", err
+	}
+	return supabaseURL + "/storage/v1" + out.SignedURL, nil
+}
+
+func updateRow(ctx context.Context, id string, patch map[string]any) error {
+	resp, err := supabaseDo(ctx, http.MethodPatch, "/rest/v1/transcriptions?id=eq."+id, patch)
+	if err != nil {
+		return err
+	}
+	return resp.Body.Close()
+}
+
+func transcribeFromStorage(ctx context.Context, client *stt.Client, id, storagePath string) error {
+	// 1. Signed URL so Speech Revolutions can read the private object.
+	audioURL, err := signedURL(ctx, "audio", storagePath, 3600) // outlast the transcription
+	if err != nil {
+		return err
+	}
+
+	// 2. Pass the URL straight to Speech Revolutions (auto-detected as a URL).
+	result, err := client.Transcribe(ctx, audioURL, stt.TranscribeOptions{
+		SpeakerLabels: stt.Bool(true),
+	}, func(e stt.ProgressEvent) {
+		pct, _ := e.Percent()
+		updateRow(ctx, id, map[string]any{"percent": pct}) // drives Realtime updates
+	})
+	if err != nil {
+		return err
+	}
+
+	// 3. Store the transcript in Postgres.
+	return updateRow(ctx, id, map[string]any{
+		"status":  "completed",
+		"percent": 100,
+		"text":    result.Text(),
+	})
+}
+
+func main() {
+	client, err := stt.NewClient("")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := transcribeFromStorage(
+		context.Background(), client, "row-id", "meeting.mp3"); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("done")
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "TranscribeSupabase.cs",
+            code: `using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+using SpeechRevolutions;
+
+// Supabase ships client libraries for JavaScript and Python, not C#, so this
+// calls the same REST endpoints those libraries wrap. Server-side: the service
+// role key, never shipped to a client.
+var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL")!;
+var serviceKey = Environment.GetEnvironmentVariable("SUPABASE_SERVICE_ROLE_KEY")!;
+
+using var http = new HttpClient { BaseAddress = new Uri(supabaseUrl) };
+http.DefaultRequestHeaders.Add("apikey", serviceKey);
+http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", serviceKey);
+
+using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+
+// Ask Storage for a short-lived URL to a private object.
+async Task<string> SignedUrlAsync(string bucket, string path, int expiresIn)
+{
+    var res = await http.PostAsJsonAsync(
+        $"/storage/v1/object/sign/{bucket}/{path}", new { expiresIn });
+    res.EnsureSuccessStatusCode();
+
+    using var doc = JsonDocument.Parse(await res.Content.ReadAsStringAsync());
+    return supabaseUrl + "/storage/v1" + doc.RootElement.GetProperty("signedURL").GetString();
+}
+
+Task UpdateRowAsync(string id, object patch) =>
+    http.PatchAsJsonAsync($"/rest/v1/transcriptions?id=eq.{id}", patch);
+
+async Task TranscribeFromStorageAsync(string id, string storagePath)
+{
+    // 1. Signed URL so Speech Revolutions can read the private object.
+    var audioUrl = await SignedUrlAsync("audio", storagePath, 3600);
+
+    // 2. Pass the URL straight to Speech Revolutions (auto-detected as a URL).
+    var result = await client.TranscribeAsync(audioUrl,
+        new TranscribeOptions { SpeakerLabels = true },
+        e => UpdateRowAsync(id, new { percent = e.Percent ?? 0 })); // drives Realtime
+
+    // 3. Store the transcript in Postgres.
+    await UpdateRowAsync(id, new { status = "completed", percent = 100, text = result.Text });
+}
+
+await TranscribeFromStorageAsync("row-id", "meeting.mp3");`,
+          },
         ]}
       />
 

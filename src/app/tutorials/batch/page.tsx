@@ -144,6 +144,136 @@ const jobIds = Object.fromEntries(pairs.filter(([, id]) => id));
 writeFileSync("jobs.json", JSON.stringify(jobIds, null, 2));
 console.log(\`submitted \${Object.keys(jobIds).length}/\${paths.length}; saved jobs.json\`);`,
           },
+          {
+            label: "Go",
+            language: "go",
+            filename: "submit.go",
+            code: `package main
+
+import (
+	"bufio"
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"sync"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+const concurrency = 16 // max simultaneous uploads — tune to your bandwidth
+
+// submitAll submits every file and returns {path: jobID}. A failure is
+// recorded, not returned: one bad file must not sink the batch.
+func submitAll(ctx context.Context, client *stt.Client, paths []string) map[string]string {
+	var (
+		mu     sync.Mutex
+		wg     sync.WaitGroup
+		jobIDs = map[string]string{}
+		sem    = make(chan struct{}, concurrency)
+	)
+
+	for _, p := range paths {
+		wg.Add(1)
+		go func(path string) {
+			defer wg.Done()
+			sem <- struct{}{} // only \`concurrency\` uploads in flight at once
+			defer func() { <-sem }()
+
+			jobID, err := client.Submit(ctx, path, stt.TranscribeOptions{
+				SpeakerLabels: stt.Bool(true),
+			})
+			if err != nil {
+				log.Printf("FAILED to submit %s: %v", path, err) // retry this file later
+				return
+			}
+
+			mu.Lock()
+			jobIDs[path] = jobID
+			mu.Unlock()
+			fmt.Printf("submitted %s -> %s\\n", path, jobID)
+		}(p)
+	}
+
+	wg.Wait()
+	return jobIDs
+}
+
+func main() {
+	client, err := stt.NewClient("")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	f, err := os.Open("files.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	var paths []string
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if line := scanner.Text(); line != "" {
+			paths = append(paths, line)
+		}
+	}
+
+	ids := submitAll(context.Background(), client, paths)
+
+	// Persist the ids BEFORE collecting — this is your durable checkpoint.
+	out, err := json.MarshalIndent(ids, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := os.WriteFile("jobs.json", out, 0o644); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("submitted %d/%d files; saved jobs.json\\n", len(ids), len(paths))
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Submit.cs",
+            code: `using System.Collections.Concurrent;
+using System.Text.Json;
+using SpeechRevolutions;
+
+const int Concurrency = 16; // max simultaneous uploads — tune to your bandwidth
+
+using var client = new SttClient();
+
+var paths = (await File.ReadAllLinesAsync("files.txt"))
+    .Where(line => !string.IsNullOrWhiteSpace(line))
+    .ToList();
+
+var jobIds = new ConcurrentDictionary<string, string>();
+
+await Parallel.ForEachAsync(
+    paths,
+    new ParallelOptions { MaxDegreeOfParallelism = Concurrency },
+    async (path, ct) =>
+    {
+        try
+        {
+            var jobId = await client.SubmitAsync(path,
+                new TranscribeOptions { SpeakerLabels = true }, ct);
+            jobIds[path] = jobId;
+            Console.WriteLine($"submitted {path} -> {jobId}");
+        }
+        catch (Exception e) // keep going; retry this file later
+        {
+            Console.Error.WriteLine($"FAILED to submit {path}: {e.Message}");
+        }
+    });
+
+// Persist the ids BEFORE collecting — this is your durable checkpoint.
+await File.WriteAllTextAsync("jobs.json",
+    JsonSerializer.Serialize(jobIds, new JsonSerializerOptions { WriteIndented = true }));
+Console.WriteLine($"submitted {jobIds.Count}/{paths.Count} files; saved jobs.json");`,
+          },
         ]}
       />
 
@@ -267,6 +397,145 @@ async function collectAll(jobIds) {
 
 await collectAll(JSON.parse(readFileSync("jobs.json", "utf8")));`,
           },
+          {
+            label: "Go",
+            language: "go",
+            filename: "collect_poll.go",
+            code: `package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"sync"
+	"time"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+const (
+	collectConcurrency = 16
+	pollInterval       = 5 * time.Second // between status checks
+)
+
+func collectOne(ctx context.Context, client *stt.Client, path, jobID string) error {
+	for {
+		status, err := client.GetJobStatus(ctx, jobID)
+		if err != nil {
+			return err
+		}
+		if status.IsCompleted() {
+			// downloads + parses
+			result, err := client.GetTranscript(ctx, jobID, stt.OutputJSON)
+			if err != nil {
+				return err
+			}
+			// -> transcripts/<name>.json
+			if _, err := result.Save(filepath.Join("transcripts", filepath.Base(path))); err != nil {
+				return err
+			}
+			fmt.Println("done", path)
+			return nil
+		}
+		if status.IsFailed() {
+			return fmt.Errorf("%s failed at %s: %s", path, status.FailedStage, status.Reason)
+		}
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(pollInterval):
+		}
+	}
+}
+
+func main() {
+	ctx := context.Background()
+	client, err := stt.NewClient("")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	raw, err := os.ReadFile("jobs.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	var jobIDs map[string]string
+	if err := json.Unmarshal(raw, &jobIDs); err != nil {
+		log.Fatal(err)
+	}
+	if err := os.MkdirAll("transcripts", 0o755); err != nil {
+		log.Fatal(err)
+	}
+
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, collectConcurrency)
+	for p, id := range jobIDs {
+		wg.Add(1)
+		go func(path, jobID string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			if err := collectOne(ctx, client, path, jobID); err != nil {
+				log.Println(err) // one failure doesn't sink the batch
+			}
+		}(p, id)
+	}
+	wg.Wait()
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "CollectPoll.cs",
+            code: `using System.Text.Json;
+using SpeechRevolutions;
+
+const int Concurrency = 16;
+var pollInterval = TimeSpan.FromSeconds(5); // between status checks
+
+using var client = new SttClient();
+
+var jobIds = JsonSerializer.Deserialize<Dictionary<string, string>>(
+    await File.ReadAllTextAsync("jobs.json"))!;
+
+Directory.CreateDirectory("transcripts");
+
+await Parallel.ForEachAsync(
+    jobIds,
+    new ParallelOptions { MaxDegreeOfParallelism = Concurrency },
+    async (entry, ct) =>
+    {
+        var (path, jobId) = entry;
+        try
+        {
+            while (true)
+            {
+                var status = await client.GetJobStatusAsync(jobId, ct);
+                if (status.IsCompleted)
+                {
+                    // downloads + parses
+                    var result = await client.GetTranscriptAsync(jobId, OutputType.Json, ct);
+                    // -> transcripts/<name>.json
+                    await result.SaveAsync(Path.Combine("transcripts", Path.GetFileName(path)));
+                    Console.WriteLine($"done {path}");
+                    return;
+                }
+                if (status.IsFailed)
+                    throw new JobFailedException(
+                        $"{path} failed", status.FailedStage, status.Reason);
+
+                await Task.Delay(pollInterval, ct);
+            }
+        }
+        catch (Exception e) // one failure doesn't sink the batch
+        {
+            Console.Error.WriteLine(e.Message);
+        }
+    });`,
+          },
         ]}
       />
 
@@ -299,6 +568,25 @@ job_id = await client.submit(
 const jobId = await client.submit(filePath, {
   speakerLabels: true,
   callbackUrl: "https://your-app.example.com/webhooks/speechrevolutions",
+});`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `// In submitAll, add a CallbackURL so Speech Revolutions notifies you on completion:
+jobID, err := client.Submit(ctx, path, stt.TranscribeOptions{
+	SpeakerLabels: stt.Bool(true),
+	CallbackURL:   "https://your-app.example.com/webhooks/speechrevolutions",
+})`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `// In the submit loop, add a CallbackUrl so we notify you on completion:
+var jobId = await client.SubmitAsync(path, new TranscribeOptions
+{
+    SpeakerLabels = true,
+    CallbackUrl = "https://your-app.example.com/webhooks/speechrevolutions",
 });`,
           },
         ]}
@@ -368,6 +656,62 @@ for (;;) {
   }
   before = page.nextBefore;
   if (!before) break;
+}`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "list_jobs.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+func main() {
+	ctx := context.Background()
+	client, err := stt.NewClient("")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	before := ""
+	for {
+		page, err := client.ListJobs(ctx, 100, before)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, job := range page.Jobs {
+			fmt.Println(job.JobID, job.CreatedAt)
+		}
+		before = page.NextBefore
+		if before == "" {
+			break
+		}
+	}
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "ListJobs.cs",
+            code: `using SpeechRevolutions;
+
+using var client = new SttClient();
+
+string? before = null;
+while (true)
+{
+    var page = await client.ListJobsAsync(limit: 100, before: before);
+    foreach (var job in page.Jobs)
+        Console.WriteLine($"{job.JobId} {job.CreatedAt}");
+
+    before = page.NextBefore;
+    if (string.IsNullOrEmpty(before)) break;
 }`,
           },
         ]}
