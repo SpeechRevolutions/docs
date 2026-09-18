@@ -364,9 +364,9 @@ let before;
 for (;;) {
   const page = await client.listJobs({ limit: 100, before });
   for (const job of page.jobs) {
-    console.log(job.job_id, job.created_at);
+    console.log(job.jobId, job.createdAt);
   }
-  before = page.next_before;
+  before = page.nextBefore;
   if (!before) break;
 }`,
           },
