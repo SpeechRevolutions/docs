@@ -16,12 +16,38 @@ export default function CookbookPage() {
       <p>
         Short, copy-pasteable recipes for common Speech Revolutions tasks. Each one is a
         complete snippet in Python and JavaScript. Every client reads your key
-        from <code>SPEECHREVOLUTIONS_API_KEY</code> (or <code>STT_API_KEY</code>)
-        — see any SDK page for install and auth:{" "}
+        from <code>SPEECHREVOLUTIONS_API_KEY</code> (or <code>STT_API_KEY</code>),
+        and its host from <code>SPEECHREVOLUTIONS_BASE_URL</code> if you need to
+        point at something other than production — see any SDK page for install
+        and auth:{" "}
         <Link href="/sdks/python">Python</Link>,{" "}
         <Link href="/sdks/javascript">JavaScript</Link>,{" "}
         <Link href="/sdks/go">Go</Link>, <Link href="/sdks/csharp">C#</Link>.
       </p>
+      <Callout tone="info" title="Which languages you will see">
+        <p>
+          The <Link href="/getting-started">Quickstart</Link> shows all four
+          SDKs — Python, JavaScript, Go and C# — because that is where you pick
+          one. From there on, recipes and guides are written in{" "}
+          <strong>Python and JavaScript</strong>.
+        </p>
+        <p>
+          That is deliberate rather than a gap. Every recipe maps one-to-one onto
+          the Go and C# clients, which expose the same methods with each
+          language&apos;s naming (<code>client.transcribe(...)</code>,{" "}
+          <code>client.Transcribe(...)</code>,{" "}
+          <code>client.TranscribeAsync(...)</code>) — so the shape you read here
+          is the shape you write there. Duplicating every snippet four ways would
+          mean four chances to drift out of date, and a stale example is worse
+          than a translated one. Each SDK page carries a full working example in
+          its own language:{" "}
+          <Link href="/sdks/go">Go</Link>, <Link href="/sdks/csharp">C#</Link>.
+        </p>
+        <p>
+          If a recipe you need is hard to translate, that is a docs bug worth
+          reporting — tell us which one and we will add it in your language.
+        </p>
+      </Callout>
       <ul>
         <li>
           <a href="#file">Transcribe a local file</a>

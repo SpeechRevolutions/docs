@@ -210,6 +210,63 @@ if __name__ == "__main__":
     job_ids = json.load(open("jobs.json"))
     asyncio.run(collect_all(job_ids))`,
           },
+        
+          {
+            label: "JavaScript",
+            language: "ts",
+            filename: "collect.mjs",
+            code: `import { readFileSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { SpeechRevolutions, JobFailedError } from "@speechrevolutions/stt";
+
+const CONCURRENCY = 16;
+const POLL_INTERVAL_MS = 5000;
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function collectOne(client, filePath, jobId) {
+  for (;;) {
+    const status = await client.getJobStatus(jobId);
+    if (status.isCompleted) {
+      const result = await client.getTranscript(jobId); // downloads + parses
+      await mkdir("transcripts", { recursive: true });
+      await writeFile(
+        path.join("transcripts", path.basename(filePath) + ".json"),
+        result.toJSON(),
+      );
+      console.log("done " + filePath);
+      return;
+    }
+    if (status.isFailed) {
+      throw new JobFailedError(
+        filePath + " failed at " + status.failedStage + ": " + status.reason,
+      );
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+}
+
+// Bounded concurrency: a fixed pool of workers pulling off one queue.
+async function collectAll(jobIds) {
+  const client = new SpeechRevolutions();
+  const queue = Object.entries(jobIds);
+
+  const worker = async () => {
+    for (;;) {
+      const next = queue.shift();
+      if (!next) return;
+      const [filePath, jobId] = next;
+      // One failure must not sink the batch.
+      await collectOne(client, filePath, jobId).catch((e) => console.error(e.message));
+    }
+  };
+
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+}
+
+await collectAll(JSON.parse(readFileSync("jobs.json", "utf8")));`,
+          },
         ]}
       />
 
@@ -233,6 +290,16 @@ job_id = await client.submit(
     speaker_labels=True,
     callback_url="https://your-app.example.com/webhooks/speechrevolutions",
 )`,
+          },
+        
+          {
+            label: "JavaScript",
+            language: "ts",
+            code: `// In submitOne(), add a callbackUrl so Speech Revolutions notifies you on completion:
+const jobId = await client.submit(filePath, {
+  speakerLabels: true,
+  callbackUrl: "https://your-app.example.com/webhooks/speechrevolutions",
+});`,
           },
         ]}
       />
@@ -285,6 +352,23 @@ while True:
     before = page["next_before"]
     if not before:
         break`,
+          },
+        
+          {
+            label: "JavaScript",
+            language: "ts",
+            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+
+const client = new SpeechRevolutions();
+let before;
+for (;;) {
+  const page = await client.listJobs({ limit: 100, before });
+  for (const job of page.jobs) {
+    console.log(job.job_id, job.created_at);
+  }
+  before = page.next_before;
+  if (!before) break;
+}`,
           },
         ]}
       />
