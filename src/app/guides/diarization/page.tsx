@@ -59,6 +59,30 @@ const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 // diarize is a Deepgram-compatible alias for speakerLabels
 const r2 = await client.transcribe("meeting.mp3", { diarize: true });`,
           },
+          {
+            label: "Go",
+            language: "go",
+            code: `// SpeakerLabels defaults to on; shown explicitly here.
+result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	SpeakerLabels: stt.Bool(true),
+}, nil)
+
+// Diarize is a Deepgram-compatible alias for SpeakerLabels
+result, err = client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	Diarize: stt.Bool(true),
+}, nil)`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `// SpeakerLabels defaults to true; shown explicitly here.
+var result = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { SpeakerLabels = true });
+
+// Diarize is a Deepgram-compatible alias for SpeakerLabels
+result = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { Diarize = true });`,
+          },
         ]}
       />
 
@@ -89,6 +113,37 @@ for u in result.utterances:
 for (const u of result.utterances) {
   console.log(\`[\${u.start.toFixed(1)}s] Speaker \${u.speaker}: \${u.text}\`);
 }
+// [0.5s] Speaker SPEAKER_0: Hi, thanks for joining.
+// [3.2s] Speaker SPEAKER_1: Happy to be here.`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	SpeakerLabels: stt.Bool(true),
+}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+for _, u := range result.Utterances {
+	start := 0.0
+	if u.Start != nil {
+		start = *u.Start
+	}
+	fmt.Printf("[%.1fs] Speaker %s: %s\\n", start, u.Speaker, u.Text)
+}
+// [0.5s] Speaker SPEAKER_0: Hi, thanks for joining.
+// [3.2s] Speaker SPEAKER_1: Happy to be here.`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var result = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { SpeakerLabels = true });
+
+foreach (var u in result.Utterances)
+    Console.WriteLine($"[{u.Start:F1}s] Speaker {u.Speaker}: {u.Text}");
 // [0.5s] Speaker SPEAKER_0: Hi, thanks for joining.
 // [3.2s] Speaker SPEAKER_1: Happy to be here.`,
           },
@@ -148,6 +203,46 @@ const formatTs = (s) => {
 for (const u of result.utterances) {
   const name = NAMES[u.speaker] ?? u.speaker;
   console.log(\`\${formatTs(u.start)}  \${name}\\n  \${u.text}\\n\`);
+}`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `var names = map[string]string{"SPEAKER_0": "Host", "SPEAKER_1": "Guest"}
+
+formatTs := func(seconds float64) string {
+	d := int(seconds)
+	return fmt.Sprintf("%02d:%02d", d/60, d%60)
+}
+
+for _, u := range result.Utterances {
+	name, ok := names[u.Speaker]
+	if !ok {
+		name = u.Speaker
+	}
+	start := 0.0
+	if u.Start != nil {
+		start = *u.Start
+	}
+	fmt.Printf("%s  %s\\n  %s\\n\\n", formatTs(start), name, u.Text)
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var names = new Dictionary<string, string>
+{
+    ["SPEAKER_0"] = "Host",
+    ["SPEAKER_1"] = "Guest",
+};
+
+static string FormatTs(double seconds) =>
+    TimeSpan.FromSeconds(seconds).ToString(@"mm\\:ss");
+
+foreach (var u in result.Utterances)
+{
+    var name = names.TryGetValue(u.Speaker ?? "", out var n) ? n : u.Speaker;
+    Console.WriteLine($"{FormatTs(u.Start ?? 0)}  {name}\\n  {u.Text}\\n");
 }`,
           },
         ]}

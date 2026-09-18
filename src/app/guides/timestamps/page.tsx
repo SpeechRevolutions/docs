@@ -55,6 +55,35 @@ for (const w of result.words.slice(0, 5)) {
 // 0.48–0.71  Hello
 // 0.71–1.02  everyone`,
           },
+          {
+            label: "Go",
+            language: "go",
+            code: `// WordTimestamps defaults to on.
+result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+for _, w := range result.Words[:5] {
+	if w.Start == nil || w.End == nil {
+		continue // only nil when WordTimestamps is off
+	}
+	fmt.Printf("%6.2f–%6.2f  %s\\n", *w.Start, *w.End, w.Word)
+}
+// 0.48–  0.71  Hello
+// 0.71–  1.02  everyone`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `// WordTimestamps defaults to true.
+var result = await client.TranscribeAsync("meeting.mp3");
+
+foreach (var w in result.Words.Take(5))
+    Console.WriteLine($"{w.Start:F2}–{w.End:F2}  {w.Text}");
+// 0.48–0.71  Hello
+// 0.71–1.02  everyone`,
+          },
         ]}
       />
 

@@ -181,6 +181,38 @@ await srt.save("meeting");    // -> meeting.srt
 const vtt = await client.transcribe("meeting.mp3", { outputType: "vtt" });
 await vtt.save("meeting");    // -> meeting.vtt`,
           },
+          {
+            label: "Go",
+            language: "go",
+            code: `srt, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	OutputType: stt.OutputSRT,
+}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(srt.Text())     // the decoded .srt contents
+srt.Save("meeting")         // -> meeting.srt
+
+vtt, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	OutputType: stt.OutputVTT,
+}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+vtt.Save("meeting")         // -> meeting.vtt`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var srt = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { OutputType = OutputType.Srt });
+Console.WriteLine(srt.Text);      // the decoded .srt contents
+await srt.SaveAsync("meeting");   // -> meeting.srt
+
+var vtt = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { OutputType = OutputType.Vtt });
+await vtt.SaveAsync("meeting");   // -> meeting.vtt`,
+          },
         ]}
       />
       <CodeBlock
@@ -231,6 +263,38 @@ await docx.save("meeting"); // -> meeting.docx
 const pdf = await client.transcribe("meeting.mp3", { outputType: "pdf" });
 // .content is the raw bytes if you'd rather stream than save
 await pdf.save("meeting");  // -> meeting.pdf`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `docx, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	OutputType: stt.OutputDOCX,
+}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+docx.Save("meeting")        // -> meeting.docx
+
+pdf, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+	OutputType: stt.OutputPDF,
+}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+// Content is the raw bytes if you'd rather stream than save.
+os.WriteFile("meeting.pdf", pdf.Content, 0o644)`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var docx = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { OutputType = OutputType.Docx });
+await docx.SaveAsync("meeting");  // -> meeting.docx
+
+var pdf = await client.TranscribeAsync("meeting.mp3",
+    new TranscribeOptions { OutputType = OutputType.Pdf });
+// Content is the raw bytes if you'd rather stream than save.
+await File.WriteAllBytesAsync("meeting.pdf", pdf.Content);`,
           },
         ]}
       />

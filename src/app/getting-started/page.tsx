@@ -42,17 +42,38 @@ export default function QuickstartPage() {
         tabs={[
           {
             label: "Python",
+            language: "bash",
+            code: `pip install speechrevolutions`,
+          },
+          {
+            label: "JavaScript",
+            language: "bash",
+            code: `npm install @speechrevolutions/stt`,
+          },
+          {
+            label: "Go",
+            language: "bash",
+            code: `go get github.com/speechrevolutions/go-sdk`,
+          },
+          {
+            label: "C#",
+            language: "bash",
+            code: `dotnet add package SpeechRevolutions`,
+          },
+        ]}
+      />
+      <p>Then transcribe a file:</p>
+      <CodeTabs
+        tabs={[
+          {
+            label: "Python",
             language: "python",
-            code: `pip install speechrevolutions
+            filename: "quickstart.py",
+            code: `from speechrevolutions import SpeechRevolutions
 
-# then:
-from speechrevolutions import SpeechRevolutions
+client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY
+result = client.transcribe("audio.mp3", speaker_labels=True)
 
-client = SpeechRevolutions()
-result = client.transcribe(
-    "audio.mp3",
-    speaker_labels=True,
-)
 print(result.text)
 for u in result.utterances:
     print(f"{u.speaker}: {u.text}")`,
@@ -60,14 +81,12 @@ for u in result.utterances:
           {
             label: "JavaScript",
             language: "ts",
-            code: `npm install @speechrevolutions/stt
+            filename: "quickstart.mjs",
+            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
 
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+const client = new SpeechRevolutions(); // reads SPEECHREVOLUTIONS_API_KEY
+const result = await client.transcribe("audio.mp3", { speakerLabels: true });
 
-const client = new SpeechRevolutions();
-const result = await client.transcribe("audio.mp3", {
-  speakerLabels: true,
-});
 console.log(result.text);
 for (const u of result.utterances) {
   console.log(\`\${u.speaker}: \${u.text}\`);
@@ -76,38 +95,45 @@ for (const u of result.utterances) {
           {
             label: "Go",
             language: "go",
-            code: `go get github.com/speechrevolutions/go-sdk
+            filename: "quickstart.go",
+            code: `package main
 
-// then:
-import stt "github.com/speechrevolutions/go-sdk"
+import (
+	"context"
+	"fmt"
+	"log"
 
-client, _ := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
-ctx := context.Background()
-sl := true
-result, err := client.Transcribe(ctx, "audio.mp3", stt.TranscribeOptions{
-    SpeakerLabels: &sl,
-}, nil)
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Println(result.Text())
-for _, u := range result.Utterances {
-    fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+func main() {
+	client, err := stt.NewClient("") // reads SPEECHREVOLUTIONS_API_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := client.Transcribe(context.Background(), "audio.mp3",
+		stt.TranscribeOptions{SpeakerLabels: stt.Bool(true)}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(result.Text())
+	for _, u := range result.Utterances {
+		fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
+	}
 }`,
           },
           {
             label: "C#",
             language: "csharp",
-            code: `dotnet add package SpeechRevolutions
+            filename: "Program.cs",
+            code: `using SpeechRevolutions;
 
-// then:
-using SpeechRevolutions;
+using var client = new SttClient(); // reads SPEECHREVOLUTIONS_API_KEY
+var result = await client.TranscribeAsync("audio.mp3",
+    new TranscribeOptions { SpeakerLabels = true });
 
-using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY
-var result = await client.TranscribeAsync("audio.mp3", new TranscribeOptions
-{
-    SpeakerLabels = true,
-});
 Console.WriteLine(result.Text);
 foreach (var u in result.Utterances)
     Console.WriteLine($"{u.Speaker}: {u.Text}");`,

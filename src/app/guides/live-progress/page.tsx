@@ -152,6 +152,145 @@ const result = await client.transcribe("meeting.mp3", {
 });
 store.done();`,
           },
+          {
+            label: "Go",
+            language: "go",
+            filename: "progress_webapp.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"math"
+	"sync"
+
+	stt "github.com/speechrevolutions/go-sdk"
+)
+
+// Weight the two phases into one bar. Upload is usually quick; give it the
+// first slice and let transcription fill the rest. Tune to taste.
+const (
+	uploadWeight     = 0.15 // upload spans 0–15% of the overall bar
+	transcribeWeight = 0.85 // transcription spans 15–100%
+)
+
+// JobProgress is the latest progress for one job — the shape you would serve
+// to your frontend. The callbacks fire on the SDK's reader goroutine, so the
+// mutex is not optional.
+type JobProgress struct {
+	mu      sync.Mutex
+	phase   string  // "upload" | "transcribe" | "done"
+	percent float64 // overall 0–100 across both phases
+}
+
+func (p *JobProgress) set(phase string, overall float64) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.phase = phase
+	// never let the bar go backwards (events can arrive out of order)
+	p.percent = math.Max(p.percent, math.Round(overall*10)/10)
+}
+
+func (p *JobProgress) OnUpload(e stt.ProgressEvent) {
+	pct, _ := e.Percent() // ok is false while the total is unknown
+	p.set("upload", pct*uploadWeight)
+}
+
+func (p *JobProgress) OnTranscribe(e stt.ProgressEvent) {
+	pct, _ := e.Percent()
+	p.set("transcribe", uploadWeight*100+pct*transcribeWeight)
+}
+
+func (p *JobProgress) Snapshot() (string, float64) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.phase, p.percent
+}
+
+func transcribeWithProgress(
+	ctx context.Context, c *stt.Client, audio string, store *JobProgress,
+) (*stt.Transcript, error) {
+	result, err := c.Transcribe(ctx, audio, stt.TranscribeOptions{
+		OnUploadProgress: store.OnUpload, // <- do anything with e.Percent()
+	}, store.OnTranscribe)
+	if err != nil {
+		return nil, err
+	}
+	store.set("done", 100)
+	return result, nil
+}
+
+func main() {
+	client, err := stt.NewClient("")
+	if err != nil {
+		log.Fatal(err)
+	}
+	store := &JobProgress{phase: "starting"}
+	if _, err := transcribeWithProgress(context.Background(), client, "meeting.mp3", store); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(store.Snapshot())
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "JobProgress.cs",
+            code: `using SpeechRevolutions;
+
+/// <summary>
+/// The latest progress for one job — the shape you would serve to your
+/// frontend. The callbacks fire on the SDK's reader task, so the lock is not
+/// optional.
+/// </summary>
+public sealed class JobProgress
+{
+    // Weight the two phases into a single 0–100 bar (upload is usually quick).
+    private const double UploadWeight = 0.15;     // upload spans 0–15%
+    private const double TranscribeWeight = 0.85; // transcription spans 15–100%
+
+    private readonly object _lock = new();
+
+    public string Phase { get; private set; } = "starting"; // upload|transcribe|done
+    public double Percent { get; private set; }             // overall 0–100
+
+    public void Set(string phase, double overall)
+    {
+        lock (_lock)
+        {
+            Phase = phase;
+            // never let the bar go backwards (events can arrive out of order)
+            Percent = Math.Max(Percent, Math.Round(overall, 1));
+        }
+    }
+
+    // <- do anything with e.Percent; it is null while the total is unknown
+    public void OnUpload(ProgressEvent e) =>
+        Set("upload", (e.Percent ?? 0) * UploadWeight);
+
+    public void OnTranscribe(ProgressEvent e) =>
+        Set("transcribe", UploadWeight * 100 + (e.Percent ?? 0) * TranscribeWeight);
+
+    public object Snapshot()
+    {
+        lock (_lock) return new { phase = Phase, percent = Percent };
+    }
+}
+
+public static class Transcriber
+{
+    public static async Task<TranscriptResult> RunAsync(
+        SttClient client, string audio, JobProgress store)
+    {
+        var result = await client.TranscribeAsync(audio,
+            new TranscribeOptions { OnUploadProgress = store.OnUpload },
+            store.OnTranscribe);
+        store.Set("done", 100);
+        return result;
+    }
+}`,
+          },
         ]}
       />
 
@@ -203,6 +342,67 @@ app.post("/transcribe", (req, res) => {
 app.get("/progress/:jobId", (req, res) =>
   res.json(jobs.get(req.params.jobId).snapshot()),
 );`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "net/http",
+            code: `// net/http. The "POST /path" method patterns and r.PathValue need Go 1.22+.\n// jobs is shared across handlers, so guard the map itself too.
+var (
+	jobsMu sync.Mutex
+	jobs   = map[string]*JobProgress{}
+)
+
+http.HandleFunc("POST /transcribe", func(w http.ResponseWriter, r *http.Request) {
+	jobID := r.FormValue("job_id")
+	store := &JobProgress{phase: "starting"}
+
+	jobsMu.Lock()
+	jobs[jobID] = store
+	jobsMu.Unlock()
+
+	// Runs in the background; the handler returns immediately.
+	go transcribeWithProgress(context.Background(), client, r.FormValue("url"), store)
+
+	json.NewEncoder(w).Encode(map[string]string{"job_id": jobID})
+})
+
+http.HandleFunc("GET /progress/{job_id}", func(w http.ResponseWriter, r *http.Request) {
+	jobsMu.Lock()
+	store, ok := jobs[r.PathValue("job_id")]
+	jobsMu.Unlock()
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	phase, percent := store.Snapshot()
+	json.NewEncoder(w).Encode(map[string]any{"phase": phase, "percent": percent})
+})`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "ASP.NET Core",
+            code: `// ASP.NET Core minimal API. ConcurrentDictionary because handlers race.
+var jobs = new System.Collections.Concurrent.ConcurrentDictionary<string, JobProgress>();
+
+app.MapPost("/transcribe", (StartRequest req) =>
+{
+    var store = new JobProgress();
+    jobs[req.JobId] = store;
+
+    // Runs in the background; the handler returns immediately.
+    _ = Transcriber.RunAsync(client, req.Url, store);
+
+    return Results.Ok(new { jobId = req.JobId });
+});
+
+app.MapGet("/progress/{jobId}", (string jobId) =>
+    jobs.TryGetValue(jobId, out var store)
+        ? Results.Ok(store.Snapshot())   // {"phase":"transcribe","percent":63.5}
+        : Results.NotFound());
+
+public record StartRequest(string JobId, string Url);`,
           },
         ]}
       />

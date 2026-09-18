@@ -20,11 +20,6 @@ export default function GoSdkPage() {
         language="bash"
         code={`go get github.com/speechrevolutions/go-sdk`}
       />
-      <CodeBlock
-        language="go"
-        code={`import stt "github.com/speechrevolutions/go-sdk"`}
-      />
-
       <h2>Quickstart</h2>
       <p>
         <code>Transcribe</code> accepts a local file path, an{" "}
@@ -40,6 +35,7 @@ export default function GoSdkPage() {
         code={`package main
 
 import (
+    "context"
     "fmt"
     "log"
 
@@ -47,14 +43,15 @@ import (
 )
 
 func main() {
+    ctx := context.Background()
+
     client, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
     if err != nil {
         log.Fatal(err)
     }
 
-    sl := true
-    result, err := client.Transcribe("meeting.mp3", stt.TranscribeOptions{
-        SpeakerLabels: &sl,
+    result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+        SpeakerLabels: stt.Bool(true),
     }, nil)
     if err != nil {
         log.Fatal(err)
@@ -71,10 +68,10 @@ func main() {
       <CodeBlock
         language="go"
         code={`// explicit alias
-result, err := client.TranscribeURL("https://example.com/audio.mp3", stt.TranscribeOptions{}, nil)
+result, err := client.TranscribeURL(ctx, "https://example.com/audio.mp3", stt.TranscribeOptions{}, nil)
 
 // or, since Transcribe detects http(s):
-result, err = client.Transcribe("https://example.com/audio.mp3", stt.TranscribeOptions{}, nil)
+result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.TranscribeOptions{}, nil)
 
 // TranscribeFile is the same for a local path; TranscribeBytes for in-memory audio.`}
       />
@@ -221,9 +218,8 @@ result, err = client.Transcribe("https://example.com/audio.mp3", stt.TranscribeO
         language="go"
         code={`// 1. Console bars — a single stderr line, updated in place. Shows an
 //    "Uploading" byte bar, then a "Transcribing" bar. Off by default.
-sl := true
-result, _ := client.Transcribe("meeting.mp3", stt.TranscribeOptions{
-    SpeakerLabels: &sl,
+result, _ := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+    SpeakerLabels: stt.Bool(true),
     Progress:      true,
 }, nil)
 
@@ -240,7 +236,7 @@ onUpload := func(e stt.ProgressEvent) { // upload (e.Step == "upload")
     }
 }
 
-result, _ = client.Transcribe("meeting.mp3", stt.TranscribeOptions{
+result, _ = client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
     OnUploadProgress: onUpload,
     Progress:         true, // bars AND callbacks together
 }, onProgress)`}
@@ -312,7 +308,10 @@ result, _ = client.Transcribe("meeting.mp3", stt.TranscribeOptions{
       <CodeBlock
         language="go"
         code={`// Save writes output.<output_type> when the path has no extension.
-out, _ := result.Save("output") // -> "output.json"
+out, err := result.Save("output") // -> "output.json"
+if err != nil {
+    log.Fatal(err)
+}
 fmt.Println("saved to", out)`}
       />
 
@@ -331,9 +330,13 @@ fmt.Println("saved to", out)`}
       </p>
       <CodeBlock
         language="go"
-        code={`result, err := client.Transcribe("meeting.mp3", stt.TranscribeOptions{
+        code={`jobID, err := client.Submit(ctx, "meeting.mp3", stt.TranscribeOptions{
     CallbackURL: "https://you.example.com/hook",
-}, nil)`}
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("submitted", jobID) // the hook fires when it finishes`}
       />
 
       <h2>Retrieve results later</h2>
@@ -345,17 +348,26 @@ fmt.Println("saved to", out)`}
         language="go"
         filename="retrieve.go"
         code={`// List the most-recent jobs (newest first), cursor-paginated.
-page, err := client.ListJobs(10, "") // (limit, before)
+page, err := client.ListJobs(ctx, 10, "") // (limit, before)
+if err != nil {
+    log.Fatal(err)
+}
 fmt.Printf("%d job(s); next_before=%q\\n", len(page.Jobs), page.NextBefore)
 for _, j := range page.Jobs {
     fmt.Printf("  %s  (%s)\\n", j.JobID, j.CreatedAt)
 }
 
 // Poll a job by id, then fetch its transcript.
-status, err := client.GetJobStatus(jobID)
+status, err := client.GetJobStatus(ctx, jobID)
+if err != nil {
+    log.Fatal(err)
+}
 fmt.Println("status:", status.Status)
 if status.IsCompleted() {
-    result, err := client.GetTranscript(jobID, stt.OutputJSON)
+    result, err := client.GetTranscript(ctx, jobID, stt.OutputJSON)
+    if err != nil {
+        log.Fatal(err)
+    }
     fmt.Println(result.Text())
 } else if status.IsFailed() {
     fmt.Println(status.FailedStage, status.Reason)
@@ -371,8 +383,8 @@ export STT_API_KEY=stt_...`}
       />
       <CodeBlock
         language="go"
-        code={`client, _ := stt.NewClient("")        // reads the env vars above
-client, _ := stt.NewClient("stt_...") // or pass it directly`}
+        code={`client, _ := stt.NewClient("")           // reads the env vars above
+explicit, _ := stt.NewClient("stt_...")  // or pass it directly`}
       />
 
       <Callout title="Under the hood" tone="info">
