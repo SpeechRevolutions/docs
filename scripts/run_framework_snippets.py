@@ -42,6 +42,7 @@ import run_snippets as R  # noqa: E402
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SIBLING = os.path.dirname(REPO)
 PY_SRC = os.path.join(SIBLING, "python-sdk", "src")
+NODE_DIR = os.path.join(SIBLING, "node-sdk")
 WORKSPACE = R.WORKSPACE
 SECRET = "whsec_framework_runner"
 
@@ -77,6 +78,10 @@ def request(port: int, method: str, path: str, body: bytes | None = None,
             return r.status, r.read()
     except urllib.error.HTTPError as e:
         return e.code, e.read()
+    except (urllib.error.URLError, ConnectionResetError, OSError) as e:
+        # The server died mid-request, which is a failure of the snippet, not
+        # of the probe — report it as one rather than raising out of the driver.
+        return 0, str(e).encode()
 
 
 def signed(body: bytes) -> str:
@@ -307,7 +312,141 @@ def drive_fastapi_other(results: list) -> None:
         drive_fastapi_page(page, results)
 
 
-DRIVERS = {"fastapi": drive_fastapi, "fastapi-pages": drive_fastapi_other}
+# --------------------------------------------------------------------------- express
+
+JS_WORK = re.compile(r"^(?:(?:const|let|var)\s+\w+\s*=\s*)?await\s+client\.")
+JS_ROUTE = re.compile(r'app\.(get|post)\(\s*"([^"]+)"')
+
+
+def assemble_js(code: str) -> str:
+    """Drop the module-level transcribe calls; keep everything structural.
+
+    Same reasoning as the Python assembler: a block that transcribes where it
+    stands is right for a reader and wrong at startup of a server.
+    """
+    out, skipping = [], False
+    for line in code.splitlines():
+        if skipping:
+            if line.startswith((")", "}", "]")) or line.rstrip().endswith((");", "});")):
+                skipping = False
+            continue
+        if JS_WORK.match(line):
+            if not line.rstrip().endswith(";"):
+                skipping = True
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
+SDK_IMPORT = re.compile(r'^import \{([^}]*)\} from "@speechrevolutions/stt";\s*$', re.M)
+
+
+def merge_sdk_imports(src: str, local: str) -> str:
+    names: list[str] = []
+    for group in SDK_IMPORT.findall(src):
+        for n in group.split(","):
+            n = n.strip()
+            if n and n not in names:
+                names.append(n)
+    src = SDK_IMPORT.sub("", src)
+    if names:
+        src = f'import {{ {", ".join(names)} }} from "{local}";\n' + src
+    return src
+
+
+def dedupe_imports(src: str) -> str:
+    seen, out = set(), []
+    for line in src.splitlines():
+        decl = (line.startswith("import ")
+                or re.match(r"^(const|let|var)\s+\w+\s*=", line))
+        if decl and line.rstrip().endswith(";"):
+            if line in seen:
+                continue
+            seen.add(line)
+        out.append(line)
+    return "\n".join(out)
+
+
+def drive_express(results: list) -> None:
+    pages = ("/cookbook", "/guides/live-progress", "/tutorials/meeting-app")
+    for page in pages:
+        # A cookbook page is a list of independent recipes, not one program —
+        # each recipe builds its own client, so concatenating them redeclares it.
+        # There, only the handler recipe is the app.
+        only_handlers = page == "/cookbook"
+        parts = [assemble_js(R.apply_subs(s.code))
+                 for s in extract(os.path.join(REPO, "src", "app"))
+                 if s.page == page and s.language == "ts"
+                 and (not only_handlers
+                      or R.skip_reason(s.code) == "needs a running web framework")]
+        src = dedupe_imports("\n\n".join(p for p in parts if p.strip()))
+        if not JS_ROUTE.search(src):
+            results.append((page, "express", "SKIP", "no express routes on this page"))
+            continue
+
+        port = free_port()
+        head = 'import express from "express";\n'
+        if "const app = express()" not in src:
+            head += "const app = express();\n"
+        # A receiver that verifies a signature needs the raw bytes; a global
+        # json parser would consume the body before it ever reaches the route.
+        if "express.raw" not in src:
+            head += "app.use(express.json());\n"
+        src = merge_sdk_imports(
+            src.replace('import express from "express";', ""),
+            f"{NODE_DIR}/dist/esm/index.js")
+        src = head + src + f"\napp.listen({port});\n"
+
+        path = os.path.join(NODE_DIR, f"_fw_{port}.mjs")
+        io.open(path, "w").write(src)
+        env = {**os.environ, "SR_WEBHOOK_SECRET": SECRET, "STT_WEBHOOK_SECRET": SECRET}
+        proc = subprocess.Popen([ "node", path], cwd=WORKSPACE, env=env,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        try:
+            if not wait_until_up(port, proc):
+                out = proc.stdout.read()[-700:] if proc.stdout else ""
+                results.append((page, "express", "FAIL", f"server did not start:\n{out}"))
+                continue
+
+            probed, verified = 0, ""
+            for method, route in JS_ROUTE.findall(src):
+                concrete = re.sub(r":(\w+)", "probe", route)
+                body, headers = None, {}
+                if method == "post":
+                    body = json.dumps({"job_id": "abc", "status": "completed",
+                                       "jobId": "abc", "url": "https://example/a.mp3"}).encode()
+                    headers = {"Content-Type": "application/json",
+                               "X-SR-Signature": signed(body)}
+                code, payload = request(port, method.upper(), concrete, body, headers)
+                probed += 1
+                if code == 0 or code >= 500:
+                    extra = ""
+                    if code == 0 and proc.poll() is not None and proc.stdout:
+                        extra = " | server output: " + proc.stdout.read()[:500].replace("\n", " ")
+                    results.append((page, "express", "FAIL",
+                                    f"{method.upper()} {concrete} -> {code} {payload[:120]}{extra}"))
+                    break
+                # A receiver that verifies must reject a forged signature.
+                if method == "post" and "verifySignature" in src:
+                    bad, _ = request(port, "POST", concrete, body,
+                                     {"Content-Type": "application/json",
+                                      "X-SR-Signature": "sha256=" + "0" * 64})
+                    if bad != 401:
+                        results.append((page, "express", "FAIL",
+                                        f"forged signature at {concrete} -> {bad}"))
+                        break
+                    verified = ", forged signature rejected"
+            else:
+                results.append((page, "express", "OK",
+                                f"booted; {probed} route(s) answered without a 5xx{verified}"))
+        finally:
+            proc.kill()
+            if os.path.exists(path):
+                os.unlink(path)
+
+
+DRIVERS = {"fastapi": drive_fastapi, "fastapi-pages": drive_fastapi_other,
+           "express": drive_express}
 
 
 def main() -> int:
