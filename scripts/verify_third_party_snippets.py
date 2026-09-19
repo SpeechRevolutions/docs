@@ -18,7 +18,16 @@ That is checkable without an account, so it is checked here:
     it offline
 
 What this does NOT verify is behaviour: that the call returns what the snippet
-prints. That needs the provider. The gap is stated rather than papered over.
+prints. That needs the provider.
+
+That gap was closed once, by hand, on 2026-09-18, with keys supplied for the
+purpose: all four competitor snippets were executed and all four returned a real
+transcript (Deepgram's came back empty on Russian audio and full on English —
+nova-3, not the snippet). faster-whisper ran on a 5090 with large-v3 and
+float16 exactly as published, and both Supabase snippets ran end to end against
+a local Supabase, including the Realtime subscription. Nothing was wrong with
+any of them. This checker is what keeps them honest between those runs, because
+a symbol check needs no account and can run on every change.
 
 Usage:
     python3 scripts/verify_third_party_snippets.py
