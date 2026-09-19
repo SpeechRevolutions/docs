@@ -46,6 +46,8 @@ NODE_DIR = os.path.join(SIBLING, "node-sdk")
 AUDIO_URL = os.environ.get("SR_SNIPPET_AUDIO_URL", "")
 HOOK_URL = os.environ.get("SR_SNIPPET_HOOK_URL", "")
 PROXY_URL = os.environ.get("SR_SNIPPET_PROXY_URL", "")
+SRC_BUCKET = os.environ.get("SR_SNIPPET_SRC_BUCKET", "")
+OUT_BUCKET = os.environ.get("SR_SNIPPET_OUT_BUCKET", SRC_BUCKET)
 
 # Snippets that cannot be executed as a standalone program, with the reason.
 # Each one is a framework handler driven separately by run_framework_snippets.py,
@@ -114,6 +116,10 @@ def substitutions() -> list[tuple[str, str]]:
         ]
     if PROXY_URL:
         subs += [("http://proxy.internal:8080", PROXY_URL)]
+    if SRC_BUCKET:
+        # The S3 page's placeholder buckets, pointed at one that exists.
+        subs += [("my-audio", SRC_BUCKET), ("example-audio", SRC_BUCKET),
+                 ("my-transcripts", OUT_BUCKET), ("example-transcripts", OUT_BUCKET)]
     return subs
 
 
@@ -202,7 +208,7 @@ PAGE_PRELUDE = {
 
 def py_program(code: str, page: str = "") -> str:
     body = apply_subs(code)
-    head = PY_PRELUDE + PAGE_PRELUDE.get(page, "")
+    head = PY_PRELUDE + apply_subs(PAGE_PRELUDE.get(page, ""))
     awaits = (re.search(r"(?<![\w])(await |async with |async for )", body)
               and "asyncio.run(" not in body
               and not re.search(r"^\s*(async )?def ", body, re.M))
@@ -299,7 +305,7 @@ def ts_program(code: str, page: str = "") -> str:
     needs_client = not re.search(r"^\s*const (client|stt)\s*=", body, re.M)
 
     head = "" if binds_sdk or (published and not needs_client) else TS_PRELUDE
-    prelude = TS_PAGE_PRELUDE.get(page, "")
+    prelude = apply_subs(TS_PAGE_PRELUDE.get(page, ""))
     if prelude and not re.search(r"new S3Client\(|createClient\(", body):
         head += prelude
     if needs_client:

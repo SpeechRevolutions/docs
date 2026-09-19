@@ -75,13 +75,13 @@ PAGE_PRELUDE = {
         "go": ('cfg, _ := config.LoadDefaultConfig(ctx)\n'
                's3c := s3.NewFromConfig(cfg)\n'
                'sttc := client\n'
-               'srcBucket, outBucket, key := "my-audio", "my-transcripts", "a.mp3"\n'
+               'srcBucket, outBucket, key := "my-audio", "my-transcripts", "meeting.mp3"\n'
                '_, _, _, _ = s3c, sttc, srcBucket, outBucket\n_ = key\n'),
         "csharp_usings": ["using Amazon.S3;", "using Amazon.S3.Model;"],
         "csharp": ('using var s3 = new Amazon.S3.AmazonS3Client();\n'
                    'const string SrcBucket = "my-audio";\n'
                    'const string OutBucket = "my-transcripts";\n'
-                   'var key = "a.mp3";\n'),
+                   'var key = "meeting.mp3";\n'),
     },
 }
 
