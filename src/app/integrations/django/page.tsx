@@ -79,6 +79,7 @@ class TranscriptionJob(models.Model):
         language="python"
         filename="transcripts/views.py"
         code={`from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 from speechrevolutions import SpeechRevolutions
 
@@ -103,7 +104,9 @@ def start_transcription(request):
 
 
 def job_progress(request, job_id):
-    job = TranscriptionJob.objects.get(job_id=job_id)
+    # get() would raise DoesNotExist and return a 500 for an id that has been
+    # mistyped, expired, or never existed. 404 is the honest answer.
+    job = get_object_or_404(TranscriptionJob, job_id=job_id)
     return JsonResponse(
         {"status": job.status, "percent": job.percent, "text": job.text}
     )`}

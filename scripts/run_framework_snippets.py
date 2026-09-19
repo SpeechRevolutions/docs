@@ -654,8 +654,104 @@ def drive_aspnet(results: list) -> None:
         shutil.rmtree(work, ignore_errors=True)
 
 
+# ------------------------------------------------------------------------- django
+#
+# The Django page's blocks are already a project, one file each — models, views,
+# webhooks, urls — so they are written out as those files, migrated and served,
+# rather than concatenated. Anything less would not exercise the ORM writes the
+# views and the receiver actually do.
+
+DJANGO_SETTINGS = '''
+SECRET_KEY = "framework-runner"
+DEBUG = False
+ALLOWED_HOSTS = ["*"]
+ROOT_URLCONF = "project.urls"
+INSTALLED_APPS = ["django.contrib.contenttypes", "django.contrib.auth", "transcripts"]
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "db.sqlite3"}}
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+USE_TZ = True
+MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]
+TEMPLATES = []
+STT_WEBHOOK_SECRET = "%s"
+'''
+
+
+def drive_django(results: list) -> None:
+    page = "/integrations/django"
+    blocks = {sn.index: R.apply_subs(sn.code)
+              for sn in extract(os.path.join(REPO, "src", "app"))
+              if sn.page == page and sn.language == "python"}
+    if not blocks:
+        results.append((page, "django", "SKIP", "no python snippets"))
+        return
+
+    root = tempfile.mkdtemp(prefix="fw-django-")
+    app = os.path.join(root, "transcripts")
+    project = os.path.join(root, "project")
+    os.makedirs(app)
+    os.makedirs(project)
+    io.open(os.path.join(app, "__init__.py"), "w").write("")
+    io.open(os.path.join(project, "__init__.py"), "w").write("")
+    io.open(os.path.join(app, "models.py"), "w").write(blocks.get(1, ""))
+    io.open(os.path.join(app, "views.py"), "w").write(blocks.get(2, ""))
+    io.open(os.path.join(app, "webhooks.py"), "w").write(blocks.get(3, ""))
+    io.open(os.path.join(project, "urls.py"), "w").write(blocks.get(4, ""))
+    io.open(os.path.join(project, "settings.py"), "w").write(DJANGO_SETTINGS % SECRET)
+
+    env = {**os.environ, "PYTHONPATH": os.pathsep.join([PY_SRC, root]),
+           "DJANGO_SETTINGS_MODULE": "project.settings"}
+
+    for args in (["makemigrations", "transcripts"], ["migrate"]):
+        p = subprocess.run([sys.executable, "-m", "django", *args], cwd=root,
+                           env=env, capture_output=True, text=True, timeout=300)
+        if p.returncode != 0:
+            results.append((page, "django", "FAIL",
+                            R.summarize(p.stderr or p.stdout)))
+            shutil.rmtree(root, ignore_errors=True)
+            return
+
+    port = free_port()
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "django", "runserver", f"127.0.0.1:{port}", "--noreload"],
+        cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    try:
+        if not wait_until_up(port, proc):
+            out = proc.stdout.read()[:600] if proc.stdout else ""
+            results.append((page, "django", "FAIL", f"server did not start: {out}"))
+            return
+
+        body = json.dumps({"job_id": "abc", "status": "completed"}).encode()
+        code, payload = request(port, "POST", "/webhooks/stt/", body,
+                                {"Content-Type": "application/json",
+                                 "X-SR-Signature": signed(body)})
+        if code == 0 or code >= 500:
+            results.append((page, "django", "FAIL",
+                            f"signed webhook -> {code} {payload[:200]}"))
+            return
+        bad, _ = request(port, "POST", "/webhooks/stt/", body,
+                         {"Content-Type": "application/json",
+                          "X-SR-Signature": "sha256=" + "0" * 64})
+        if bad != 401:
+            results.append((page, "django", "FAIL", f"forged signature -> {bad}"))
+            return
+
+        code, payload = request(port, "GET", "/jobs/does-not-exist/progress/")
+        if code == 0 or code >= 500:
+            results.append((page, "django", "FAIL",
+                            f"unknown job -> {code} {payload[:200]}"))
+            return
+
+        results.append((page, "django", "OK",
+                        f"migrated and served; webhook {code and 'ok'}, "
+                        f"forged rejected, unknown job -> {code}"))
+    finally:
+        proc.kill()
+        shutil.rmtree(root, ignore_errors=True)
+
+
 DRIVERS = {"fastapi": drive_fastapi, "fastapi-pages": drive_fastapi_other,
-           "express": drive_express, "go": drive_go, "aspnet": drive_aspnet}
+           "express": drive_express, "go": drive_go, "aspnet": drive_aspnet,
+           "django": drive_django}
 
 
 def main() -> int:
