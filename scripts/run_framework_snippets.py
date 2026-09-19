@@ -749,9 +749,111 @@ def drive_django(results: list) -> None:
         shutil.rmtree(root, ignore_errors=True)
 
 
+# ------------------------------------------------------------------------- nextjs
+#
+# The Next.js page names its files in the snippet filenames, and the ones that
+# do not are identifiable by what they contain. They go where the App Router
+# expects them, and the app is served by next dev — nothing else exercises a
+# route handler's runtime, its "@/lib" alias, or a "use server" action.
+
+NEXT_FILES = {
+    ("ts", 3): "lib/stt.ts",
+    ("ts", 1): "app/api/jobs/route.ts",
+    ("ts", 2): "app/api/jobs/[id]/route.ts",
+    ("ts", 4): "app/api/transcribe/route.ts",
+    ("ts", 5): "app/actions.ts",
+    ("ts", 6): "app/api/webhooks/stt/route.ts",
+    ("tsx", 1): "app/upload.tsx",
+}
+
+NEXT_TSCONFIG = """{
+  "compilerOptions": {
+    "target": "esnext", "lib": ["dom", "esnext"], "allowJs": true,
+    "skipLibCheck": true, "strict": false, "noEmit": true, "esModuleInterop": true,
+    "module": "esnext", "moduleResolution": "bundler", "resolveJsonModule": true,
+    "isolatedModules": true, "jsx": "preserve", "incremental": true,
+    "paths": {"@/*": ["./*"]},
+    "plugins": [{"name": "next"}]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"], "exclude": ["node_modules"]
+}"""
+
+
+def drive_nextjs(results: list) -> None:
+    page = "/integrations/nextjs"
+    blocks = {(sn.language, sn.index): R.apply_subs(sn.code)
+              for sn in extract(os.path.join(REPO, "src", "app"))
+              if sn.page == page and sn.language in ("ts", "tsx")}
+    if not blocks:
+        results.append((page, "nextjs", "SKIP", "no snippets"))
+        return
+
+    root = tempfile.mkdtemp(prefix="fw-next-")
+    os.symlink(os.path.join(REPO, "node_modules"), os.path.join(root, "node_modules"))
+    io.open(os.path.join(root, "package.json"), "w").write(
+        '{"name":"fw-next","private":true,"type":"module"}')
+    io.open(os.path.join(root, "tsconfig.json"), "w").write(NEXT_TSCONFIG)
+    io.open(os.path.join(root, "next.config.mjs"), "w").write(
+        "export default { eslint: { ignoreDuringBuilds: true } };\n")
+
+    for key, rel in NEXT_FILES.items():
+        if key not in blocks:
+            continue
+        dest = os.path.join(root, rel)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        code = blocks[key].replace('from "@speechrevolutions/stt"',
+                                   f'from "{NODE_DIR}/dist/esm/index.js"')
+        io.open(dest, "w").write(code)
+
+    # The App Router needs a root layout to serve anything at all.
+    io.open(os.path.join(root, "app", "layout.tsx"), "w").write(
+        "export default function RootLayout({ children }: { children: React.ReactNode }) {\n"
+        "  return (<html><body>{children}</body></html>);\n}\n")
+
+    port = free_port()
+    env = {**os.environ, "STT_WEBHOOK_SECRET": SECRET, "SR_WEBHOOK_SECRET": SECRET,
+           "NEXT_TELEMETRY_DISABLED": "1"}
+    proc = subprocess.Popen(
+        [os.path.join(REPO, "node_modules", ".bin", "next"), "dev", "-p", str(port)],
+        cwd=root, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    try:
+        if not wait_until_up(port, proc, seconds=150):
+            out = proc.stdout.read()[:700] if proc.stdout else ""
+            results.append((page, "nextjs", "FAIL", f"next dev did not start: {out}"))
+            return
+
+        body = json.dumps({"job_id": "abc", "status": "completed"}).encode()
+        code, payload = request(port, "POST", "/api/webhooks/stt", body,
+                                {"Content-Type": "application/json",
+                                 "X-SR-Signature": signed(body)}, timeout=120)
+        if code == 0 or code >= 500:
+            results.append((page, "nextjs", "FAIL",
+                            f"signed webhook -> {code} {payload[:200]}"))
+            return
+        bad, _ = request(port, "POST", "/api/webhooks/stt", body,
+                         {"Content-Type": "application/json",
+                          "X-SR-Signature": "sha256=" + "0" * 64}, timeout=120)
+        if bad != 401:
+            results.append((page, "nextjs", "FAIL", f"forged signature -> {bad}"))
+            return
+
+        code, payload = request(port, "GET", "/api/jobs/does-not-exist", timeout=120)
+        if code == 0 or code >= 500:
+            results.append((page, "nextjs", "FAIL",
+                            f"unknown job -> {code} {payload[:200]}"))
+            return
+
+        results.append((page, "nextjs", "OK",
+                        f"next dev served the routes; webhook ok, forged rejected, "
+                        f"unknown job -> {code}"))
+    finally:
+        proc.kill()
+        shutil.rmtree(root, ignore_errors=True)
+
+
 DRIVERS = {"fastapi": drive_fastapi, "fastapi-pages": drive_fastapi_other,
            "express": drive_express, "go": drive_go, "aspnet": drive_aspnet,
-           "django": drive_django}
+           "django": drive_django, "nextjs": drive_nextjs}
 
 
 def main() -> int:
