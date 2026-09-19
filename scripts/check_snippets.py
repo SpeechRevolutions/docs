@@ -43,7 +43,7 @@ from extract_snippets import Snippet, extract  # noqa: E402
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SIBLING = os.path.dirname(REPO)
-GO_SDK = os.path.join(SIBLING, "go-sdk")
+GO_SDK = os.path.join(SIBLING, "speechrevolutions-go")
 CS_SDK = os.path.join(SIBLING, "csharp-sdk", "SpeechRevolutions", "SpeechRevolutions.csproj")
 
 GO_BIN = shutil.which("go") or os.path.expanduser("~/.local/go/bin/go")
