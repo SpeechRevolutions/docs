@@ -390,10 +390,15 @@ for (const job of page.jobs) console.log(job.jobId, job.createdAt);`}
       </p>
       <CodeBlock
         language="ts"
-        code={`const client = new SpeechRevolutions({
+        code={`import { ProxyAgent } from "undici";
+
+// Any fetch option can be passed through; a dispatcher is how undici proxies.
+const dispatcher = new ProxyAgent("http://proxy.internal:8080");
+
+const client = new SpeechRevolutions({
   maxRetries: 3,
-  retryBackoffMs: 500,        // exponential
-  requestInit: { dispatcher }, // e.g. an undici ProxyAgent
+  retryBackoffMs: 500,  // exponential
+  requestInit: { dispatcher },
 });`}
       />
       <p>

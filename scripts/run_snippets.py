@@ -54,7 +54,11 @@ SKIP = {
     "needs a running web framework": (
         "FastAPI(", "@app.", "django", "WebApplication.CreateBuilder",
         "express()", "next/", "createServer(", "Flask(",
+        "app.post(", "app.get(", "app.listen(", "NextRequest", "NextResponse",
+        "ListenAndServe(", "http.HandleFunc(", "HttpListener(", "app.Map",
     ),
+    "needs a Supabase project": ("@supabase/supabase-js", "from supabase import",
+                                 "SUPABASE_SERVICE_ROLE_KEY"),
     # Competitor "before" examples on the migration pages. Running these needs a
     # paid account with that provider, which we do not have and should not buy.
     # verify_competitor_snippets.py checks instead that every symbol they use
@@ -67,6 +71,24 @@ SKIP = {
 
 
 # Failures that are the network rather than the snippet, retried once.
+SNIPPET_TIMEOUT = 420
+
+
+def summarize(out: str) -> str:
+    """The useful part of a failure.
+
+    Python puts the exception last and node puts it first, so neither a head nor
+    a tail alone is right. Prefer the lines that actually name the error.
+    """
+    lines = [l for l in out.strip().splitlines() if l.strip()]
+    named = [l for l in lines
+             if re.search(r"(Error|Exception|error TS\d+):", l)
+             or "ERR_MODULE_NOT_FOUND" in l or "Cannot find package" in l]
+    if named:
+        return "\n".join(named[:4])
+    return "\n".join(lines[:6])
+
+
 TRANSIENT = (
     "RemoteDisconnected",
     "Connection aborted",
@@ -98,6 +120,42 @@ def apply_subs(code: str) -> str:
     for old, new in substitutions():
         code = code.replace(old, new)
     return code
+
+
+_REAL_JOB: list[str] = []
+
+
+def real_job_id() -> str:
+    """A job id that actually exists, created once per run.
+
+    check_snippets injects an all-zero UUID for the `jobID` a page established
+    earlier, which is enough to compile and useless to run — the API rightly
+    answers "job not found". Snippets that fetch a job by id need a real one.
+    """
+    if _REAL_JOB:
+        return _REAL_JOB[0]
+    sys.path.insert(0, PY_SRC)
+    from speechrevolutions import SpeechRevolutions  # noqa: E402
+
+    with SpeechRevolutions(timeout=600) as c:
+        result = c.transcribe(os.path.join(WORKSPACE, "meeting.mp3"))
+    _REAL_JOB.append(result.job_id)
+    return result.job_id
+
+
+PLACEHOLDER_JOB = "00000000-0000-0000-0000-000000000000"
+
+
+def real_key(program: str) -> str:
+    """check_snippets injects a placeholder key so a snippet compiles. To RUN it
+    the client has to read the real key from the environment, so the placeholder
+    becomes an empty string, which is what every SDK treats as "use the env"."""
+    program = (program
+               .replace('stt.NewClient("k")', 'stt.NewClient("")')
+               .replace('new SttClient("k")', 'new SttClient()'))
+    if PLACEHOLDER_JOB in program:
+        program = program.replace(PLACEHOLDER_JOB, real_job_id())
+    return program
 
 
 def skip_reason(code: str) -> str | None:
@@ -181,19 +239,19 @@ def run_python(snips: list[Snippet], res) -> None:
             path = f.name
         try:
             p = subprocess.run([sys.executable, path], cwd=WORKSPACE, env=env,
-                               capture_output=True, text=True, timeout=900)
+                               capture_output=True, text=True, timeout=SNIPPET_TIMEOUT)
             if p.returncode == 0:
                 res.ok.append(s)
             else:
                 out = p.stderr or p.stdout
                 if any(t in out for t in TRANSIENT):
                     p = subprocess.run([sys.executable, path], cwd=WORKSPACE, env=env,
-                                       capture_output=True, text=True, timeout=900)
+                                       capture_output=True, text=True, timeout=SNIPPET_TIMEOUT)
                     out = p.stderr or p.stdout
                 if p.returncode == 0:
                     res.ok.append(s)
                 else:
-                    res.failed.append((s, "\n".join(out.strip().splitlines()[-6:])))
+                    res.failed.append((s, summarize(out)))
         except subprocess.TimeoutExpired:
             res.failed.append((s, "timed out after 900s"))
         finally:
@@ -208,13 +266,25 @@ TS_PRELUDE = 'import { SpeechRevolutions } from "%s/dist/esm/index.js";\n' % NOD
 
 TS_CLIENT = "const client = new SpeechRevolutions({ timeout: 900000 });\n"
 
+TS_PAGE_PRELUDE = {
+    # What the S3 page builds in its first block and keeps using in the second.
+    "/integrations/s3": (
+        'import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";\n'
+        'import { getSignedUrl } from "@aws-sdk/s3-request-presigner";\n'
+        'const s3 = new S3Client({});\n'
+        'const SRC_BUCKET = "example-audio";\n'
+        'const OUT_BUCKET = "example-transcripts";\n'
+        'const key = "meeting.mp3";\n'
+    ),
+}
+
 TS_SCOPE = {
     "result": 'const result = await client.transcribe("meeting.mp3");\n',
     "jobId": 'const jobId = await client.submit("meeting.mp3");\n',
 }
 
 
-def ts_program(code: str) -> str:
+def ts_program(code: str, page: str = "") -> str:
     body = apply_subs(code)
     # Point the published import at the local build, keeping whatever names it
     # binds, rather than stripping it and adding our own (which redeclares).
@@ -222,7 +292,10 @@ def ts_program(code: str) -> str:
     body = re.sub(r'(^import \{[^}]*\} from )"@speechrevolutions/stt";$',
                   r'\1"%s/dist/esm/index.js";' % NODE_DIR, body, flags=re.M)
     head = "" if published else TS_PRELUDE
-    if not re.search(r"^\s*const client\s*=", body, re.M):
+    prelude = TS_PAGE_PRELUDE.get(page, "")
+    if prelude and not re.search(r"new S3Client\(|createClient\(", body):
+        head += prelude
+    if not re.search(r"^\s*const (client|stt)\s*=", body, re.M):
         head += TS_CLIENT
         for name, decl in TS_SCOPE.items():
             used = re.search(r"(?<![\w.])" + name + r"(?![\w])", body)
@@ -238,10 +311,8 @@ def run_ts(snips: list[Snippet], res) -> None:
         if why:
             res.skipped.append((s, why))
             continue
-        program = ts_program(s.code)
-        if s.language == "tsx" or re.search(r"^\s*(const|let|function)[^\n=]*:\s*\w", program, re.M) \
-                or "interface " in program or ": string" in program or ": number" in program:
-            program = transpile_ts(program)
+        program = ts_program(s.code, s.page)
+        program = transpile_ts(program)
         # The file lives beside node-sdk/node_modules so bare specifiers like
         # "@aws-sdk/client-s3" resolve, but runs with the fixture workspace as
         # cwd so "meeting.mp3" does too. Node uses the file for the first and
@@ -252,7 +323,7 @@ def run_ts(snips: list[Snippet], res) -> None:
             path = f.name
         try:
             p = subprocess.run(["node", path], cwd=WORKSPACE, env=os.environ,
-                               capture_output=True, text=True, timeout=900)
+                               capture_output=True, text=True, timeout=SNIPPET_TIMEOUT)
             if p.returncode == 0:
                 res.ok.append(s)
             else:
@@ -286,6 +357,138 @@ def transpile_ts(program: str) -> str:
     return result
 
 
+# --------------------------------------------------------------------------- go/csharp
+#
+# check_snippets.py already builds a compilable program from each Go and C#
+# snippet, including the page-scope machinery. Reuse that exactly, so what runs
+# here is the same text that is proven to compile there, and only the execution
+# is new.
+
+def run_go(snips: list[Snippet], res) -> None:
+    import check_snippets as C
+
+    if not os.path.exists(C.GO_BIN):
+        for s in snips:
+            res.skipped.append((s, "go toolchain not found"))
+        return
+
+    work = tempfile.mkdtemp(prefix="runsnip-go-")
+    io.open(os.path.join(work, "go.mod"), "w").write(
+        "module runsnippets\n\ngo 1.22\n\n"
+        "require github.com/speechrevolutions/go-sdk v0.0.0\n\n"
+        f"replace github.com/speechrevolutions/go-sdk => {C.GO_SDK}\n"
+    )
+    env = {**os.environ, "GOFLAGS": "-mod=mod", "GOTOOLCHAIN": "local"}
+
+    # Write every program FIRST. `go mod tidy` prunes anything no package in the
+    # module imports, so tidying between snippets drops the AWS modules that
+    # only the S3 page needs.
+    planned: list[tuple[str, Snippet]] = []
+    seen: dict[str, list[str]] = {}
+    for i, sn in enumerate(snips):
+        why = skip_reason(sn.code)
+        if why:
+            res.skipped.append((sn, why))
+            continue
+        context = "\n\n".join(seen.get(sn.page, []))
+        program = real_key(C.go_program(apply_subs(sn.code), context, sn.page))
+        decls = C.go_toplevel_decls(sn.code)
+        if decls:
+            seen.setdefault(sn.page, []).append(decls)
+        if not re.search(r"^package main\b", program, re.M):
+            res.skipped.append((sn, "library package, nothing to run"))
+            continue
+        name = f"s{i}"
+        os.makedirs(os.path.join(work, name), exist_ok=True)
+        io.open(os.path.join(work, name, "main.go"), "w").write(program)
+        planned.append((name, sn))
+
+    all_code = "\n".join(sn.code for _n, sn in planned)
+    for _path, (q, module) in C.GO_EXTRA.items():
+        if re.search(r"(?<![\w.])" + re.escape(q), all_code):
+            subprocess.run([C.GO_BIN, "get", module], cwd=work, env=env,
+                           capture_output=True, timeout=300)
+    subprocess.run([C.GO_BIN, "mod", "tidy"], cwd=work, env=env,
+                   capture_output=True, timeout=600)
+
+    for name, sn in planned:
+        binary = os.path.join(work, name + ".bin")
+        b = subprocess.run([C.GO_BIN, "build", "-o", binary, f"./{name}/"],
+                           cwd=work, env=env, capture_output=True, text=True,
+                           timeout=300)
+        if b.returncode != 0:
+            res.failed.append((sn, summarize(b.stderr or b.stdout)))
+            continue
+        # Built inside the module, run inside the fixture workspace: the binary
+        # needs meeting.mp3 next to it, not go.mod.
+        try:
+            p = subprocess.run([binary], cwd=WORKSPACE, env=os.environ,
+                               capture_output=True, text=True, timeout=SNIPPET_TIMEOUT)
+            out = p.stderr or p.stdout
+            if p.returncode != 0 and any(t in out for t in TRANSIENT):
+                p = subprocess.run([binary], cwd=WORKSPACE, env=os.environ,
+                                   capture_output=True, text=True, timeout=SNIPPET_TIMEOUT)
+                out = p.stderr or p.stdout
+            if p.returncode == 0:
+                res.ok.append(sn)
+            else:
+                res.failed.append((sn, summarize(out)))
+        except subprocess.TimeoutExpired:
+            res.failed.append((sn, f"timed out after {SNIPPET_TIMEOUT}s"))
+    shutil.rmtree(work, ignore_errors=True)
+
+
+def run_csharp(snips: list[Snippet], res) -> None:
+    import check_snippets as C
+
+    if not os.path.exists(C.DOTNET):
+        for s in snips:
+            res.skipped.append((s, "dotnet not found"))
+        return
+
+    root = os.environ.get("DOTNET_ROOT", os.path.dirname(C.DOTNET))
+    env = {**os.environ, "DOTNET_ROOT": root, "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+           "DOTNET_NOLOGO": "1", "PATH": root + os.pathsep + os.environ.get("PATH", "")}
+
+    work = tempfile.mkdtemp(prefix="runsnip-cs-")
+    proj = os.path.join(work, "console")
+    subprocess.run([C.DOTNET, "new", "console", "-o", proj, "--no-restore"],
+                   env=env, capture_output=True, timeout=300)
+    subprocess.run([C.DOTNET, "add", proj, "reference", C.CS_SDK],
+                   env=env, capture_output=True, timeout=300)
+    if any("Amazon.S3" in x.code for x in snips):
+        subprocess.run([C.DOTNET, "add", proj, "package", "AWSSDK.S3"],
+                       env=env, capture_output=True, timeout=600)
+    ls = os.path.join(proj, "Properties", "launchSettings.json")
+    if os.path.exists(ls):
+        os.remove(ls)
+
+    seen: dict[str, list[str]] = {}
+    for s in snips:
+        why = skip_reason(s.code)
+        if why:
+            res.skipped.append((s, why))
+            continue
+        context = "\n\n".join(seen.get(s.page, []))
+        io.open(os.path.join(proj, "Program.cs"), "w").write(
+            real_key(C.cs_program(apply_subs(s.code), context, s.page)))
+        decls = C.cs_toplevel_decls(s.code)
+        if decls:
+            seen.setdefault(s.page, []).append(decls)
+        try:
+            p = subprocess.run([C.DOTNET, "run", "--project", proj, "-v", "q", "--nologo"],
+                               cwd=WORKSPACE, env=env, capture_output=True, text=True,
+                               timeout=SNIPPET_TIMEOUT + 120)
+            out = p.stdout + p.stderr
+            if p.returncode == 0:
+                res.ok.append(s)
+            else:
+                res.failed.append((s, summarize(out)))
+        except subprocess.TimeoutExpired:
+            res.failed.append((s, f"timed out after {SNIPPET_TIMEOUT}s"))
+    shutil.rmtree(work, ignore_errors=True)
+
+
 class Result:
     def __init__(self):
         self.ok: list[Snippet] = []
@@ -293,7 +496,7 @@ class Result:
         self.skipped: list[tuple[Snippet, str]] = []
 
 
-RUNNERS = {"python": run_python, "ts": run_ts}
+RUNNERS = {"python": run_python, "ts": run_ts, "go": run_go, "csharp": run_csharp}
 
 
 def main() -> int:
