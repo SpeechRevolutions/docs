@@ -27,6 +27,7 @@ import io
 import json
 import os
 import signal
+import shutil
 import socket
 import subprocess
 import sys
@@ -445,8 +446,216 @@ def drive_express(results: list) -> None:
                 os.unlink(path)
 
 
+# --------------------------------------------------------------------------- go
+
+GO_ROUTE = re.compile(r'http\.HandleFunc\("(?:(GET|POST) )?([^"]+)"')
+
+
+def drive_go(results: list) -> None:
+    import check_snippets as C
+
+    for page in ("/cookbook", "/guides/live-progress", "/tutorials/meeting-app"):
+        snips = [sn for sn in extract(os.path.join(REPO, "src", "app"))
+                 if sn.page == page and sn.language == "go"]
+        handlers = [sn for sn in snips
+                    if R.skip_reason(sn.code) == "needs a running web framework"]
+        if not handlers:
+            results.append((page, "go", "SKIP", "no go handlers on this page"))
+            continue
+
+        # Same rule as elsewhere: a cookbook page is separate recipes.
+        use = handlers if page == "/cookbook" else snips
+        context = "\n\n".join(C.go_toplevel_decls(sn.code) for sn in use
+                               if sn not in handlers)
+        body = "\n\n".join(R.apply_subs(sn.code) for sn in handlers)
+
+        port = free_port()
+        body = re.sub(r'ListenAndServe\(":\d+"', f'ListenAndServe(":{port}"', body)
+        if "ListenAndServe(" not in body:
+            body += f'\nlog.Fatal(http.ListenAndServe(":{port}", nil))\n'
+        program = R.real_key(C.go_program(body, context, page))
+
+        work = tempfile.mkdtemp(prefix="fw-go-")
+        io.open(os.path.join(work, "go.mod"), "w").write(
+            "module fwsnippets\n\ngo 1.22\n\n"
+            "require github.com/speechrevolutions/go-sdk v0.0.0\n\n"
+            f"replace github.com/speechrevolutions/go-sdk => {C.GO_SDK}\n")
+        os.makedirs(os.path.join(work, "app"))
+        io.open(os.path.join(work, "app", "main.go"), "w").write(program)
+        env = {**os.environ, "GOFLAGS": "-mod=mod", "GOTOOLCHAIN": "local",
+               "SR_WEBHOOK_SECRET": SECRET, "STT_WEBHOOK_SECRET": SECRET}
+        subprocess.run([C.GO_BIN, "mod", "tidy"], cwd=work, env=env,
+                       capture_output=True, timeout=300)
+        binary = os.path.join(work, "app.bin")
+        b = subprocess.run([C.GO_BIN, "build", "-o", binary, "./app/"], cwd=work,
+                           env=env, capture_output=True, text=True, timeout=300)
+        if b.returncode != 0:
+            results.append((page, "go", "FAIL", R.summarize(b.stderr or b.stdout)))
+            continue
+
+        proc = subprocess.Popen([binary], cwd=WORKSPACE, env=env,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        try:
+            if not wait_until_up(port, proc):
+                out = proc.stdout.read()[:600] if proc.stdout else ""
+                results.append((page, "go", "FAIL", f"server did not start: {out}"))
+                continue
+
+            probed, verified = 0, ""
+            ok = True
+            routes = []
+            for m, route in GO_ROUTE.findall(program):
+                # A mux entry with no method pattern accepts any verb. If the
+                # page verifies signatures, the interesting verb is POST.
+                routes.append((m or ("POST" if "verifySignature" in program else "GET"), route))
+            for method, route in routes:
+                concrete = re.sub(r"\{[^}]+\}", "probe", route)
+                data, headers = None, {}
+                if method == "POST":
+                    data = json.dumps({"job_id": "abc", "status": "completed"}).encode()
+                    headers = {"Content-Type": "application/json",
+                               "X-SR-Signature": signed(data)}
+                code, payload = request(port, method, concrete, data, headers)
+                probed += 1
+                if code == 0 or code >= 500:
+                    results.append((page, "go", "FAIL",
+                                    f"{method} {concrete} -> {code} {payload[:140]}"))
+                    ok = False
+                    break
+                if method == "POST" and "verifySignature" in program:
+                    bad, _ = request(port, "POST", concrete, data,
+                                     {"Content-Type": "application/json",
+                                      "X-SR-Signature": "sha256=" + "0" * 64})
+                    if bad != 401:
+                        results.append((page, "go", "FAIL",
+                                        f"forged signature at {concrete} -> {bad}"))
+                        ok = False
+                        break
+                    verified = ", forged signature rejected"
+            if ok:
+                results.append((page, "go", "OK",
+                                f"booted; {probed} route(s) answered without a 5xx{verified}"))
+        finally:
+            proc.kill()
+            shutil.rmtree(work, ignore_errors=True)
+
+
+# ------------------------------------------------------------------------- aspnet
+
+CS_ROUTE = re.compile(r'app\.Map(Get|Post)\("([^"]+)"')
+
+
+def drive_aspnet(results: list) -> None:
+    import check_snippets as C
+
+    if not os.path.exists(C.DOTNET):
+        results.append(("(all)", "aspnet", "SKIP", "dotnet not found"))
+        return
+
+    root = os.environ.get("DOTNET_ROOT", os.path.dirname(C.DOTNET))
+    env = {**os.environ, "DOTNET_ROOT": root, "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+           "DOTNET_NOLOGO": "1", "PATH": root + os.pathsep + os.environ.get("PATH", ""),
+           "SR_WEBHOOK_SECRET": SECRET, "STT_WEBHOOK_SECRET": SECRET}
+
+    work = tempfile.mkdtemp(prefix="fw-cs-")
+    proj = os.path.join(work, "web")
+    subprocess.run([C.DOTNET, "new", "web", "-o", proj, "--no-restore"],
+                   env=env, capture_output=True, timeout=300)
+    subprocess.run([C.DOTNET, "add", proj, "reference", C.CS_SDK],
+                   env=env, capture_output=True, timeout=300)
+    ls = os.path.join(proj, "Properties", "launchSettings.json")
+    if os.path.exists(ls):
+        os.remove(ls)
+
+    # `dotnet run --project` sets the content root to the project, ignoring cwd,
+    # so a snippet opening meeting.mp3 has to find it there.
+    for name in os.listdir(WORKSPACE):
+        src_path = os.path.join(WORKSPACE, name)
+        if os.path.isfile(src_path):
+            shutil.copy(src_path, os.path.join(proj, name))
+
+    try:
+        for page in ("/cookbook", "/guides/live-progress", "/tutorials/meeting-app"):
+            snips = [sn for sn in extract(os.path.join(REPO, "src", "app"))
+                     if sn.page == page and sn.language == "csharp"]
+            handlers = [sn for sn in snips
+                        if R.skip_reason(sn.code) == "needs a running web framework"]
+            if not handlers:
+                results.append((page, "aspnet", "SKIP", "no aspnet handlers"))
+                continue
+
+            use = handlers if page == "/cookbook" else snips
+            context = "\n\n".join(C.cs_toplevel_decls(sn.code) for sn in use
+                                   if sn not in handlers)
+            body = "\n\n".join(R.apply_subs(sn.code) for sn in handlers)
+            program = R.real_key(C.cs_program(body, context, page))
+            if "WebApplication" not in program.split("app.Map")[0]:
+                program = program.replace(
+                    "var app = WebApplication.Create();",
+                    "var app = WebApplication.Create();")
+            if "app.Run()" not in program:
+                # Routes are registered above; the host has to actually run.
+                program = re.sub(r"(\n(?:public |internal )?(?:record|class|sealed) )",
+                                 r"\napp.Run();\1", program, count=1)
+                if "app.Run();" not in program:
+                    program += "\napp.Run();\n"
+            io.open(os.path.join(proj, "Program.cs"), "w").write(program)
+
+            port = free_port()
+            runenv = {**env, "ASPNETCORE_URLS": f"http://127.0.0.1:{port}"}
+            build = subprocess.run([C.DOTNET, "build", proj, "-v", "q", "--nologo"],
+                                   env=env, capture_output=True, text=True, timeout=600)
+            if build.returncode != 0:
+                results.append((page, "aspnet", "FAIL",
+                                R.summarize(build.stdout + build.stderr)))
+                continue
+            proc = subprocess.Popen(
+                [C.DOTNET, "run", "--project", proj, "--no-build", "-v", "q", "--nologo"],
+                cwd=WORKSPACE, env=runenv, stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT, text=True)
+            try:
+                if not wait_until_up(port, proc, seconds=60):
+                    out = proc.stdout.read()[:600] if proc.stdout else ""
+                    results.append((page, "aspnet", "FAIL", f"server did not start: {out}"))
+                    continue
+
+                probed, verified, ok = 0, "", True
+                for method, route in CS_ROUTE.findall(program):
+                    concrete = re.sub(r"\{[^}]+\}", "probe", route)
+                    data, headers = None, {}
+                    if method == "Post":
+                        data = json.dumps({"job_id": "abc", "status": "completed",
+                                           "jobId": "abc", "url": "https://x/a.mp3"}).encode()
+                        headers = {"Content-Type": "application/json",
+                                   "X-SR-Signature": signed(data)}
+                    code, payload = request(port, method.upper(), concrete, data, headers)
+                    probed += 1
+                    if code == 0 or code >= 500:
+                        results.append((page, "aspnet", "FAIL",
+                                        f"{method.upper()} {concrete} -> {code} {payload[:140]}"))
+                        ok = False
+                        break
+                    if method == "Post" and "VerifySignature" in program:
+                        bad, _ = request(port, "POST", concrete, data,
+                                         {"Content-Type": "application/json",
+                                          "X-SR-Signature": "sha256=" + "0" * 64})
+                        if bad != 401:
+                            results.append((page, "aspnet", "FAIL",
+                                            f"forged signature at {concrete} -> {bad}"))
+                            ok = False
+                            break
+                        verified = ", forged signature rejected"
+                if ok:
+                    results.append((page, "aspnet", "OK",
+                                    f"booted; {probed} route(s) answered without a 5xx{verified}"))
+            finally:
+                proc.kill()
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
 DRIVERS = {"fastapi": drive_fastapi, "fastapi-pages": drive_fastapi_other,
-           "express": drive_express}
+           "express": drive_express, "go": drive_go, "aspnet": drive_aspnet}
 
 
 def main() -> int:
