@@ -89,31 +89,41 @@ export default function BenchmarksPage() {
 
       <h2>Reproduce it yourself</h2>
       <p>
-        The suite lives under <code>public_benchmarks/</code>. Run it against the
-        local Zephyr stack, or against any competitor with that provider&apos;s
-        API key — every provider returns the same normalized transcript, so
-        scoring is identical.
+        The suite is the{" "}
+        <a href="https://github.com/SpeechRevolutions/benchmarks">
+          SpeechRevolutions/benchmarks
+        </a>{" "}
+        repository. It talks to the production API through the published{" "}
+        <code>speechrevolutions</code> SDK — there is nothing to host and no
+        local stack to run. Point it at any competitor with that provider&apos;s
+        API key instead; every provider returns the same normalized transcript,
+        so scoring is identical.
       </p>
       <CodeBlock
         language="bash"
-        code={`# from the repo root
-pip install -r public_benchmarks/requirements.txt
+        code={`git clone https://github.com/SpeechRevolutions/benchmarks
+cd benchmarks
+
+pip install -r requirements.txt
 python -m spacy download en_core_web_sm          # entity benchmark
 
-# 1. Build the frozen datasets from public sources (deterministic)
-python -m public_benchmarks.datasets.prepare_all
+# 1. Build the frozen datasets from public sources (deterministic).
+#    The audio is not committed, so this step is required.
+python -m benchmarks.datasets.prepare_all
 
-# 2. Run one benchmark, or all of them, against the local Zephyr stack
-python -m public_benchmarks.cli run wer
-python -m public_benchmarks.cli run all
+# 2. Run one benchmark, or all of them, against our production API
+export SPEECHREVOLUTIONS_API_KEY=stt_...
+python -m benchmarks.cli run wer
+python -m benchmarks.cli run all
 
 # 3. Run against another provider (needs that provider's API key)
-DEEPGRAM_API_KEY=... python -m public_benchmarks.cli run all --provider deepgram
-ASSEMBLYAI_API_KEY=... python -m public_benchmarks.cli run all --provider assemblyai`}
+DEEPGRAM_API_KEY=... python -m benchmarks.cli run all --provider deepgram
+ASSEMBLYAI_API_KEY=... python -m benchmarks.cli run all --provider assemblyai`}
       />
       <p>
-        <code>python -m public_benchmarks.cli list</code> shows every benchmark
-        and provider. Results are written as JSON / Markdown / CSV.
+        <code>python -m benchmarks.cli list</code> shows every benchmark and
+        provider. Results are written as JSON / Markdown / CSV. Every command
+        above runs from the repository root.
       </p>
 
       <h2>Methodology we hold ourselves to</h2>
