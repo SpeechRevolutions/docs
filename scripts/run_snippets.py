@@ -55,10 +55,11 @@ SKIP = {
         "FastAPI(", "@app.", "django", "WebApplication.CreateBuilder",
         "express()", "next/", "createServer(", "Flask(",
         "app.post(", "app.get(", "app.listen(", "NextRequest", "NextResponse",
+        '"server-only"', '"use server"', '"use client"', 'from "@/',
         "ListenAndServe(", "http.HandleFunc(", "HttpListener(", "app.Map",
     ),
     "needs a Supabase project": ("@supabase/supabase-js", "from supabase import",
-                                 "SUPABASE_SERVICE_ROLE_KEY"),
+                                 "SUPABASE_SERVICE_ROLE_KEY", "postgres_changes"),
     # Competitor "before" examples on the migration pages. Running these needs a
     # paid account with that provider, which we do not have and should not buy.
     # verify_competitor_snippets.py checks instead that every symbol they use
@@ -281,6 +282,7 @@ TS_PAGE_PRELUDE = {
 TS_SCOPE = {
     "result": 'const result = await client.transcribe("meeting.mp3");\n',
     "jobId": 'const jobId = await client.submit("meeting.mp3");\n',
+    "filePath": 'const filePath = "meeting.mp3";\n',
 }
 
 
@@ -291,11 +293,16 @@ def ts_program(code: str, page: str = "") -> str:
     published = re.search(r'^import \{[^}]*\} from "@speechrevolutions/stt";$', body, re.M)
     body = re.sub(r'(^import \{[^}]*\} from )"@speechrevolutions/stt";$',
                   r'\1"%s/dist/esm/index.js";' % NODE_DIR, body, flags=re.M)
-    head = "" if published else TS_PRELUDE
+    # A snippet may import only the error types; the injected client still needs
+    # SpeechRevolutions itself, so the two decisions are independent.
+    binds_sdk = bool(published and "SpeechRevolutions" in published.group(0))
+    needs_client = not re.search(r"^\s*const (client|stt)\s*=", body, re.M)
+
+    head = "" if binds_sdk or (published and not needs_client) else TS_PRELUDE
     prelude = TS_PAGE_PRELUDE.get(page, "")
     if prelude and not re.search(r"new S3Client\(|createClient\(", body):
         head += prelude
-    if not re.search(r"^\s*const (client|stt)\s*=", body, re.M):
+    if needs_client:
         head += TS_CLIENT
         for name, decl in TS_SCOPE.items():
             used = re.search(r"(?<![\w.])" + name + r"(?![\w])", body)

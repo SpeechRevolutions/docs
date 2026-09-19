@@ -358,17 +358,17 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function collectOne(client, filePath, jobId) {
   for (;;) {
     const status = await client.getJobStatus(jobId);
-    if (status.isCompleted) {
+    if (status.status === "completed") {
       const result = await client.getTranscript(jobId); // downloads + parses
       await mkdir("transcripts", { recursive: true });
       await writeFile(
         path.join("transcripts", path.basename(filePath) + ".json"),
-        result.toJSON(),
+        JSON.stringify(result.toDict(), null, 2),
       );
       console.log("done " + filePath);
       return;
     }
-    if (status.isFailed) {
+    if (status.status === "failed") {
       throw new JobFailedError(
         filePath + " failed at " + status.failedStage + ": " + status.reason,
       );
