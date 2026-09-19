@@ -84,7 +84,7 @@ def transcribe_s3_object(key: str) -> str:
             filename: "transcribe-s3.ts",
             code: `import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+import { SpeechRevolutions } from "speechrevolutions";
 
 const s3 = new S3Client({});
 const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
@@ -134,7 +134,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 const (
@@ -210,7 +210,7 @@ const string SrcBucket = "my-audio";
 const string OutBucket = "my-transcripts";
 
 using var s3 = new AmazonS3Client();
-using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
 
 async Task<string> TranscribeS3ObjectAsync(string key)
 {

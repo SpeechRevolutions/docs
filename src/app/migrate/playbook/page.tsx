@@ -118,7 +118,7 @@ def transcribe(audio: str) -> dict:
             label: "JavaScript",
             language: "ts",
             code: `// transcription.ts — the ONE place your app calls
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
 
@@ -140,7 +140,7 @@ package transcription
 import (
 	"context"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 type Speaker struct {
@@ -187,7 +187,7 @@ public record TranscriptionResult(
 
 public sealed class Transcription : IDisposable
 {
-    private readonly SttClient _client = new(); // SPEECHREVOLUTIONS_API_KEY
+    private readonly SpeechRevolutionsClient _client = new(); // SPEECHREVOLUTIONS_API_KEY
 
     public async Task<TranscriptionResult> TranscribeAsync(string audio)
     {
@@ -254,13 +254,13 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`,
           {
             label: "JavaScript",
             language: "bash",
-            code: `npm install @speechrevolutions/stt
+            code: `npm install speechrevolutions
 export SPEECHREVOLUTIONS_API_KEY=stt_...`,
           },
           {
             label: "Go",
             language: "bash",
-            code: `go get github.com/speechrevolutions/go-sdk
+            code: `go get github.com/speechrevolutions/speechrevolutions-go
 export SPEECHREVOLUTIONS_API_KEY=stt_...`,
           },
           {
@@ -285,7 +285,7 @@ print(result.text)`,
           {
             label: "JavaScript",
             language: "ts",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
@@ -312,7 +312,7 @@ fmt.Println(result.Text())`,
             language: "csharp",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 var result = await client.TranscribeAsync("meeting.mp3",
     new TranscribeOptions { SpeakerLabels = true });
 

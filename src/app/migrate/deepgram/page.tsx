@@ -293,7 +293,7 @@ for u in result.utterances:
             label: "After — Speech Revolutions (JavaScript)",
             language: "ts",
             filename: "stt-transcribe.mjs",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 const result = await client.transcribe("meeting.mp3", { diarize: true });

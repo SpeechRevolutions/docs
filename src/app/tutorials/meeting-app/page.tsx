@@ -129,7 +129,7 @@ async def transcribe_meeting(audio: str, meeting: Meeting) -> None:
             label: "JavaScript",
             language: "ts",
             filename: "meeting-app.mjs",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const UPLOAD_WEIGHT = 0.15; // upload spans 0–15% of the bar
 
@@ -182,7 +182,7 @@ import (
 	"math"
 	"sync"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 // Give upload the first slice of the bar; transcription fills the rest.
@@ -308,7 +308,7 @@ public sealed class Meeting
 
 public static class Meetings
 {
-    public static async Task TranscribeAsync(SttClient client, string audio, Meeting meeting)
+    public static async Task TranscribeAsync(SpeechRevolutionsClient client, string audio, Meeting meeting)
     {
         try
         {

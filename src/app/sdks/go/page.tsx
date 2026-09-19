@@ -18,7 +18,7 @@ export default function GoSdkPage() {
       <h2>Install</h2>
       <CodeBlock
         language="bash"
-        code={`go get github.com/speechrevolutions/go-sdk`}
+        code={`go get github.com/speechrevolutions/speechrevolutions-go`}
       />
       <h2>Quickstart</h2>
       <p>
@@ -39,7 +39,7 @@ import (
     "fmt"
     "log"
 
-    stt "github.com/speechrevolutions/go-sdk"
+    stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 func main() {

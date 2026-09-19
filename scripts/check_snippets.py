@@ -240,7 +240,7 @@ def go_program(code: str, context: str = "", page: str = "") -> str:
     return (
         "package main\n\n"
         "import (\n" + imports + "\n\n"
-        '\tstt "github.com/speechrevolutions/go-sdk"\n'
+        '\tstt "github.com/speechrevolutions/speechrevolutions-go"\n'
         ")\n\n"
         "func main() {\n"
         + prelude + "".join("\t" + l + "\n" for l in extra.splitlines())
@@ -259,8 +259,8 @@ def check_go(snips: list[Snippet], res: Result) -> None:
     work = tempfile.mkdtemp(prefix="docsnip-go-")
     io.open(os.path.join(work, "go.mod"), "w").write(
         "module docsnippets\n\ngo 1.22\n\n"
-        "require github.com/speechrevolutions/go-sdk v0.0.0\n\n"
-        f"replace github.com/speechrevolutions/go-sdk => {GO_SDK}\n"
+        "require github.com/speechrevolutions/speechrevolutions-go v0.0.0\n\n"
+        f"replace github.com/speechrevolutions/speechrevolutions-go => {GO_SDK}\n"
     )
     env0 = {**os.environ, "GOFLAGS": "-mod=mod", "GOTOOLCHAIN": "local"}
     all_code = "\n".join(s.code for s in snips)
@@ -320,8 +320,8 @@ def cs_program(code: str, context: str = "", page: str = "") -> str:
             head.append(u)
 
     prelude = ""
-    if "new SttClient" not in body:
-        prelude = 'using var client = new SttClient("k");\n'
+    if "new SpeechRevolutionsClient" not in body:
+        prelude = 'using var client = new SpeechRevolutionsClient("k");\n'
     for name, decl in (CS_PAGE_SCOPE.items() if prelude else []):
         used = re.search(r"(?<![\w.])" + name + r"(?![\w])", body)
         declared = re.search(r"(?:var|string|int)\s+" + name + r"\b", body)

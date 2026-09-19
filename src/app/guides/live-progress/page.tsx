@@ -116,7 +116,7 @@ async def transcribe_with_progress(audio: str, store: JobProgress):
             label: "JavaScript",
             language: "ts",
             filename: "progress-webapp.mjs",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 // Weight the two phases into a single 0–100 bar (upload is usually quick).
 const UPLOAD_WEIGHT = 0.15;     // upload spans 0–15%
@@ -165,7 +165,7 @@ import (
 	"math"
 	"sync"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 // Weight the two phases into one bar. Upload is usually quick; give it the
@@ -281,7 +281,7 @@ public sealed class JobProgress
 public static class Transcriber
 {
     public static async Task<TranscriptResult> RunAsync(
-        SttClient client, string audio, JobProgress store)
+        SpeechRevolutionsClient client, string audio, JobProgress store)
     {
         var result = await client.TranscribeAsync(audio,
             new TranscribeOptions { OnUploadProgress = store.OnUpload },

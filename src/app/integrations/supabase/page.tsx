@@ -67,7 +67,7 @@ alter publication supabase_realtime add table transcriptions;`}
             language: "ts",
             filename: "transcribe-supabase.ts",
             code: `import { createClient } from "@supabase/supabase-js";
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+import { SpeechRevolutions } from "speechrevolutions";
 
 // Server-side: service role key, never shipped to the browser.
 const supabase = createClient(
@@ -152,7 +152,7 @@ import (
 	"net/http"
 	"os"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 // Supabase ships client libraries for JavaScript and Python, not Go, so this
@@ -264,7 +264,7 @@ using var http = new HttpClient { BaseAddress = new Uri(supabaseUrl) };
 http.DefaultRequestHeaders.Add("apikey", serviceKey);
 http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", serviceKey);
 
-using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
 
 // Ask Storage for a short-lived URL to a private object.
 async Task<string> SignedUrlAsync(string bucket, string path, int expiresIn)

@@ -39,7 +39,7 @@ export default function CsharpSdkPage() {
         filename="Program.cs"
         code={`using SpeechRevolutions;
 
-using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
 var result = await client.TranscribeAsync("meeting.mp3", new TranscribeOptions
 {
     SpeakerLabels = true, // or Diarize = true
@@ -358,7 +358,7 @@ else if (status.IsFailed)
 export STT_API_KEY=stt_...`}
       />
       <p>Or pass it explicitly:</p>
-      <CodeBlock language="csharp" code={`using var client = new SttClient(apiKey: "stt_...");`} />
+      <CodeBlock language="csharp" code={`using var client = new SpeechRevolutionsClient(apiKey: "stt_...");`} />
 
       <h2>Errors</h2>
       <p>

@@ -38,13 +38,13 @@ export default function DocsHomePage() {
             href: "/sdks/javascript",
             title: "JavaScript",
             body: "TypeScript types, Node and edge runtimes.",
-            install: "npm install @speechrevolutions/stt",
+            install: "npm install speechrevolutions",
           },
           {
             href: "/sdks/go",
             title: "Go",
             body: "Context-aware, cancellable on every call.",
-            install: "go get github.com/speechrevolutions/go-sdk",
+            install: "go get github.com/speechrevolutions/speechrevolutions-go",
           },
           {
             href: "/sdks/csharp",
@@ -122,7 +122,7 @@ print(result.text)`,
           {
             label: "JavaScript",
             language: "ts",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 const result = await client.transcribe("meeting.mp3", {
@@ -148,7 +148,7 @@ fmt.Println(result.Text())`,
             language: "csharp",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient(); // SPEECHREVOLUTIONS_API_KEY
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
 var result = await client.TranscribeAsync("meeting.mp3", new TranscribeOptions
 {
     SpeakerLabels = true,

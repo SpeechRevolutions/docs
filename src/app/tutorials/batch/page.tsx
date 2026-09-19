@@ -108,7 +108,7 @@ if __name__ == "__main__":
             language: "ts",
             filename: "submit.mjs",
             code: `import { writeFileSync, readFileSync } from "node:fs";
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+import { SpeechRevolutions } from "speechrevolutions";
 
 const CONCURRENCY = 16;
 const client = new SpeechRevolutions();
@@ -159,7 +159,7 @@ import (
 	"os"
 	"sync"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 const concurrency = 16 // max simultaneous uploads — tune to your bandwidth
@@ -243,7 +243,7 @@ using SpeechRevolutions;
 
 const int Concurrency = 16; // max simultaneous uploads — tune to your bandwidth
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 
 var paths = (await File.ReadAllLinesAsync("files.txt"))
     .Where(line => !string.IsNullOrWhiteSpace(line))
@@ -348,7 +348,7 @@ if __name__ == "__main__":
             code: `import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { SpeechRevolutions, JobFailedError } from "@speechrevolutions/stt";
+import { SpeechRevolutions, JobFailedError } from "speechrevolutions";
 
 const CONCURRENCY = 16;
 const POLL_INTERVAL_MS = 5000;
@@ -413,7 +413,7 @@ import (
 	"sync"
 	"time"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 const (
@@ -496,7 +496,7 @@ using SpeechRevolutions;
 const int Concurrency = 16;
 var pollInterval = TimeSpan.FromSeconds(5); // between status checks
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 
 var jobIds = JsonSerializer.Deserialize<Dictionary<string, string>>(
     await File.ReadAllTextAsync("jobs.json"))!;
@@ -645,7 +645,7 @@ while True:
           {
             label: "JavaScript",
             language: "ts",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 let before;
@@ -669,7 +669,7 @@ import (
 	"fmt"
 	"log"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 func main() {
@@ -701,7 +701,7 @@ func main() {
             filename: "ListJobs.cs",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 
 string? before = null;
 while (true)

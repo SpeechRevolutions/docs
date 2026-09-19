@@ -20,7 +20,7 @@ export default function JsSdkPage() {
       </p>
 
       <h2>Install</h2>
-      <CodeBlock language="bash" code={`npm install @speechrevolutions/stt`} />
+      <CodeBlock language="bash" code={`npm install speechrevolutions`} />
 
       <h2>Quickstart</h2>
       <p>
@@ -31,7 +31,7 @@ export default function JsSdkPage() {
       <CodeBlock
         language="ts"
         filename="transcribe.ts"
-        code={`import { SpeechRevolutions } from "@speechrevolutions/stt";
+        code={`import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
 const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
@@ -407,7 +407,7 @@ const client = new SpeechRevolutions({
       </p>
       <CodeBlock
         language="ts"
-        code={`import { RateLimitError, AuthenticationError } from "@speechrevolutions/stt";
+        code={`import { RateLimitError, AuthenticationError } from "speechrevolutions";
 
 try {
   const result = await client.transcribe("meeting.mp3");

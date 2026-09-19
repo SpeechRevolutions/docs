@@ -339,7 +339,7 @@ def assemble_js(code: str) -> str:
     return "\n".join(out)
 
 
-SDK_IMPORT = re.compile(r'^import \{([^}]*)\} from "@speechrevolutions/stt";\s*$', re.M)
+SDK_IMPORT = re.compile(r'^import \{([^}]*)\} from "speechrevolutions";\s*$', re.M)
 
 
 def merge_sdk_imports(src: str, local: str) -> str:
@@ -478,8 +478,8 @@ def drive_go(results: list) -> None:
         work = tempfile.mkdtemp(prefix="fw-go-")
         io.open(os.path.join(work, "go.mod"), "w").write(
             "module fwsnippets\n\ngo 1.22\n\n"
-            "require github.com/speechrevolutions/go-sdk v0.0.0\n\n"
-            f"replace github.com/speechrevolutions/go-sdk => {C.GO_SDK}\n")
+            "require github.com/speechrevolutions/speechrevolutions-go v0.0.0\n\n"
+            f"replace github.com/speechrevolutions/speechrevolutions-go => {C.GO_SDK}\n")
         os.makedirs(os.path.join(work, "app"))
         io.open(os.path.join(work, "app", "main.go"), "w").write(program)
         env = {**os.environ, "GOFLAGS": "-mod=mod", "GOTOOLCHAIN": "local",
@@ -801,7 +801,7 @@ def drive_nextjs(results: list) -> None:
             continue
         dest = os.path.join(root, rel)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
-        code = blocks[key].replace('from "@speechrevolutions/stt"',
+        code = blocks[key].replace('from "speechrevolutions"',
                                    f'from "{NODE_DIR}/dist/esm/index.js"')
         io.open(dest, "w").write(code)
 

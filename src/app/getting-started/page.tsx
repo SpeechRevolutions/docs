@@ -48,12 +48,12 @@ export default function QuickstartPage() {
           {
             label: "JavaScript",
             language: "bash",
-            code: `npm install @speechrevolutions/stt`,
+            code: `npm install speechrevolutions`,
           },
           {
             label: "Go",
             language: "bash",
-            code: `go get github.com/speechrevolutions/go-sdk`,
+            code: `go get github.com/speechrevolutions/speechrevolutions-go`,
           },
           {
             label: "C#",
@@ -82,7 +82,7 @@ for u in result.utterances:
             label: "JavaScript",
             language: "ts",
             filename: "quickstart.mjs",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions(); // reads SPEECHREVOLUTIONS_API_KEY
 const result = await client.transcribe("audio.mp3", { speakerLabels: true });
@@ -103,7 +103,7 @@ import (
 	"fmt"
 	"log"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 func main() {
@@ -130,7 +130,7 @@ func main() {
             filename: "Program.cs",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient(); // reads SPEECHREVOLUTIONS_API_KEY
+using var client = new SpeechRevolutionsClient(); // reads SPEECHREVOLUTIONS_API_KEY
 var result = await client.TranscribeAsync("audio.mp3",
     new TranscribeOptions { SpeakerLabels = true });
 

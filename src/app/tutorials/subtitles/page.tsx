@@ -78,7 +78,7 @@ print(f"Wrote {path}")`,
             label: "JavaScript",
             language: "ts",
             filename: "subtitles.mjs",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 
@@ -111,7 +111,7 @@ import (
 	"fmt"
 	"log"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 func main() {
@@ -142,7 +142,7 @@ func main() {
             filename: "Subtitles.cs",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient(); // reads SPEECHREVOLUTIONS_API_KEY
+using var client = new SpeechRevolutionsClient(); // reads SPEECHREVOLUTIONS_API_KEY
 
 var result = await client.TranscribeAsync(
     "talk.mp4",  // audio or video: local path, URL, or bytes

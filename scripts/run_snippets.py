@@ -159,7 +159,7 @@ def real_key(program: str) -> str:
     becomes an empty string, which is what every SDK treats as "use the env"."""
     program = (program
                .replace('stt.NewClient("k")', 'stt.NewClient("")')
-               .replace('new SttClient("k")', 'new SttClient()'))
+               .replace('new SpeechRevolutionsClient("k")', 'new SpeechRevolutionsClient()'))
     if PLACEHOLDER_JOB in program:
         program = program.replace(PLACEHOLDER_JOB, real_job_id())
     return program
@@ -296,8 +296,8 @@ def ts_program(code: str, page: str = "") -> str:
     body = apply_subs(code)
     # Point the published import at the local build, keeping whatever names it
     # binds, rather than stripping it and adding our own (which redeclares).
-    published = re.search(r'^import \{[^}]*\} from "@speechrevolutions/stt";$', body, re.M)
-    body = re.sub(r'(^import \{[^}]*\} from )"@speechrevolutions/stt";$',
+    published = re.search(r'^import \{[^}]*\} from "speechrevolutions";$', body, re.M)
+    body = re.sub(r'(^import \{[^}]*\} from )"speechrevolutions";$',
                   r'\1"%s/dist/esm/index.js";' % NODE_DIR, body, flags=re.M)
     # A snippet may import only the error types; the injected client still needs
     # SpeechRevolutions itself, so the two decisions are independent.
@@ -388,8 +388,8 @@ def run_go(snips: list[Snippet], res) -> None:
     work = tempfile.mkdtemp(prefix="runsnip-go-")
     io.open(os.path.join(work, "go.mod"), "w").write(
         "module runsnippets\n\ngo 1.22\n\n"
-        "require github.com/speechrevolutions/go-sdk v0.0.0\n\n"
-        f"replace github.com/speechrevolutions/go-sdk => {C.GO_SDK}\n"
+        "require github.com/speechrevolutions/speechrevolutions-go v0.0.0\n\n"
+        f"replace github.com/speechrevolutions/speechrevolutions-go => {C.GO_SDK}\n"
     )
     env = {**os.environ, "GOFLAGS": "-mod=mod", "GOTOOLCHAIN": "local"}
 

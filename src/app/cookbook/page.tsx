@@ -77,7 +77,7 @@ print(result.text)`,
             label: "JavaScript",
             language: "ts",
             filename: "transcribe.mjs",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 const result = await client.transcribe("meeting.mp3");
@@ -95,7 +95,7 @@ import (
 	"fmt"
 	"log"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 func main() {
@@ -119,7 +119,7 @@ func main() {
             filename: "Program.cs",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 var result = await client.TranscribeAsync("meeting.mp3");
 
 Console.WriteLine(result.Text);`,
@@ -218,8 +218,8 @@ print(result.text)`,
             label: "JavaScript",
             language: "ts",
             filename: "submit-poll.mjs",
-            code: `import { SpeechRevolutions } from "@speechrevolutions/stt";
-import { JobFailedError } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions } from "speechrevolutions";
+import { JobFailedError } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 
@@ -257,7 +257,7 @@ import (
 	"log"
 	"time"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 func main() {
@@ -311,7 +311,7 @@ func pollUntilDone(
             filename: "SubmitPoll.cs",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 
 // Returns as soon as the audio is enqueued.
 var jobId = await client.SubmitAsync(
@@ -322,7 +322,7 @@ var result = await PollUntilDoneAsync(client, jobId);
 Console.WriteLine(result.Text);
 
 static async Task<TranscriptResult> PollUntilDoneAsync(
-    SttClient client, string jobId, int intervalMs = 3000)
+    SpeechRevolutionsClient client, string jobId, int intervalMs = 3000)
 {
     while (true)
     {
@@ -390,7 +390,7 @@ for job_id, result in results.items():
             language: "ts",
             filename: "batch.mjs",
             code: `import { readdir } from "node:fs/promises";
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -438,7 +438,7 @@ import (
 	"path/filepath"
 	"time"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 func main() {
@@ -509,7 +509,7 @@ func main() {
             filename: "Batch.cs",
             code: `using SpeechRevolutions;
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 
 // 1. Submit all files up front.
 var jobs = new Dictionary<string, string>(); // jobId -> source path
@@ -620,7 +620,7 @@ async def hook(request: Request):
             filename: "webhooks.mjs",
             code: `import { createHmac, timingSafeEqual } from "node:crypto";
 import express from "express";
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions();
 
@@ -668,7 +668,7 @@ import (
 	"net/http"
 	"os"
 
-	stt "github.com/speechrevolutions/go-sdk"
+	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
 // The same secret configured server-side.
@@ -751,7 +751,7 @@ var app = builder.Build();
 var secret = Encoding.UTF8.GetBytes(
     Environment.GetEnvironmentVariable("SR_WEBHOOK_SECRET")!);
 
-using var client = new SttClient();
+using var client = new SpeechRevolutionsClient();
 
 // 1. Submit with a webhook. Use SubmitAsync so you return without waiting.
 await client.SubmitAsync("meeting.mp3",
@@ -831,7 +831,7 @@ except RateLimitError as e:
           {
             label: "JavaScript",
             language: "ts",
-            code: `import { SpeechRevolutions, RateLimitError } from "@speechrevolutions/stt";
+            code: `import { SpeechRevolutions, RateLimitError } from "speechrevolutions";
 
 const client = new SpeechRevolutions({
   maxRetries: 3,
@@ -882,7 +882,7 @@ var handler = new HttpClientHandler
     UseProxy = true,
 };
 
-using var client = new SttClient(
+using var client = new SpeechRevolutionsClient(
     maxRetries: 3,
     retryBackoff: TimeSpan.FromMilliseconds(500), // exponential
     timeout: TimeSpan.FromMinutes(10),

@@ -23,7 +23,7 @@ export default function NextjsIntegrationPage() {
 
       <Callout title="Keep the key on the server" tone="warn">
         <p>
-          The <code>@speechrevolutions/stt</code> client reads{" "}
+          The <code>speechrevolutions</code> client reads{" "}
           <code>SPEECHREVOLUTIONS_API_KEY</code> (or <code>STT_API_KEY</code>).
           Only reference it from server code — Route Handlers, Server Actions,
           or <code>route.ts</code> files. Never expose it through a{" "}
@@ -35,7 +35,7 @@ export default function NextjsIntegrationPage() {
       <h2>Install</h2>
       <CodeBlock
         language="bash"
-        code={`npm install @speechrevolutions/stt
+        code={`npm install speechrevolutions
 
 # .env.local (server-only — no NEXT_PUBLIC_ prefix)
 SPEECHREVOLUTIONS_API_KEY=stt_...`}
@@ -51,7 +51,7 @@ SPEECHREVOLUTIONS_API_KEY=stt_...`}
         language="ts"
         filename="lib/stt.ts"
         code={`import "server-only";
-import { SpeechRevolutions } from "@speechrevolutions/stt";
+import { SpeechRevolutions } from "speechrevolutions";
 
 // Reads SPEECHREVOLUTIONS_API_KEY / STT_API_KEY from the server environment.
 export const stt = new SpeechRevolutions();`}
