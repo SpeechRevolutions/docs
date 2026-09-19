@@ -351,7 +351,7 @@ public static class Meetings
             language: "python",
             filename: "FastAPI",
             code: `import uuid
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 
 app = FastAPI()
 MEETINGS: dict[str, Meeting] = {}
@@ -365,7 +365,10 @@ async def start(url: str, background: BackgroundTasks):
 
 @app.get("/meetings/{job_id}")
 def get(job_id: str):
-    return MEETINGS[job_id].snapshot()
+    meeting = MEETINGS.get(job_id)
+    if meeting is None:                       # restarted, expired, or a typo
+        raise HTTPException(status_code=404, detail="unknown meeting")
+    return meeting.snapshot()
     # -> {"phase": "transcribe", "percent": 63.5, "turns": []}
     #    ...and once done: "turns": [{"speaker": "A", "text": "...", "start": 0.4, "end": 5.1}, ...]`,
           },
@@ -386,7 +389,9 @@ app.post("/meetings", (req, res) => {
 });
 
 app.get("/meetings/:jobId", (req, res) => {
-  res.json(meetings.get(req.params.jobId).snapshot());
+  const meeting = meetings.get(req.params.jobId);
+  if (!meeting) return res.status(404).json({ error: "unknown meeting" });
+  res.json(meeting.snapshot());
   // -> { phase: "done", percent: 100, turns: [{ speaker: "A", text, start, end }, ...] }
 });`,
           },

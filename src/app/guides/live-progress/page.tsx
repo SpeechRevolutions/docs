@@ -307,7 +307,7 @@ public static class Transcriber
             label: "Python",
             language: "python",
             filename: "FastAPI",
-            code: `from fastapi import FastAPI, BackgroundTasks
+            code: `from fastapi import FastAPI, BackgroundTasks, HTTPException
 
 app = FastAPI()
 JOBS: dict[str, JobProgress] = {}
@@ -321,7 +321,10 @@ async def start(url: str, background: BackgroundTasks):
 
 @app.get("/progress/{job_id}")
 def progress(job_id: str):
-    return JOBS[job_id].snapshot()      # {"phase": "transcribe", "percent": 63.5}`,
+    store = JOBS.get(job_id)
+    if store is None:                   # restarted, expired, or a typo
+        raise HTTPException(status_code=404, detail="unknown job")
+    return store.snapshot()             # {"phase": "transcribe", "percent": 63.5}`,
           },
           {
             label: "JavaScript",
@@ -339,9 +342,11 @@ app.post("/transcribe", (req, res) => {
   res.json({ jobId: req.body.jobId }); // returns immediately
 });
 
-app.get("/progress/:jobId", (req, res) =>
-  res.json(jobs.get(req.params.jobId).snapshot()),
-);`,
+app.get("/progress/:jobId", (req, res) => {
+  const store = jobs.get(req.params.jobId);
+  if (!store) return res.status(404).json({ error: "unknown job" });
+  res.json(store.snapshot());
+});`,
           },
           {
             label: "Go",
