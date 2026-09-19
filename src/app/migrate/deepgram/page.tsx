@@ -244,7 +244,13 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
       </p>
 
       <h2>Side by side</h2>
-      <p>Diarized transcription, before and after:</p>
+      <p>
+        Diarized transcription, before and after. The &quot;before&quot; column
+        is <code>deepgram-sdk</code> v3, which is what most existing integrations
+        are running; Deepgram has since reshaped its client, so if you are on v4
+        or newer your code will differ from the left-hand side. The right-hand
+        side is unaffected either way.
+      </p>
       <CodeTabs
         tabs={[
           {
@@ -259,7 +265,7 @@ with open("meeting.mp3", "rb") as f:
     source = {"buffer": f.read(), "mimetype": "audio/mp3"}
 
 options = PrerecordedOptions(model="nova-3", diarize=True, smart_format=True)
-resp = dg.listen.prerecorded.v("1").transcribe_file(source, options)
+resp = dg.listen.rest.v("1").transcribe_file(source, options)
 
 alt = resp["results"]["channels"][0]["alternatives"][0]
 print(alt["transcript"])
