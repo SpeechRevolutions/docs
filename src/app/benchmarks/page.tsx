@@ -74,16 +74,6 @@ export default function BenchmarksPage() {
             <td>FLEURS (generated)</td>
             <td>Switch-boundary WER, switch latency</td>
           </tr>
-          <tr>
-            <td>Long-form</td>
-            <td>AMI, Earnings21, podcasts</td>
-            <td>WER, hallucination / duplicate / drift rates</td>
-          </tr>
-          <tr>
-            <td>Price / performance</td>
-            <td>LibriSpeech subset</td>
-            <td>RTF, hours per dollar, p95/p99 latency</td>
-          </tr>
         </tbody>
       </table>
 
