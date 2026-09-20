@@ -14,13 +14,25 @@ printed with the results so it is obvious what was swapped:
   https://example.com/...      -> a reachable URL (SR_SNIPPET_AUDIO_URL)
   https://you.example.com/...  -> a reachable webhook sink (SR_SNIPPET_HOOK_URL)
   http://proxy.internal:8080   -> a real local forward proxy, when one is running
+  ${SITE.apiBase}              -> the URL the page renders (it is a JSX
+                                  interpolation, so the reader never sees the
+                                  literal)
+  export ...API_KEY=stt_...    -> neutralised; the key comes from the environment
+                                  and is never written into a snippet or a log
 
 Nothing else is rewritten. If a snippet does not run as published after that, it
 is the snippet that is wrong.
 
+The shell snippets are covered too -- the cURL calls, the install commands and
+the ffmpeg lines. Install commands run verbatim but inside a throwaway sandbox
+with that toolchain's bin first on PATH, so `pip install speechrevolutions` is
+the published command and still cannot touch this machine. Shell snippets that
+start a job are cancelled afterwards; see cancel_created_jobs for why that is
+load-bearing rather than tidy.
+
 Usage:
     SPEECHREVOLUTIONS_API_KEY=stt_... python3 scripts/run_snippets.py python
-    ... run_snippets.py python ts go csharp
+    ... run_snippets.py python ts go csharp bash
 """
 
 from __future__ import annotations
@@ -502,6 +514,167 @@ def run_csharp(snips: list[Snippet], res) -> None:
     shutil.rmtree(work, ignore_errors=True)
 
 
+# --------------------------------------------------------------------------- bash
+
+# The docs render these inside a JSX template literal, so `${SITE.apiBase}` is an
+# interpolation, not literal text: the published page shows the resolved URL.
+# Resolving it here reproduces what a reader copies.
+SITE_API_BASE = "https://api.speechrevolutions.com"
+
+BASH_SKIP = {
+    "an illustrative request body, not a runnable request": ("-d '{ ... }'",),
+    "clones a repo and runs the whole benchmark suite against production":
+        ("git clone https://github.com/SpeechRevolutions/benchmarks",),
+    # The migration page's "before" example: the reader's existing setup, which
+    # is a binary they compiled and model weights they downloaded.
+    "needs a locally compiled whisper.cpp binary and model weights":
+        ("./main -m models/",),
+}
+
+# Commands that install something. Each is run verbatim, but inside a throwaway
+# sandbox with that toolchain's `bin` first on PATH, so `pip install ...` is the
+# published command yet cannot touch the machine's environment.
+INSTALL_MARKERS = ("pip install", "npm install", "go get", "dotnet add package",
+                   "spacy download")
+
+
+def bash_is_install(code: str) -> bool:
+    return any(m in code for m in INSTALL_MARKERS)
+
+
+def bash_program(code: str) -> str:
+    """Make a published shell snippet runnable without rewriting what it does."""
+    code = code.replace("${SITE.apiBase}", SITE_API_BASE)
+    # `export SPEECHREVOLUTIONS_API_KEY=stt_...` is the docs telling a reader to
+    # set their key. Executing it verbatim would overwrite the real key with the
+    # literal "stt_...", so the line is neutralised rather than the key inlined --
+    # inlining would put a live credential in the log.
+    code = re.sub(r"^export (SPEECHREVOLUTIONS_API_KEY|STT_API_KEY)=.*$",
+                  r"# (key comes from the environment)", code, flags=re.M)
+    if "$JOB_ID" in code:
+        code = f'JOB_ID="{real_job_id()}"\n' + code
+    return code
+
+
+def bash_fixtures(work: str) -> None:
+    """Materialise the files the shell snippets name."""
+    src = os.path.join(WORKSPACE, "meeting.mp3")
+    for name in ("meeting.mp3", "audio.mp3"):
+        shutil.copy(src, os.path.join(work, name))
+    # /tutorials/subtitles burns captions.srt into talk.mp4.
+    with io.open(os.path.join(work, "captions.srt"), "w", encoding="utf-8") as fh:
+        fh.write("1\n00:00:00,000 --> 00:00:02,000\nhello\n\n")
+    subprocess.run(
+        ["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=black:s=320x240:d=3",
+         "-i", src, "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+         os.path.join(work, "talk.mp4")],
+        capture_output=True, timeout=180,
+    )
+
+
+def bash_sandbox(code: str, work: str) -> dict[str, str]:
+    """A PATH that isolates an install command, or {} when nothing is installed."""
+    env = {**os.environ}
+    if "pip install" in code or "spacy download" in code:
+        venv = os.path.join(work, ".venv")
+        subprocess.run([sys.executable, "-m", "venv", venv], capture_output=True, timeout=300)
+        env["PATH"] = os.path.join(venv, "bin") + os.pathsep + env["PATH"]
+        env["VIRTUAL_ENV"] = venv
+    if "npm install" in code:
+        subprocess.run(["npm", "init", "-y"], cwd=work, capture_output=True, timeout=300)
+    if "go get" in code:
+        subprocess.run(["go", "mod", "init", "snippet/check"], cwd=work,
+                       capture_output=True, timeout=300)
+        env["GOTOOLCHAIN"] = "local"
+    if "dotnet add package" in code:
+        subprocess.run(["dotnet", "new", "console", "-o", "."], cwd=work,
+                       capture_output=True, timeout=600)
+        env.setdefault("DOTNET_CLI_TELEMETRY_OPTOUT", "1")
+        env.setdefault("DOTNET_NOLOGO", "1")
+    return env
+
+
+# Job ids created by snippets that only START an upload. `POST /api/v1/upload`
+# mints a job and returns a presigned URL; actually uploading the bytes is a
+# separate step the snippet does not show, so running it verbatim leaves a job
+# registered that will never complete and never fail.
+#
+# That is not untidiness. Production sheds customer intake when two such jobs sit
+# past their deadline, so a harness that left them behind would take the platform
+# down for everyone, every time it ran. It is exactly how this was discovered.
+_CREATED_JOBS: list[str] = []
+
+_JOB_ID_RE = re.compile(
+    r'"job_id"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"')
+
+
+def _collect_jobs(output: str) -> None:
+    _CREATED_JOBS.extend(_JOB_ID_RE.findall(output))
+
+
+def cancel_created_jobs() -> None:
+    """Give every job a snippet started a terminal state."""
+    if not _CREATED_JOBS:
+        return
+    sys.path.insert(0, PY_SRC)
+    from speechrevolutions import SpeechRevolutions  # noqa: E402
+
+    cancelled = 0
+    with SpeechRevolutions() as c:
+        for job_id in dict.fromkeys(_CREATED_JOBS):
+            try:
+                if c.get_job_status(job_id).status != "processing":
+                    continue
+                c.cancel_job(job_id)
+                cancelled += 1
+            except Exception as exc:  # noqa: BLE001
+                print(f"  [WARN] could not cancel {job_id}: {exc}", file=sys.stderr)
+    if cancelled:
+        print(f"cleaned up {cancelled} job(s) left open by create-only snippets")
+
+
+def run_bash(snippets: list[Snippet], res: Result) -> None:
+    for s in snippets:
+        # Deliberately NOT skip_reason(): those markers describe program source
+        # ("django", "whisper.cpp") and match shell text that merely mentions the
+        # same words -- `pip install django speechrevolutions` is a runnable
+        # install command, not a Django app.
+        why = _bash_skip_reason(s.code)
+        if why:
+            res.skipped.append((s, why))
+            continue
+        work = tempfile.mkdtemp(prefix="snipbash-")
+        try:
+            program = bash_program(apply_subs(s.code))
+            bash_fixtures(work)
+            env = bash_sandbox(program, work)
+            path = os.path.join(work, "snippet.sh")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                # -e so a failing line fails the snippet; -o pipefail so a failure
+                # part-way through a pipeline is not masked by a succeeding tail.
+                fh.write("set -euo pipefail\n" + program + "\n")
+            timeout = 900 if bash_is_install(program) else SNIPPET_TIMEOUT
+            p = subprocess.run(["bash", path], cwd=work, env=env,
+                               capture_output=True, text=True, timeout=timeout)
+            _collect_jobs(p.stdout)
+            if p.returncode == 0:
+                res.ok.append(s)
+            else:
+                res.failed.append((s, summarize(p.stdout + p.stderr)))
+        except subprocess.TimeoutExpired:
+            res.failed.append((s, f"timed out after {timeout}s"))
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+    cancel_created_jobs()
+
+
+def _bash_skip_reason(code: str) -> str | None:
+    for reason, markers in BASH_SKIP.items():
+        if any(m in code for m in markers):
+            return reason
+    return None
+
+
 class Result:
     def __init__(self):
         self.ok: list[Snippet] = []
@@ -509,7 +682,8 @@ class Result:
         self.skipped: list[tuple[Snippet, str]] = []
 
 
-RUNNERS = {"python": run_python, "ts": run_ts, "go": run_go, "csharp": run_csharp}
+RUNNERS = {"python": run_python, "ts": run_ts, "go": run_go,
+           "csharp": run_csharp, "bash": run_bash}
 
 
 def main() -> int:
