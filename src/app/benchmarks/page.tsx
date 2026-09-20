@@ -46,7 +46,7 @@ export default function BenchmarksPage() {
         <tbody>
           <tr>
             <td>WER</td>
-            <td>LibriSpeech clean/other, Earnings21</td>
+            <td>LibriSpeech clean/other, Earnings21, SPGISpeech</td>
             <td>Word error rate (accuracy)</td>
           </tr>
           <tr>
@@ -56,8 +56,12 @@ export default function BenchmarksPage() {
           </tr>
           <tr>
             <td>Diarization</td>
-            <td>AMI, Earnings21</td>
-            <td>DER, speaker error, missed speech, false alarm</td>
+            <td>AMI-SDM, AMI Mix-Headset, Earnings21, NotSoFar, DiPCo</td>
+            <td>
+              DER at collar 0 (overlap-aware, comparable to the DiariZen /
+              pyannote model cards), DER at a lenient 0.25 s collar, cpWER,
+              speaker error, missed speech, false alarm — overall and per dataset
+            </td>
           </tr>
           <tr>
             <td>Timestamps</td>
@@ -66,7 +70,7 @@ export default function BenchmarksPage() {
           </tr>
           <tr>
             <td>Multilingual</td>
-            <td>FLEURS (~25 langs)</td>
+            <td>FLEURS (14 langs)</td>
             <td>WER per language (CER for zh/ja/th)</td>
           </tr>
           <tr>
