@@ -25,3 +25,19 @@ export const LIMITS = {
   jobDeadlineMinutes: 10,
   dataRetentionMinutes: 30,
 } as const;
+
+/**
+ * Per-key request limits, mirroring the server. Keep in step with
+ * user_cluster/server/rate_limit.py (class RateLimit, production values).
+ * Publishing a limit the server does not enforce is the same bug as documenting
+ * a response field it does not send, so these are the real numbers.
+ */
+export const RATE_LIMITS = [
+  { endpoint: "POST /api/v1/upload", perMinute: 120 },
+  { endpoint: "POST /api/v1/upload/progress", perMinute: 600 },
+  { endpoint: "POST /api/v1/transcribe", perMinute: 120 },
+  { endpoint: "GET /api/v1/jobs, /api/v1/jobs/{id}", perMinute: 120 },
+  { endpoint: "GET /api/v1/jobs/{id}/stream", perMinute: 120 },
+  { endpoint: "POST /api/v1/jobs/check-failed", perMinute: 60 },
+  { endpoint: "POST /api/v1/jobs/cancel", perMinute: 30 },
+] as const;

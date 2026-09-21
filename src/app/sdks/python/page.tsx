@@ -20,6 +20,15 @@ export default function PythonSdkPage() {
         <code>transcribe()</code> API.
       </p>
 
+      <p>
+        Source on 
+        <a href="https://github.com/SpeechRevolutions/python-sdk">GitHub</a> &middot; 
+        <a href="https://github.com/SpeechRevolutions/python-sdk/issues">
+          report an issue
+        </a>{" "}
+        &middot; <a href="https://pypi.org/project/speechrevolutions/">PyPI</a>
+      </p>
+
       <h2>Install</h2>
       <CodeBlock language="bash" code={`pip install speechrevolutions
 

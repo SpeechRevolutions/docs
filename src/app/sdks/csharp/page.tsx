@@ -19,6 +19,15 @@ export default function CsharpSdkPage() {
         .NET clients.
       </p>
 
+      <p>
+        Source on 
+        <a href="https://github.com/SpeechRevolutions/csharp-sdk">GitHub</a> &middot; 
+        <a href="https://github.com/SpeechRevolutions/csharp-sdk/issues">
+          report an issue
+        </a>{" "}
+        &middot; <a href="https://www.nuget.org/packages/SpeechRevolutions">NuGet</a>
+      </p>
+
       <h2>Install</h2>
       <CodeBlock language="bash" code={`dotnet add package SpeechRevolutions`} />
       <p>Or reference the project directly:</p>

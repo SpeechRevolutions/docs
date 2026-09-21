@@ -19,6 +19,15 @@ export default function JsSdkPage() {
         native <code>fetch</code>.
       </p>
 
+      <p>
+        Source on 
+        <a href="https://github.com/SpeechRevolutions/node-sdk">GitHub</a> &middot; 
+        <a href="https://github.com/SpeechRevolutions/node-sdk/issues">
+          report an issue
+        </a>{" "}
+        &middot; <a href="https://www.npmjs.com/package/speechrevolutions">npm</a>
+      </p>
+
       <h2>Install</h2>
       <CodeBlock language="bash" code={`npm install speechrevolutions`} />
 

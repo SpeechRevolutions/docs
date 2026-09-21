@@ -1,5 +1,5 @@
 import { Callout } from "@/components/DocsUI";
-import { LIMITS, SITE } from "@/lib/constants";
+import { LIMITS, RATE_LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -63,6 +63,37 @@ export default function ApiOverviewPage() {
         before any upload starts. Send anything above{" "}
         <code>{LIMITS.apiUploadMax}</code> through an SDK rather than the REST
         endpoint.
+      </p>
+
+      <h2>Rate limits</h2>
+      <p>
+        Limits apply per API key, per endpoint, over a rolling minute. Going over
+        returns <code>429</code>. The official SDKs back off and retry
+        automatically, so most applications never see one; if you call the API
+        directly, wait a few seconds and retry with exponential backoff.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Endpoint</th>
+            <th>Requests / minute</th>
+          </tr>
+        </thead>
+        <tbody>
+          {RATE_LIMITS.map((r) => (
+            <tr key={r.endpoint}>
+              <td>
+                <code>{r.endpoint}</code>
+              </td>
+              <td>{r.perMinute}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p>
+        Each upload creates one job, so the upload limit is also your job
+        submission rate: 120 new jobs a minute, 7,200 an hour. If you need more,
+        contact us and we will raise it for your key.
       </p>
 
       <h2>Endpoints</h2>

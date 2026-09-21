@@ -24,6 +24,12 @@ export default function CookbookPage() {
         <Link href="/sdks/javascript">JavaScript</Link>,{" "}
         <Link href="/sdks/go">Go</Link>, <Link href="/sdks/csharp">C#</Link>.
       </p>
+      <p>
+        Want them as files instead? The{" "}
+        <a href="https://github.com/SpeechRevolutions/cookbook">cookbook repo</a>{" "}
+        has each recipe as a runnable script with its own command-line
+        arguments, and every one is tested on each change.
+      </p>
       <ul>
         <li>
           <a href="#file">Transcribe a local file</a>

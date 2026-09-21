@@ -15,6 +15,15 @@ export default function GoSdkPage() {
       <h1>Go SDK</h1>
       <p>Official Go client for the Speech Revolutions STT API.</p>
 
+      <p>
+        Source on 
+        <a href="https://github.com/SpeechRevolutions/speechrevolutions-go">GitHub</a> &middot; 
+        <a href="https://github.com/SpeechRevolutions/speechrevolutions-go/issues">
+          report an issue
+        </a>{" "}
+        &middot; <a href="https://pkg.go.dev/github.com/speechrevolutions/speechrevolutions-go">pkg.go.dev</a>
+      </p>
+
       <h2>Install</h2>
       <CodeBlock
         language="bash"
