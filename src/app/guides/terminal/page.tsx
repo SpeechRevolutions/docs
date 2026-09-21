@@ -133,23 +133,44 @@ curl -N -X POST \\
 
       <h2>Progress stream</h2>
       <p>
-        While the job runs, the response body streams events similar to:
+        While the job runs, the response body streams events. Progress is
+        reported as <strong>steps completed out of a total</strong>, not a
+        percentage &mdash; divide to get one:
       </p>
       <CodeBlock
         language="text"
         filename="stream"
-        code={`event: progress
-data: {"percent": 12, "step": "preprocess"}
+        code={`event: accepted
+data: {"job_id": "...", "download_url": "https://..."}
 
 event: progress
-data: {"percent": 48, "step": "transcribe"}
+data: {"completed":1,"total":4,"step":"preprocess"}
 
 event: progress
-data: {"percent": 91, "step": "aggregate"}
+data: {"completed":2,"total":4,"step":"chunk:1"}
+
+event: progress
+data: {"completed":3,"total":4,"step":"chunk:0"}
+
+event: progress
+data: {"completed":4,"total":4,"step":"aggregation"}
 
 event: completed
-data: {"download_url": "https://...", "job_id": "..."}`}
+data: {"download_url": "https://...", "job_id": "..."}
+
+event: transcript
+data: <the transcript, one data: line per line of output>`}
       />
+      <p>
+        <code>total</code> is the number of pipeline steps for your file, so it
+        depends on how many chunks the audio is split into &mdash; don&apos;t
+        hard-code it. Chunk steps are named <code>chunk:N</code> and can arrive
+        out of order (they finish in whatever order the workers do). A short
+        file that finishes in one pass may emit no <code>progress</code> events
+        at all, going straight from <code>accepted</code> to{" "}
+        <code>completed</code>; treat progress as advisory and drive completion
+        off the <code>completed</code> event.
+      </p>
       <p>
         Unlike the SDK upload flow, there is no separate{" "}
         <code>/upload/progress</code> or <code>/upload/complete</code> step —
