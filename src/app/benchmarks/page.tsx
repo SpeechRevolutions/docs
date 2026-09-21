@@ -34,7 +34,7 @@ export default function BenchmarksPage() {
       </Callout>
 
       <h2>What we measure</h2>
-      <p>Eight benchmarks, each from public data:</p>
+      <p>Six benchmarks, each from public data:</p>
       <table>
         <thead>
           <tr>
