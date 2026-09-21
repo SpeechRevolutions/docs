@@ -58,9 +58,9 @@ export default function BenchmarksPage() {
             <td>Diarization</td>
             <td>AMI-SDM, AMI Mix-Headset, Earnings21, NotSoFar, DiPCo</td>
             <td>
-              DER at collar 0 (overlap-aware, comparable to the DiariZen /
-              pyannote model cards), DER at a lenient 0.25 s collar, cpWER,
-              speaker error, missed speech, false alarm — overall and per dataset
+              DER at the standard 0.25 s collar (the figure on our site), strict
+              DER at collar 0, cpWER, speaker error, missed speech, false alarm —
+              overall and per dataset, all overlap-aware
             </td>
           </tr>
           <tr>
@@ -124,7 +124,8 @@ ASSEMBLYAI_API_KEY=... python -m benchmarks.cli run all --provider assemblyai`}
       <ul>
         <li>
           WER uses the standard Whisper text normalizers; diarization DER is
-          overlap-aware and reported at a matched collar.
+          overlap-aware and scored at the same 0.25 s collar for every provider,
+          with strict collar-0 figures reported alongside.
         </li>
         <li>
           Where a metric requires data a provider can&apos;t emit (e.g. per-word
