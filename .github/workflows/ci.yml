@@ -1,0 +1,108 @@
+# Build and check the docs on every push and pull request; deploy on main.
+#
+# The site is a static export (`output: "export"`), served from a private S3
+# bucket behind CloudFront. There is no server: deploying is an `s3 sync` of
+# `out/` plus a CloudFront invalidation.
+#
+# check_snippets.py compiles every Go and C# snippet against the SDK source it
+# finds in sibling directories, so the two SDK repos are checked out next to
+# this one, reproducing the layout on a developer's machine.
+#
+# Deploy authenticates through GitHub OIDC; there is no long-lived AWS key in
+# this repo. Needs these repository variables:
+#   DOCS_DEPLOY_ROLE_ARN   IAM role trusted for this repo's main branch
+#   DOCS_BUCKET            the site bucket
+#   DOCS_DISTRIBUTION_ID   the CloudFront distribution in front of it
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: docs
+      - uses: actions/checkout@v4
+        with:
+          repository: SpeechRevolutions/speechrevolutions-go
+          path: speechrevolutions-go
+      - uses: actions/checkout@v4
+        with:
+          repository: SpeechRevolutions/csharp-sdk
+          path: csharp-sdk
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm ci
+        working-directory: docs
+      - run: npx tsc --noEmit
+        working-directory: docs
+      - run: python3 scripts/check_snippets.py
+        working-directory: docs
+      # postbuild runs on its own after build: llms.txt, then the Pagefind index.
+      - run: npm run build
+        working-directory: docs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: docs/out
+          retention-days: 7
+
+  deploy:
+    needs: check
+    # Skipped, not failed, until the AWS side exists and the variables are set.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DOCS_DEPLOY_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    environment: docs-prod
+    # Two pushes in quick succession must not interleave their syncs.
+    concurrency:
+      group: docs-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: out
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.DOCS_DEPLOY_ROLE_ARN }}
+          aws-region: us-west-2
+      # Hashed build assets never change under a given name, so they cache for a
+      # year. They go up first: a page must never reference a chunk that is not
+      # there yet.
+      - name: Upload hashed assets
+        run: >
+          aws s3 sync out/_next "s3://${{ vars.DOCS_BUCKET }}/_next"
+          --cache-control "public, max-age=31536000, immutable"
+      # Everything else (HTML, llms.txt, the search index, icons) keeps its name
+      # across deploys, so browsers revalidate it on each visit. --delete runs
+      # only here: removing old chunks would break a page already open in a tab.
+      - name: Upload pages
+        run: >
+          aws s3 sync out "s3://${{ vars.DOCS_BUCKET }}"
+          --exclude "_next/*" --delete
+          --cache-control "public, max-age=0, must-revalidate"
+      - name: Invalidate CloudFront
+        run: >
+          aws cloudfront create-invalidation
+          --distribution-id "${{ vars.DOCS_DISTRIBUTION_ID }}"
+          --paths "/*"
