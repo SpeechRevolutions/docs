@@ -18,6 +18,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Re-deploy the current main without an empty commit (Actions -> ci -> Run workflow).
+  workflow_dispatch:
 
 env:
   BUCKET: speechrevolutions-docs-153372322861
