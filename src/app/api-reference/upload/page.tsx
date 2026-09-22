@@ -132,13 +132,64 @@ export default function UploadApiPage() {
       </p>
       <p>
         <code>callback_url</code> is an optional http(s) webhook. On completion
-        or permanent failure the platform POSTs a JSON notification there —{" "}
+        or permanent failure the platform POSTs a JSON notification there, shaped like{" "}
         <code>
           {`{job_id, status: "completed"|"failed", download_url?, step?, reason?}`}
-        </code>{" "}
-        — signed with HMAC-SHA256 in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (verify against
-        the raw body) plus a unique <code>X-SR-Delivery</code> id. See any{" "}
+        </code>
+        , with these headers:
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Header</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <code>X-SR-Signature</code>
+            </td>
+            <td>
+              <code>sha256=&lt;hex&gt;</code>, an HMAC-SHA256 of the raw request
+              body. Verify it against the exact bytes you received, with a
+              constant-time comparison.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>X-SR-Event</code>
+            </td>
+            <td>
+              <code>completed</code> or <code>failed</code>, the same value as{" "}
+              <code>status</code> in the body, so you can route a delivery
+              before parsing it.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>X-SR-Delivery</code>
+            </td>
+            <td>
+              A unique id for this delivery. Retries of the same delivery reuse
+              it, so use it to ignore duplicates.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <code>User-Agent</code>
+            </td>
+            <td>
+              <code>SpeechRevolutions-Webhook/1</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Respond with any <code>2xx</code> to acknowledge. A <code>5xx</code>,
+        a timeout (10 seconds per attempt) or a connection error is retried with
+        backoff, up to 4 attempts in all; a <code>4xx</code> is treated as
+        final and not retried. See any{" "}
         <Link href="/sdks/python">SDK page</Link> for a signature-verification
         snippet.
       </p>

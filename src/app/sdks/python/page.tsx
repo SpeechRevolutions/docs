@@ -375,7 +375,7 @@ print("saved to", out)`}
           {`{job_id, status: "completed"|"failed", download_url?, step?, reason?}`}
         </code>
         , signed with HMAC-SHA256 over the raw body in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus a unique{" "}
+        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
         <code>X-SR-Delivery</code> id). Always verify the signature against the
         raw bytes you received — not a re-serialized dict — using a
         constant-time comparison.

@@ -330,7 +330,7 @@ const path = await result.save("output"); // -> "output.json"`}
           {`{ job_id, status: "completed"|"failed", download_url?, step?, reason? }`}
         </code>
         , signed with HMAC-SHA256 over the raw body in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus a unique{" "}
+        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
         <code>X-SR-Delivery</code> id). Verify against the <em>raw</em> body
         bytes with a constant-time comparison.
       </p>

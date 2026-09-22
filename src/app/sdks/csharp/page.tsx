@@ -319,7 +319,7 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
           {`{job_id, status: "completed"|"failed", download_url?, step?, reason?}`}
         </code>{" "}
         to your URL, signed with HMAC-SHA256 over the raw body in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus a unique{" "}
+        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
         <code>X-SR-Delivery</code> id). Verify it against the raw request bytes
         with <code>HMACSHA256</code> +{" "}
         <code>CryptographicOperations.FixedTimeEquals</code>.
