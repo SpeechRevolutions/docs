@@ -1,19 +1,28 @@
-# Typecheck, compile every published snippet and build the docs on every push and
-# pull request.
+# Build and check the docs on every push and pull request; deploy main.
+#
+# The site is a static export (`output: "export"`), served from a private S3
+# bucket behind CloudFront. There is no server: deploying is an `s3 sync` of
+# `out/` plus a CloudFront invalidation. The bucket, distribution and deploy role
+# are defined in infra/terraform/docs.tf in the API repo.
 #
 # check_snippets.py compiles every Go and C# snippet against the SDK source it
 # finds in sibling directories, so the two SDK repos are checked out next to
 # this one, reproducing the layout on a developer's machine.
 #
-# Deploys are not done here. Like every other service, the docs ship through a
-# hand-run CD script (scripts/cd/deploy.sh) against infra that terraform owns
-# (infra/terraform/docs.tf in the API repo).
+# Deploy authenticates through GitHub OIDC; no AWS key is stored in GitHub. The
+# role trusts only runs on main of this repo. It stays skipped until the
+# repository variable DOCS_DEPLOY_ENABLED is set to `true`.
 name: ci
 
 on:
   push:
     branches: [main]
   pull_request:
+
+env:
+  BUCKET: speechrevolutions-docs-153372322861
+  DOMAIN: docs.speechrevolutions.com
+  DEPLOY_ROLE: arn:aws:iam::153372322861:role/sr-docs-deploy
 
 jobs:
   check:
@@ -53,3 +62,74 @@ jobs:
       # postbuild runs on its own after build: llms.txt, then the Pagefind index.
       - run: npm run build
         working-directory: docs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: docs/out
+          retention-days: 7
+
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DOCS_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    # No `environment:` here: declaring one changes the OIDC subject to
+    # repo:...:environment:<name>, which the role's trust policy does not accept.
+    # Two pushes in quick succession must not interleave their syncs.
+    concurrency:
+      group: docs-deploy
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: out
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.DEPLOY_ROLE }}
+          aws-region: us-west-2
+      # Looked up by alias rather than stored: the id only exists after terraform's
+      # second apply.
+      - name: Find the distribution
+        run: |
+          ID=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?contains(Aliases.Items || \`[]\`, '${DOMAIN}')].Id | [0]" \
+            --output text)
+          [ -n "$ID" ] && [ "$ID" != "None" ] || { echo "::error::no CloudFront distribution for ${DOMAIN}"; exit 1; }
+          echo "DISTRIBUTION_ID=$ID" >> "$GITHUB_ENV"
+      # Hashed build assets never change under a given name, so they cache for a
+      # year. They go up first so a page never references a chunk that is not there
+      # yet, and are never deleted: a tab opened before this deploy keeps working.
+      - name: Upload hashed assets
+        run: >
+          aws s3 sync out/_next "s3://${BUCKET}/_next" --only-show-errors
+          --cache-control "public, max-age=31536000, immutable"
+      # Everything else (HTML, llms.txt, the search index, icons) keeps its name
+      # across deploys, so browsers revalidate it on each visit.
+      - name: Upload pages
+        run: >
+          aws s3 sync out "s3://${BUCKET}" --only-show-errors
+          --exclude "_next/*" --delete
+          --cache-control "public, max-age=0, must-revalidate"
+      # One wildcard path counts as one against the 1,000 free paths a month.
+      - name: Invalidate CloudFront
+        run: |
+          INV=$(aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" \
+            --paths "/*" --query 'Invalidation.Id' --output text)
+          aws cloudfront wait invalidation-completed --distribution-id "$DISTRIBUTION_ID" --id "$INV"
+      - name: Smoke check
+        run: |
+          fail=0
+          check() {
+            got=$(curl -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}$1")
+            if [ "$got" = "$2" ]; then echo "ok    $1 -> $got"; else echo "::error::$1 -> $got (want $2)"; fail=1; fi
+          }
+          check /                      200
+          check /sdks/python/          200
+          check /sdks/python           301
+          check /llms.txt              200
+          check /pagefind/pagefind.js  200
+          check /no-such-page/         404
+          exit $fail
