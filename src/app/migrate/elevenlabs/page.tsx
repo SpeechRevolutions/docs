@@ -61,7 +61,7 @@ export default function MigrateElevenLabsPage() {
               <code>ELEVENLABS_API_KEY</code> env var
             </td>
             <td>
-              <code>SPEECHREVOLUTIONS_API_KEY</code> or <code>STT_API_KEY</code>
+              <code>SPEECHREVOLUTIONS_API_KEY</code>
             </td>
           </tr>
         </tbody>

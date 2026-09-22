@@ -44,8 +44,7 @@ export default function MigrateSelfHostedWhisperPage() {
       </p>
       <CodeBlock
         language="bash"
-        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...
-# or STT_API_KEY`}
+        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />
 
       <h2>From a function call to an API call</h2>

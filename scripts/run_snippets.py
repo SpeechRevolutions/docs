@@ -549,7 +549,7 @@ def bash_program(code: str) -> str:
     # set their key. Executing it verbatim would overwrite the real key with the
     # literal "stt_...", so the line is neutralised rather than the key inlined --
     # inlining would put a live credential in the log.
-    code = re.sub(r"^export (SPEECHREVOLUTIONS_API_KEY|STT_API_KEY)=.*$",
+    code = re.sub(r"^export SPEECHREVOLUTIONS_API_KEY=.*$",
                   r"# (key comes from the environment)", code, flags=re.M)
     if "$JOB_ID" in code:
         code = f'JOB_ID="{real_job_id()}"\n' + code

@@ -42,7 +42,7 @@ export default function JsSdkPage() {
         filename="transcribe.ts"
         code={`import { SpeechRevolutions } from "speechrevolutions";
 
-const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
+const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
 const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 
 console.log(result.text);
@@ -431,9 +431,7 @@ try {
       <p>The SDK reads the key from either environment variable:</p>
       <CodeBlock
         language="bash"
-        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...
-# or
-export STT_API_KEY=stt_...`}
+        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />
       <p>Or pass it explicitly:</p>
       <CodeBlock

@@ -48,7 +48,7 @@ export default function CsharpSdkPage() {
         filename="Program.cs"
         code={`using SpeechRevolutions;
 
-using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
 var result = await client.TranscribeAsync("meeting.mp3", new TranscribeOptions
 {
     SpeakerLabels = true, // or Diarize = true
@@ -362,16 +362,14 @@ else if (status.IsFailed)
       <h2>Auth</h2>
       <CodeBlock
         language="bash"
-        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...
-# or
-export STT_API_KEY=stt_...`}
+        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />
       <p>Or pass it explicitly:</p>
       <CodeBlock language="csharp" code={`using var client = new SpeechRevolutionsClient(apiKey: "stt_...");`} />
 
       <h2>Errors</h2>
       <p>
-        All errors derive from <code>SttException</code>:{" "}
+        All errors derive from <code>SpeechRevolutionsException</code>:{" "}
         <code>AuthenticationException</code>, <code>RateLimitException</code>,{" "}
         <code>JobNotFoundException</code>, <code>JobFailedException</code>{" "}
         (<code>Step</code> / <code>Reason</code>), <code>UploadException</code>,{" "}

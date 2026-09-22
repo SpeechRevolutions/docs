@@ -26,15 +26,12 @@ export default function AuthPage() {
       />
 
       <h2>Environment variables</h2>
-      <p>Official SDKs read the key automatically from either:</p>
-      <ul>
-        <li>
-          <code>SPEECHREVOLUTIONS_API_KEY</code> (preferred)
-        </li>
-        <li>
-          <code>STT_API_KEY</code> (alias)
-        </li>
-      </ul>
+      <p>
+        Official SDKs read the key automatically from{" "}
+        <code>SPEECHREVOLUTIONS_API_KEY</code>, so in most code you never pass it
+        explicitly. To point a client at a different host, such as staging, set{" "}
+        <code>SPEECHREVOLUTIONS_BASE_URL</code>.
+      </p>
 
       <h2>Errors</h2>
       <table>

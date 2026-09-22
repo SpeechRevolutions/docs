@@ -74,7 +74,7 @@ const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
-const stt = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+const stt = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
 
 export async function transcribeFromStorage(id: string, storagePath: string) {
   // 1. Signed URL so Speech Revolutions can read the private object.
@@ -113,7 +113,7 @@ supabase = create_client(
     os.environ["SUPABASE_URL"],
     os.environ["SUPABASE_SERVICE_ROLE_KEY"],  # server-side only
 )
-stt = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+stt = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY
 
 
 def transcribe_from_storage(row_id: str, storage_path: str) -> None:
@@ -264,7 +264,7 @@ using var http = new HttpClient { BaseAddress = new Uri(supabaseUrl) };
 http.DefaultRequestHeaders.Add("apikey", serviceKey);
 http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", serviceKey);
 
-using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
 
 // Ask Storage for a short-lived URL to a private object.
 async Task<string> SignedUrlAsync(string bucket, string path, int expiresIn)

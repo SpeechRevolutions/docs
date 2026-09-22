@@ -24,7 +24,7 @@ export default function DjangoIntegrationPage() {
       <Callout title="Keep the key server-side" tone="warn">
         <p>
           <code>SpeechRevolutions()</code> reads{" "}
-          <code>SPEECHREVOLUTIONS_API_KEY</code> (or <code>STT_API_KEY</code>)
+          <code>SPEECHREVOLUTIONS_API_KEY</code>
           from the environment. Views run on the server, so the client and key
           never ship to templates or JavaScript.
         </p>
@@ -85,7 +85,7 @@ from speechrevolutions import SpeechRevolutions
 
 from .models import TranscriptionJob
 
-client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY
 
 
 @require_POST

@@ -51,7 +51,7 @@ import boto3
 from speechrevolutions import SpeechRevolutions
 
 s3 = boto3.client("s3")
-client = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+client = SpeechRevolutions()  # SPEECHREVOLUTIONS_API_KEY
 
 SRC_BUCKET = "my-audio"
 OUT_BUCKET = "my-transcripts"
@@ -87,7 +87,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { SpeechRevolutions } from "speechrevolutions";
 
 const s3 = new S3Client({});
-const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
 
 const SRC_BUCKET = "my-audio";
 const OUT_BUCKET = "my-transcripts";
@@ -184,7 +184,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sttc, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+	sttc, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -210,7 +210,7 @@ const string SrcBucket = "my-audio";
 const string OutBucket = "my-transcripts";
 
 using var s3 = new AmazonS3Client();
-using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY / STT_API_KEY
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
 
 async Task<string> TranscribeS3ObjectAsync(string key)
 {

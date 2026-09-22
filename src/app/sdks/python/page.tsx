@@ -46,7 +46,7 @@ pip install "speechrevolutions[progress]"`} />
         filename="transcribe.py"
         code={`from speechrevolutions import SpeechRevolutions
 
-client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
+client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY
 result = client.transcribe("meeting.mp3", speaker_labels=True)
 
 print(result.text)
@@ -469,9 +469,7 @@ except AuthenticationError as e:
       <p>The SDK reads the key from either environment variable:</p>
       <CodeBlock
         language="bash"
-        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...
-# or
-export STT_API_KEY=stt_...`}
+        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />
       <p>Or pass it explicitly:</p>
       <CodeBlock language="python" code={`client = SpeechRevolutions(api_key="stt_...")`} />

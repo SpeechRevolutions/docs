@@ -54,7 +54,7 @@ import (
 func main() {
     ctx := context.Background()
 
-    client, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY or STT_API_KEY
+    client, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
     if err != nil {
         log.Fatal(err)
     }
@@ -386,9 +386,7 @@ if status.IsCompleted() {
       <h2>Auth</h2>
       <CodeBlock
         language="bash"
-        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...
-# or
-export STT_API_KEY=stt_...`}
+        code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />
       <CodeBlock
         language="go"

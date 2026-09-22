@@ -24,7 +24,7 @@ export default function FastapiIntegrationPage() {
       <Callout title="Keep the key server-side" tone="warn">
         <p>
           <code>AsyncSpeechRevolutions()</code> reads{" "}
-          <code>SPEECHREVOLUTIONS_API_KEY</code> (or <code>STT_API_KEY</code>)
+          <code>SPEECHREVOLUTIONS_API_KEY</code>
           from the environment. It stays on your FastAPI host — the browser only
           ever sees job ids and progress numbers.
         </p>
