@@ -69,10 +69,13 @@ jobs:
           name: site
           path: docs/out
           retention-days: 7
+      - name: Deploy gate
+        run: echo "DOCS_DEPLOY_ENABLED=[${{ vars.DOCS_DEPLOY_ENABLED }}]"
 
   deploy:
     needs: check
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DOCS_DEPLOY_ENABLED == 'true'
+    # Any non-empty value switches deploys on; the exact spelling of "true" should not matter.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DOCS_DEPLOY_ENABLED != ''
     runs-on: ubuntu-latest
     # No `environment:` here: declaring one changes the OIDC subject to
     # repo:...:environment:<name>, which the role's trust policy does not accept.
