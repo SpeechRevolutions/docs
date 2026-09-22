@@ -10,8 +10,8 @@
 # this one, reproducing the layout on a developer's machine.
 #
 # Deploy authenticates through GitHub OIDC; no AWS key is stored in GitHub. The
-# role trusts only runs on main of this repo. It stays skipped until the
-# repository variable DOCS_DEPLOY_ENABLED is set to `true`.
+# role trusts only runs on main of this repo, so a pull request cannot deploy
+# even if this workflow let it.
 name: ci
 
 on:
@@ -69,13 +69,10 @@ jobs:
           name: site
           path: docs/out
           retention-days: 7
-      - name: Deploy gate
-        run: echo "DOCS_DEPLOY_ENABLED=[${{ vars.DOCS_DEPLOY_ENABLED }}]"
 
   deploy:
     needs: check
-    # Any non-empty value switches deploys on; the exact spelling of "true" should not matter.
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DOCS_DEPLOY_ENABLED != ''
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # No `environment:` here: declaring one changes the OIDC subject to
     # repo:...:environment:<name>, which the role's trust policy does not accept.
