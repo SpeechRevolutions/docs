@@ -20,16 +20,9 @@ Routes under `src/app/` map to site sections: `getting-started`, `api-reference`
 
 ## Deploy
 
-The site is a static export served from S3 behind CloudFront. The bucket and
-distribution are defined in `infra/terraform/docs.tf` in the API repo. To ship
-the current commit:
-
-```bash
-DOCS_DEPLOY_CONFIRM=yes scripts/cd/deploy.sh
-```
-
-The script typechecks, compiles the published snippets, builds, uploads,
-invalidates the CDN and smoke-checks the live site. It refuses a dirty working
-tree. Snippet compilation expects `speechrevolutions-go` and `csharp-sdk`
-checked out next to this repo. CI (`.github/workflows/ci.yml`) runs the same
-checks on every push.
+Every push to `main` deploys through `.github/workflows/ci.yml`: typecheck,
+compile the published snippets, build, then sync `out/` to S3, invalidate
+CloudFront and smoke-check the live site. The bucket, distribution and the
+deploy role (assumed via GitHub OIDC; no AWS key in GitHub) are defined in
+`infra/terraform/docs.tf` in the API repo. Deploys stay off until the repository
+variable `DOCS_DEPLOY_ENABLED` is `true`.
