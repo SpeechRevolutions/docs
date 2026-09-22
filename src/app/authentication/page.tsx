@@ -34,28 +34,30 @@ export default function AuthPage() {
       </p>
 
       <h2>Errors</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Meaning</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>401</code>
-            </td>
-            <td>Missing or invalid API key</td>
-          </tr>
-          <tr>
-            <td>
-              <code>429</code>
-            </td>
-            <td>Rate limit exceeded</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>401</code>
+              </td>
+              <td>Missing or invalid API key</td>
+            </tr>
+            <tr>
+              <td>
+                <code>429</code>
+              </td>
+              <td>Rate limit exceeded</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <Callout title="Keep keys server-side" tone="warn">
         <p>

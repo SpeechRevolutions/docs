@@ -138,10 +138,24 @@
 
 .docs-prose code:not(pre code) {
   @apply rounded bg-white/10 px-1.5 py-0.5 font-mono text-[13px] text-cyan-200;
+  /* Long identifiers (`results.channels[0].alternatives[0].transcript`) would push a
+   * phone-width page sideways. break-word, unlike anywhere, leaves min-content width
+   * alone, so table columns keep their size and the table scrolls instead. */
+  overflow-wrap: break-word;
 }
 
 .docs-prose table {
   @apply mt-6 w-full text-left text-sm;
+}
+
+/* Every prose table sits in one of these. On a phone the wider tables (SDK options,
+ * migration maps) scroll sideways inside the column instead of widening the page. */
+.docs-prose .table-scroll {
+  @apply mt-6 overflow-x-auto;
+}
+
+.docs-prose .table-scroll > table {
+  @apply mt-0;
 }
 
 .docs-prose th {

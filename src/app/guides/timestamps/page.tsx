@@ -88,79 +88,81 @@ foreach (var w in result.Words.Take(5))
       />
 
       <h2 id="fields">Per-word fields</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Meaning</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>word</code>
-            </td>
-            <td>
-              <code>string</code>
-            </td>
-            <td>
-              The token. <code>.text</code> is an AssemblyAI-compatible alias.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>start</code>
-            </td>
-            <td>
-              <code>float</code>
-            </td>
-            <td>Seconds from the start of the audio to the word onset.</td>
-          </tr>
-          <tr>
-            <td>
-              <code>end</code>
-            </td>
-            <td>
-              <code>float</code>
-            </td>
-            <td>Seconds to the word offset.</td>
-          </tr>
-          <tr>
-            <td>
-              <code>speaker</code>
-            </td>
-            <td>
-              <code>string | null</code>
-            </td>
-            <td>
-              Set when <code>speaker_labels</code> is on; otherwise absent.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>confidence</code>
-            </td>
-            <td>
-              <code>float | null</code>
-            </td>
-            <td>Per-word confidence when the model reports it.</td>
-          </tr>
-          <tr>
-            <td>
-              <code>language</code>
-            </td>
-            <td>
-              <code>string | null</code>
-            </td>
-            <td>
-              The detected language for this word — see{" "}
-              <Link href="/migrate/deepgram">language detection</Link> for
-              the transcript-level <code>result.languages</code> segments.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>word</code>
+              </td>
+              <td>
+                <code>string</code>
+              </td>
+              <td>
+                The token. <code>.text</code> is an AssemblyAI-compatible alias.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>start</code>
+              </td>
+              <td>
+                <code>float</code>
+              </td>
+              <td>Seconds from the start of the audio to the word onset.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>end</code>
+              </td>
+              <td>
+                <code>float</code>
+              </td>
+              <td>Seconds to the word offset.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>speaker</code>
+              </td>
+              <td>
+                <code>string | null</code>
+              </td>
+              <td>
+                Set when <code>speaker_labels</code> is on; otherwise absent.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>confidence</code>
+              </td>
+              <td>
+                <code>float | null</code>
+              </td>
+              <td>Per-word confidence when the model reports it.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>language</code>
+              </td>
+              <td>
+                <code>string | null</code>
+              </td>
+              <td>
+                The detected language for this word — see{" "}
+                <Link href="/migrate/deepgram">language detection</Link> for
+                the transcript-level <code>result.languages</code> segments.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2 id="json">The JSON shape</h2>
       <p>

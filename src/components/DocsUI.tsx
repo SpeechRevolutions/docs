@@ -61,7 +61,7 @@ export function EndpointBadge({
       <span className={cn("rounded-md px-2 py-0.5 text-xs font-bold", color)}>
         {method}
       </span>
-      <span className="text-zinc-200">{path}</span>
+      <span className="min-w-0 break-words text-zinc-200">{path}</span>
     </div>
   );
 }

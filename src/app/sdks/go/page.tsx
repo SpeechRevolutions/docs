@@ -16,8 +16,8 @@ export default function GoSdkPage() {
       <p>Official Go client for the Speech Revolutions STT API.</p>
 
       <p>
-        Source on 
-        <a href="https://github.com/SpeechRevolutions/speechrevolutions-go">GitHub</a> &middot; 
+        Source on{" "}
+        <a href="https://github.com/SpeechRevolutions/speechrevolutions-go">GitHub</a> &middot;{" "}
         <a href="https://github.com/SpeechRevolutions/speechrevolutions-go/issues">
           report an issue
         </a>{" "}
@@ -90,130 +90,132 @@ result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.Transc
         <code>TranscribeOptions</code> fields — an empty{" "}
         <code>TranscribeOptions{"{}"}</code> gets all defaults applied.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>OutputType</code>
-            </td>
-            <td>
-              <code>OutputType</code>
-            </td>
-            <td>
-              <code>OutputJSON</code>
-            </td>
-            <td>
-              <code>txt | json | srt | vtt | docx | pdf</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>WordTimestamps</code>
-            </td>
-            <td>
-              <code>*bool</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Per-word start/end times</td>
-          </tr>
-          <tr>
-            <td>
-              <code>SpeakerLabels</code>
-            </td>
-            <td>
-              <code>*bool</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Label who spoke each segment</td>
-          </tr>
-          <tr>
-            <td>
-              <code>Diarize</code>
-            </td>
-            <td>
-              <code>*bool</code>
-            </td>
-            <td>—</td>
-            <td>
-              Deepgram-compatible alias for <code>SpeakerLabels</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>NLTK</code>
-            </td>
-            <td>
-              <code>*bool</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Restore punctuation &amp; capitalization</td>
-          </tr>
-          <tr>
-            <td>
-              <code>Tier</code>
-            </td>
-            <td>
-              <code>*ProcessingTier</code>
-            </td>
-            <td>
-              <code>TierStandard</code>
-            </td>
-            <td>
-              <code>TierStandard</code> — the only tier currently available
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>CustomVocabulary</code>
-            </td>
-            <td>
-              <code>[]string</code>
-            </td>
-            <td>
-              <code>nil</code>
-            </td>
-            <td>Domain terms to bias toward</td>
-          </tr>
-          <tr>
-            <td>
-              <code>OnUploadProgress</code>
-            </td>
-            <td>
-              <code>ProgressFunc</code>
-            </td>
-            <td>
-              <code>nil</code>
-            </td>
-            <td>Upload byte-progress callback</td>
-          </tr>
-          <tr>
-            <td>
-              <code>Progress</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>false</code>
-            </td>
-            <td>Render live console bars</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>OutputType</code>
+              </td>
+              <td>
+                <code>OutputType</code>
+              </td>
+              <td>
+                <code>OutputJSON</code>
+              </td>
+              <td>
+                <code>txt | json | srt | vtt | docx | pdf</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>WordTimestamps</code>
+              </td>
+              <td>
+                <code>*bool</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Per-word start/end times</td>
+            </tr>
+            <tr>
+              <td>
+                <code>SpeakerLabels</code>
+              </td>
+              <td>
+                <code>*bool</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Label who spoke each segment</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Diarize</code>
+              </td>
+              <td>
+                <code>*bool</code>
+              </td>
+              <td>—</td>
+              <td>
+                Deepgram-compatible alias for <code>SpeakerLabels</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>NLTK</code>
+              </td>
+              <td>
+                <code>*bool</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Restore punctuation &amp; capitalization</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Tier</code>
+              </td>
+              <td>
+                <code>*ProcessingTier</code>
+              </td>
+              <td>
+                <code>TierStandard</code>
+              </td>
+              <td>
+                <code>TierStandard</code> — the only tier currently available
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>CustomVocabulary</code>
+              </td>
+              <td>
+                <code>[]string</code>
+              </td>
+              <td>
+                <code>nil</code>
+              </td>
+              <td>Domain terms to bias toward</td>
+            </tr>
+            <tr>
+              <td>
+                <code>OnUploadProgress</code>
+              </td>
+              <td>
+                <code>ProgressFunc</code>
+              </td>
+              <td>
+                <code>nil</code>
+              </td>
+              <td>Upload byte-progress callback</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Progress</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Render live console bars</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Live progress</h2>
       <p>
@@ -262,58 +264,60 @@ result, _ = client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
         With <code>OutputJSON</code> the result is parsed into a
         transcript-first object:
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Access</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>result.Text()</code>
-            </td>
-            <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.TranscriptText()</code>
-            </td>
-            <td>Deepgram-style alias</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.Words</code>
-            </td>
-            <td>Word + start / end / speaker</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.Utterances</code>
-            </td>
-            <td>AssemblyAI-style speaker turns</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.ToDeepgram()</code>
-            </td>
-            <td>Deepgram-shaped map</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.ToDict()</code>
-            </td>
-            <td>Normalized map</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.Content</code> / <code>result.Save(path)</code>
-            </td>
-            <td>Raw bytes / write to disk</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Access</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>result.Text()</code>
+              </td>
+              <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.TranscriptText()</code>
+              </td>
+              <td>Deepgram-style alias</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.Words</code>
+              </td>
+              <td>Word + start / end / speaker</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.Utterances</code>
+              </td>
+              <td>AssemblyAI-style speaker turns</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.ToDeepgram()</code>
+              </td>
+              <td>Deepgram-shaped map</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.ToDict()</code>
+              </td>
+              <td>Normalized map</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.Content</code> / <code>result.Save(path)</code>
+              </td>
+              <td>Raw bytes / write to disk</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <CodeBlock
         language="go"
         code={`// Save writes output.<output_type> when the path has no extension.

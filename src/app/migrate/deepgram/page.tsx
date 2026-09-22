@@ -43,32 +43,34 @@ export default function MigrateDeepgramPage() {
         header. Speech Revolutions uses an <code>X-API-Key</code> header, and the SDKs read
         it from the environment for you.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Deepgram</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>Authorization: Token DEEPGRAM_API_KEY</code>
-            </td>
-            <td>
-              <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>DEEPGRAM_API_KEY</code> env var
-            </td>
-            <td>
-              <code>SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Deepgram</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>Authorization: Token DEEPGRAM_API_KEY</code>
+              </td>
+              <td>
+                <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>DEEPGRAM_API_KEY</code> env var
+              </td>
+              <td>
+                <code>SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <CodeBlock
         language="bash"
         code={`# was
@@ -84,48 +86,50 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
         flow and blocks until the transcript is ready — the closest analogue to a
         single Deepgram call.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Deepgram</th>
-            <th>Speech Revolutions REST</th>
-            <th>Speech Revolutions SDK</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>POST /v1/listen</code> (sync)
-            </td>
-            <td>
-              <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
-              <code>POST /api/v1/upload/complete</code>
-            </td>
-            <td>
-              <code>transcribe()</code> (blocks) or <code>submit()</code>{" "}
-              (non-blocking)
-            </td>
-          </tr>
-          <tr>
-            <td>— (response is inline)</td>
-            <td>
-              <code>GET /api/v1/jobs/{`{id}`}/stream</code> (SSE progress)
-            </td>
-            <td>
-              <code>on_progress</code> callback
-            </td>
-          </tr>
-          <tr>
-            <td>— (response is inline)</td>
-            <td>
-              <code>GET /api/v1/jobs/{`{id}`}</code>
-            </td>
-            <td>
-              <code>get_job_status()</code> / <code>get_transcript()</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Deepgram</th>
+              <th>Speech Revolutions REST</th>
+              <th>Speech Revolutions SDK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>POST /v1/listen</code> (sync)
+              </td>
+              <td>
+                <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
+                <code>POST /api/v1/upload/complete</code>
+              </td>
+              <td>
+                <code>transcribe()</code> (blocks) or <code>submit()</code>{" "}
+                (non-blocking)
+              </td>
+            </tr>
+            <tr>
+              <td>— (response is inline)</td>
+              <td>
+                <code>GET /api/v1/jobs/{`{id}`}/stream</code> (SSE progress)
+              </td>
+              <td>
+                <code>on_progress</code> callback
+              </td>
+            </tr>
+            <tr>
+              <td>— (response is inline)</td>
+              <td>
+                <code>GET /api/v1/jobs/{`{id}`}</code>
+              </td>
+              <td>
+                <code>get_job_status()</code> / <code>get_transcript()</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <EndpointBadge method="POST" path="/api/v1/upload" />
 
       <h2>Upload differences</h2>
@@ -147,58 +151,60 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
         speakers as integers. Speech Revolutions returns a transcript-first object. Map it
         like this:
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Deepgram field</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>...alternatives[0].transcript</code>
-            </td>
-            <td>
-              <code>result.text</code> (or <code>result.transcript</code>)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>...alternatives[0].words[]</code> (<code>word</code>,{" "}
-              <code>start</code>, <code>end</code>)
-            </td>
-            <td>
-              <code>result.words</code> (<code>text</code>, <code>start</code>,{" "}
-              <code>end</code>)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              per-word <code>speaker</code> (integer, e.g. <code>0</code>)
-            </td>
-            <td>
-              per-word <code>speaker</code> (string, e.g.{" "}
-              <code>speaker_0</code>) plus <code>result.utterances</code>{" "}
-              (grouped speaker turns)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>results.channels[0].detected_language</code>
-            </td>
-            <td>
-              <code>result.languages</code>
-            </td>
-          </tr>
-          <tr>
-            <td>the whole Deepgram JSON</td>
-            <td>
-              <code>result.to_deepgram()</code> reproduces it
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Deepgram field</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>...alternatives[0].transcript</code>
+              </td>
+              <td>
+                <code>result.text</code> (or <code>result.transcript</code>)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>...alternatives[0].words[]</code> (<code>word</code>,{" "}
+                <code>start</code>, <code>end</code>)
+              </td>
+              <td>
+                <code>result.words</code> (<code>text</code>, <code>start</code>,{" "}
+                <code>end</code>)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                per-word <code>speaker</code> (integer, e.g. <code>0</code>)
+              </td>
+              <td>
+                per-word <code>speaker</code> (string, e.g.{" "}
+                <code>speaker_0</code>) plus <code>result.utterances</code>{" "}
+                (grouped speaker turns)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>results.channels[0].detected_language</code>
+              </td>
+              <td>
+                <code>result.languages</code>
+              </td>
+            </tr>
+            <tr>
+              <td>the whole Deepgram JSON</td>
+              <td>
+                <code>result.to_deepgram()</code> reproduces it
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <Callout title="Drop-in for existing parsers" tone="info">
         <p>
           If your codebase already digs into{" "}

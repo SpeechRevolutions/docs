@@ -43,40 +43,42 @@ export default function MigrationPlaybookPage() {
       </ul>
 
       <h2>2. What to evaluate</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Dimension</th>
-            <th>How to judge it</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Accuracy</td>
-            <td>WER on a sample of your own audio, not a vendor&apos;s demo clip</td>
-          </tr>
-          <tr>
-            <td>Diarization</td>
-            <td>DER + does the speaker labeling actually hold up on your meetings</td>
-          </tr>
-          <tr>
-            <td>Timestamps</td>
-            <td>Word-level start/end accuracy (matters for subtitles &amp; search)</td>
-          </tr>
-          <tr>
-            <td>Languages</td>
-            <td>The specific languages and code-switching you serve</td>
-          </tr>
-          <tr>
-            <td>Formats &amp; features</td>
-            <td>JSON shape, SRT/VTT/DOCX, custom vocabulary, webhooks</td>
-          </tr>
-          <tr>
-            <td>Throughput &amp; price</td>
-            <td>Batch latency and cost at your monthly volume</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>How to judge it</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Accuracy</td>
+              <td>WER on a sample of your own audio, not a vendor&apos;s demo clip</td>
+            </tr>
+            <tr>
+              <td>Diarization</td>
+              <td>DER + does the speaker labeling actually hold up on your meetings</td>
+            </tr>
+            <tr>
+              <td>Timestamps</td>
+              <td>Word-level start/end accuracy (matters for subtitles &amp; search)</td>
+            </tr>
+            <tr>
+              <td>Languages</td>
+              <td>The specific languages and code-switching you serve</td>
+            </tr>
+            <tr>
+              <td>Formats &amp; features</td>
+              <td>JSON shape, SRT/VTT/DOCX, custom vocabulary, webhooks</td>
+            </tr>
+            <tr>
+              <td>Throughput &amp; price</td>
+              <td>Batch latency and cost at your monthly volume</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <Callout title="Measure on your data" tone="tip">
         <p>
           Our <Link href="/benchmarks">public benchmark suite</Link> is

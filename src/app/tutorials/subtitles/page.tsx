@@ -171,45 +171,47 @@ Console.WriteLine($"Wrote {path}");`,
         Once you have the file, there are two ways to get captions in front of a
         viewer, and the right one depends on where the video plays.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Approach</th>
-            <th>What it is</th>
-            <th>Best when</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <strong>Sidecar</strong>
-            </td>
-            <td>
-              Ship the <code>.srt</code>/<code>.vtt</code> as a separate file
-              alongside the video; the player overlays it at playback.
-            </td>
-            <td>
-              You control the player (a web <code>&lt;video&gt;</code>, a
-              streaming platform, VLC). Viewers can toggle captions on/off and
-              you can serve multiple languages.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <strong>Burned-in</strong>
-            </td>
-            <td>
-              Render the captions permanently into the video&apos;s pixels, so
-              they&apos;re part of the picture.
-            </td>
-            <td>
-              The destination has no caption support or you can&apos;t trust it
-              to — social autoplay clips, embedded GIFs, downloads. Always
-              visible; not toggleable.
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>What it is</th>
+              <th>Best when</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>Sidecar</strong>
+              </td>
+              <td>
+                Ship the <code>.srt</code>/<code>.vtt</code> as a separate file
+                alongside the video; the player overlays it at playback.
+              </td>
+              <td>
+                You control the player (a web <code>&lt;video&gt;</code>, a
+                streaming platform, VLC). Viewers can toggle captions on/off and
+                you can serve multiple languages.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Burned-in</strong>
+              </td>
+              <td>
+                Render the captions permanently into the video&apos;s pixels, so
+                they&apos;re part of the picture.
+              </td>
+              <td>
+                The destination has no caption support or you can&apos;t trust it
+                to — social autoplay clips, embedded GIFs, downloads. Always
+                visible; not toggleable.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <p>
         <strong>Sidecar</strong> is the default and needs nothing beyond the

@@ -114,41 +114,43 @@ data: {"completed": 8, "total": 8, "step": "aggregation"}
 event: completed
 data: {"job_id": "…", "download_url": "https://…", "output_type": "json"}`}
       />
-      <table>
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Data</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>progress</code>
-            </td>
-            <td>
-              <code>{`{"completed": <int>, "total": <int>, "step": "<name>"}`}</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>completed</code>
-            </td>
-            <td>
-              Terminal success; data may include a <code>download_url</code> and
-              job metadata
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>failed</code>
-            </td>
-            <td>
-              Terminal failure; <code>{`{"step": "<name>", "reason": "<msg>"}`}</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>progress</code>
+              </td>
+              <td>
+                <code>{`{"completed": <int>, "total": <int>, "step": "<name>"}`}</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>completed</code>
+              </td>
+              <td>
+                Terminal success; data may include a <code>download_url</code> and
+                job metadata
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>failed</code>
+              </td>
+              <td>
+                Terminal failure; <code>{`{"step": "<name>", "reason": "<msg>"}`}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <Callout title="completed / total → percent" tone="tip">
         <p>

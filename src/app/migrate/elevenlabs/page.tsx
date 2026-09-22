@@ -40,67 +40,71 @@ export default function MigrateElevenLabsPage() {
         ElevenLabs authenticates with an <code>xi-api-key</code> header. Speech Revolutions
         uses <code>X-API-Key</code>, read from the environment by the SDK.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>ElevenLabs</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>xi-api-key: ELEVENLABS_API_KEY</code>
-            </td>
-            <td>
-              <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>ELEVENLABS_API_KEY</code> env var
-            </td>
-            <td>
-              <code>SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ElevenLabs</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>xi-api-key: ELEVENLABS_API_KEY</code>
+              </td>
+              <td>
+                <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>ELEVENLABS_API_KEY</code> env var
+              </td>
+              <td>
+                <code>SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Endpoint &amp; method mapping</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ElevenLabs</th>
-            <th>Speech Revolutions REST</th>
-            <th>Speech Revolutions SDK</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>POST /v1/speech-to-text</code> (sync multipart,{" "}
-              <code>model_id</code>)
-            </td>
-            <td>
-              <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
-              <code>POST /api/v1/upload/complete</code>
-            </td>
-            <td>
-              <code>transcribe()</code> (blocks until done)
-            </td>
-          </tr>
-          <tr>
-            <td>— (response is inline)</td>
-            <td>
-              <code>GET /api/v1/jobs/{`{id}`}</code> / <code>/stream</code>
-            </td>
-            <td>
-              <code>get_transcript()</code> / <code>on_progress</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ElevenLabs</th>
+              <th>Speech Revolutions REST</th>
+              <th>Speech Revolutions SDK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>POST /v1/speech-to-text</code> (sync multipart,{" "}
+                <code>model_id</code>)
+              </td>
+              <td>
+                <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
+                <code>POST /api/v1/upload/complete</code>
+              </td>
+              <td>
+                <code>transcribe()</code> (blocks until done)
+              </td>
+            </tr>
+            <tr>
+              <td>— (response is inline)</td>
+              <td>
+                <code>GET /api/v1/jobs/{`{id}`}</code> / <code>/stream</code>
+              </td>
+              <td>
+                <code>get_transcript()</code> / <code>on_progress</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <EndpointBadge method="POST" path="/api/v1/upload" />
 
       <h2>Upload differences</h2>
@@ -122,55 +126,57 @@ export default function MigrateElevenLabsPage() {
         <code>speaker_0</code>). The Speech Revolutions <code>result.words</code> contains
         words only, with matching string speaker labels.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>ElevenLabs field</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>text</code>
-            </td>
-            <td>
-              <code>result.text</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>words[]</code> where <code>type == &quot;word&quot;</code> (
-              <code>text</code>, <code>start</code>, <code>end</code>,{" "}
-              <code>speaker_id</code>)
-            </td>
-            <td>
-              <code>result.words</code> (<code>text</code>, <code>start</code>,{" "}
-              <code>end</code>, <code>speaker</code>) — no spacing tokens
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>words[]</code> where <code>type == &quot;spacing&quot;</code>
-            </td>
-            <td>— (dropped; you no longer filter these out)</td>
-          </tr>
-          <tr>
-            <td>— (regroup by <code>speaker_id</code> yourself)</td>
-            <td>
-              <code>result.utterances</code> (pre-grouped speaker turns)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>language_code</code>
-            </td>
-            <td>
-              <code>result.languages</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ElevenLabs field</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>text</code>
+              </td>
+              <td>
+                <code>result.text</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>words[]</code> where <code>type == &quot;word&quot;</code> (
+                <code>text</code>, <code>start</code>, <code>end</code>,{" "}
+                <code>speaker_id</code>)
+              </td>
+              <td>
+                <code>result.words</code> (<code>text</code>, <code>start</code>,{" "}
+                <code>end</code>, <code>speaker</code>) — no spacing tokens
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>words[]</code> where <code>type == &quot;spacing&quot;</code>
+              </td>
+              <td>— (dropped; you no longer filter these out)</td>
+            </tr>
+            <tr>
+              <td>— (regroup by <code>speaker_id</code> yourself)</td>
+              <td>
+                <code>result.utterances</code> (pre-grouped speaker turns)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>language_code</code>
+              </td>
+              <td>
+                <code>result.languages</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <Callout title="Retire the spacing filter" tone="info">
         <p>
           If your code skips <code>word.type === &quot;spacing&quot;</code>{" "}

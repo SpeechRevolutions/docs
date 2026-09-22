@@ -23,66 +23,68 @@ export default function OutputFormatsGuidePage() {
       </p>
 
       <h2 id="formats">The six formats</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>
-              <code>output_type</code>
-            </th>
-            <th>What you get</th>
-            <th>Reach for it when</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>json</code> <em>(default)</em>
-            </td>
-            <td>
-              Structured document with per-word timings and speakers; parsed into{" "}
-              <code>.text</code>, <code>.words</code>, <code>.utterances</code>.
-            </td>
-            <td>You&apos;re writing code against the result.</td>
-          </tr>
-          <tr>
-            <td>
-              <code>txt</code>
-            </td>
-            <td>Plain transcript text, no timing or structure.</td>
-            <td>You just need the words.</td>
-          </tr>
-          <tr>
-            <td>
-              <code>srt</code>
-            </td>
-            <td>SubRip subtitles — numbered cues with start/end times.</td>
-            <td>Captions for most video players and editors.</td>
-          </tr>
-          <tr>
-            <td>
-              <code>vtt</code>
-            </td>
-            <td>WebVTT subtitles.</td>
-            <td>
-              Web video (<code>&lt;track&gt;</code>) and HTML5 players.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>docx</code>
-            </td>
-            <td>Formatted Word document.</td>
-            <td>Shareable transcripts for non-technical readers.</td>
-          </tr>
-          <tr>
-            <td>
-              <code>pdf</code>
-            </td>
-            <td>Formatted PDF document.</td>
-            <td>Fixed-layout, print-ready transcripts.</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>
+                <code>output_type</code>
+              </th>
+              <th>What you get</th>
+              <th>Reach for it when</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>json</code> <em>(default)</em>
+              </td>
+              <td>
+                Structured document with per-word timings and speakers; parsed into{" "}
+                <code>.text</code>, <code>.words</code>, <code>.utterances</code>.
+              </td>
+              <td>You&apos;re writing code against the result.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>txt</code>
+              </td>
+              <td>Plain transcript text, no timing or structure.</td>
+              <td>You just need the words.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>srt</code>
+              </td>
+              <td>SubRip subtitles — numbered cues with start/end times.</td>
+              <td>Captions for most video players and editors.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>vtt</code>
+              </td>
+              <td>WebVTT subtitles.</td>
+              <td>
+                Web video (<code>&lt;track&gt;</code>) and HTML5 players.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>docx</code>
+              </td>
+              <td>Formatted Word document.</td>
+              <td>Shareable transcripts for non-technical readers.</td>
+            </tr>
+            <tr>
+              <td>
+                <code>pdf</code>
+              </td>
+              <td>Formatted PDF document.</td>
+              <td>Fixed-layout, print-ready transcripts.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p>
         <code>output_type</code> is a request option across every SDK — a kwarg
         in Python, an option field in JavaScript, and the <code>OutputType</code>{" "}

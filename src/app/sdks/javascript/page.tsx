@@ -20,8 +20,8 @@ export default function JsSdkPage() {
       </p>
 
       <p>
-        Source on 
-        <a href="https://github.com/SpeechRevolutions/node-sdk">GitHub</a> &middot; 
+        Source on{" "}
+        <a href="https://github.com/SpeechRevolutions/node-sdk">GitHub</a> &middot;{" "}
         <a href="https://github.com/SpeechRevolutions/node-sdk/issues">
           report an issue
         </a>{" "}
@@ -79,125 +79,127 @@ const result2 = await client.transcribeUrl("https://example.com/audio.mp3");`}
   customVocabulary: ["AcmeCorp"],
 });`}
       />
-      <table>
-        <thead>
-          <tr>
-            <th>Option</th>
-            <th>Type</th>
-            <th>Default</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>outputType</code>
-            </td>
-            <td>
-              <code>&quot;txt&quot; | &quot;json&quot; | &quot;srt&quot; | &quot;vtt&quot; | &quot;docx&quot; | &quot;pdf&quot;</code>
-            </td>
-            <td>
-              <code>&quot;json&quot;</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>wordTimestamps</code>
-            </td>
-            <td>
-              <code>boolean</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>speakerLabels</code>
-            </td>
-            <td>
-              <code>boolean</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>diarize</code>
-            </td>
-            <td>
-              <code>boolean</code> (alias for <code>speakerLabels</code>)
-            </td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td>
-              <code>nltk</code>
-            </td>
-            <td>
-              <code>boolean</code> (punctuation &amp; capitalization)
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>tier</code>
-            </td>
-            <td>
-              <code>&quot;standard&quot;</code>
-            </td>
-            <td>
-              <code>&quot;standard&quot;</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>customVocabulary</code>
-            </td>
-            <td>
-              <code>string[]</code>
-            </td>
-            <td>
-              <code>undefined</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>onProgress</code>
-            </td>
-            <td>
-              <code>(event: ProgressEvent) =&gt; void</code>
-            </td>
-            <td>
-              <code>undefined</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>onUploadProgress</code>
-            </td>
-            <td>
-              <code>(event: ProgressEvent) =&gt; void</code>
-            </td>
-            <td>
-              <code>undefined</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>progress</code>
-            </td>
-            <td>
-              <code>boolean</code> (render console bars)
-            </td>
-            <td>
-              <code>false</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Type</th>
+              <th>Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>outputType</code>
+              </td>
+              <td>
+                <code>&quot;txt&quot; | &quot;json&quot; | &quot;srt&quot; | &quot;vtt&quot; | &quot;docx&quot; | &quot;pdf&quot;</code>
+              </td>
+              <td>
+                <code>&quot;json&quot;</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>wordTimestamps</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>speakerLabels</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>diarize</code>
+              </td>
+              <td>
+                <code>boolean</code> (alias for <code>speakerLabels</code>)
+              </td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>
+                <code>nltk</code>
+              </td>
+              <td>
+                <code>boolean</code> (punctuation &amp; capitalization)
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>tier</code>
+              </td>
+              <td>
+                <code>&quot;standard&quot;</code>
+              </td>
+              <td>
+                <code>&quot;standard&quot;</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>customVocabulary</code>
+              </td>
+              <td>
+                <code>string[]</code>
+              </td>
+              <td>
+                <code>undefined</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>onProgress</code>
+              </td>
+              <td>
+                <code>(event: ProgressEvent) =&gt; void</code>
+              </td>
+              <td>
+                <code>undefined</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>onUploadProgress</code>
+              </td>
+              <td>
+                <code>(event: ProgressEvent) =&gt; void</code>
+              </td>
+              <td>
+                <code>undefined</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>progress</code>
+              </td>
+              <td>
+                <code>boolean</code> (render console bars)
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p>
         <code>tier</code>: <code>standard</code> is the only tier currently
         available.
@@ -249,58 +251,60 @@ await client.transcribe("meeting.mp3", {
         With <code>outputType: "json"</code> the SDK returns a transcript-first
         object:
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>result.text</code>
-            </td>
-            <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.transcript</code>
-            </td>
-            <td>Deepgram-style alias</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.words</code>
-            </td>
-            <td>Word + start / end / speaker</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.utterances</code>
-            </td>
-            <td>AssemblyAI-style speaker turns</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.toDeepgram()</code>
-            </td>
-            <td>Deepgram-shaped object</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.toDict()</code>
-            </td>
-            <td>Normalized JSON</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.content</code> / <code>result.save(path)</code>
-            </td>
-            <td>Raw bytes / write to disk</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>result.text</code>
+              </td>
+              <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.transcript</code>
+              </td>
+              <td>Deepgram-style alias</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.words</code>
+              </td>
+              <td>Word + start / end / speaker</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.utterances</code>
+              </td>
+              <td>AssemblyAI-style speaker turns</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.toDeepgram()</code>
+              </td>
+              <td>Deepgram-shaped object</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.toDict()</code>
+              </td>
+              <td>Normalized JSON</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.content</code> / <code>result.save(path)</code>
+              </td>
+              <td>Raw bytes / write to disk</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <CodeBlock
         language="ts"
         code={`const dg = result.toDeepgram();

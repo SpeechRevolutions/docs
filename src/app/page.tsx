@@ -56,7 +56,7 @@ export default function DocsHomePage() {
           <Link
             key={card.href}
             href={card.href}
-            className="flex flex-col rounded-xl border border-white/10 bg-white/[0.03] p-4 no-underline transition-colors hover:border-brand-500/30 hover:bg-brand-500/5"
+            className="flex min-w-0 flex-col rounded-xl border border-white/10 bg-white/[0.03] p-4 no-underline transition-colors hover:border-brand-500/30 hover:bg-brand-500/5"
           >
             <p className="text-sm font-semibold text-white">{card.title}</p>
             <p className="mt-1 flex-1 text-sm text-zinc-400">{card.body}</p>
@@ -74,31 +74,33 @@ export default function DocsHomePage() {
         without managing upload sessions.
       </p>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Use case</th>
-            <th>Endpoint</th>
-            <th>Best for</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>SDK / apps</td>
-            <td>
-              <code>POST /api/v1/upload</code>
-            </td>
-            <td>Large files, progress heartbeats, resumable wait via SSE</td>
-          </tr>
-          <tr>
-            <td>Terminal / scripts</td>
-            <td>
-              <code>POST /api/v1/transcribe</code>
-            </td>
-            <td>One-shot stream upload + percentage progress on the wire</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Use case</th>
+              <th>Endpoint</th>
+              <th>Best for</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>SDK / apps</td>
+              <td>
+                <code>POST /api/v1/upload</code>
+              </td>
+              <td>Large files, progress heartbeats, resumable wait via SSE</td>
+            </tr>
+            <tr>
+              <td>Terminal / scripts</td>
+              <td>
+                <code>POST /api/v1/transcribe</code>
+              </td>
+              <td>One-shot stream upload + percentage progress on the wire</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <Callout title="Base URL" tone="info">
         <p>

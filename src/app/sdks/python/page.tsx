@@ -21,8 +21,8 @@ export default function PythonSdkPage() {
       </p>
 
       <p>
-        Source on 
-        <a href="https://github.com/SpeechRevolutions/python-sdk">GitHub</a> &middot; 
+        Source on{" "}
+        <a href="https://github.com/SpeechRevolutions/python-sdk">GitHub</a> &middot;{" "}
         <a href="https://github.com/SpeechRevolutions/python-sdk/issues">
           report an issue
         </a>{" "}
@@ -88,142 +88,144 @@ result = client.transcribe(
     options=TranscribeOptions(speaker_labels=True),
 )`}
       />
-      <table>
-        <thead>
-          <tr>
-            <th>Kwarg</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>output_type</code>
-            </td>
-            <td>
-              <code>str</code>
-            </td>
-            <td>
-              <code>&quot;json&quot;</code>
-            </td>
-            <td>
-              <code>txt | json | srt | vtt | docx | pdf</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>word_timestamps</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>True</code>
-            </td>
-            <td>Per-word start/end times</td>
-          </tr>
-          <tr>
-            <td>
-              <code>speaker_labels</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>True</code>
-            </td>
-            <td>Label who spoke each segment</td>
-          </tr>
-          <tr>
-            <td>
-              <code>diarize</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>—</td>
-            <td>
-              Alias for <code>speaker_labels</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>nltk</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>True</code>
-            </td>
-            <td>Restore punctuation &amp; capitalization</td>
-          </tr>
-          <tr>
-            <td>
-              <code>tier</code>
-            </td>
-            <td>
-              <code>str</code>
-            </td>
-            <td>
-              <code>&quot;standard&quot;</code>
-            </td>
-            <td>
-              <code>standard</code> — the only tier currently available
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>custom_vocabulary</code>
-            </td>
-            <td>
-              <code>list[str] | None</code>
-            </td>
-            <td>
-              <code>None</code>
-            </td>
-            <td>Domain terms to bias toward</td>
-          </tr>
-          <tr>
-            <td>
-              <code>on_progress</code>
-            </td>
-            <td>
-              <code>Callable</code>
-            </td>
-            <td>
-              <code>None</code>
-            </td>
-            <td>Transcription-progress callback (see below)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>on_upload_progress</code>
-            </td>
-            <td>
-              <code>Callable</code>
-            </td>
-            <td>
-              <code>None</code>
-            </td>
-            <td>Upload byte-progress callback</td>
-          </tr>
-          <tr>
-            <td>
-              <code>progress</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>False</code>
-            </td>
-            <td>Render live console bars</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Kwarg</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>output_type</code>
+              </td>
+              <td>
+                <code>str</code>
+              </td>
+              <td>
+                <code>&quot;json&quot;</code>
+              </td>
+              <td>
+                <code>txt | json | srt | vtt | docx | pdf</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>word_timestamps</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>True</code>
+              </td>
+              <td>Per-word start/end times</td>
+            </tr>
+            <tr>
+              <td>
+                <code>speaker_labels</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>True</code>
+              </td>
+              <td>Label who spoke each segment</td>
+            </tr>
+            <tr>
+              <td>
+                <code>diarize</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>—</td>
+              <td>
+                Alias for <code>speaker_labels</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>nltk</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>True</code>
+              </td>
+              <td>Restore punctuation &amp; capitalization</td>
+            </tr>
+            <tr>
+              <td>
+                <code>tier</code>
+              </td>
+              <td>
+                <code>str</code>
+              </td>
+              <td>
+                <code>&quot;standard&quot;</code>
+              </td>
+              <td>
+                <code>standard</code> — the only tier currently available
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>custom_vocabulary</code>
+              </td>
+              <td>
+                <code>list[str] | None</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>Domain terms to bias toward</td>
+            </tr>
+            <tr>
+              <td>
+                <code>on_progress</code>
+              </td>
+              <td>
+                <code>Callable</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>Transcription-progress callback (see below)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>on_upload_progress</code>
+              </td>
+              <td>
+                <code>Callable</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>Upload byte-progress callback</td>
+            </tr>
+            <tr>
+              <td>
+                <code>progress</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>False</code>
+              </td>
+              <td>Render live console bars</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Live progress</h2>
       <p>
@@ -296,58 +298,60 @@ asyncio.run(main())`}
         object. The client never writes files unless you call{" "}
         <code>save()</code>.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>result.text</code>
-            </td>
-            <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.transcript</code>
-            </td>
-            <td>Deepgram-style alias for the same text</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.words</code>
-            </td>
-            <td>Word + start / end / speaker</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.utterances</code>
-            </td>
-            <td>AssemblyAI-style speaker turns</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.to_deepgram()</code>
-            </td>
-            <td>Deepgram-shaped dict for migrations</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.to_dict()</code>
-            </td>
-            <td>Normalized JSON dict</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.content</code> / <code>result.save(path)</code>
-            </td>
-            <td>Raw bytes / write to disk</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>result.text</code>
+              </td>
+              <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.transcript</code>
+              </td>
+              <td>Deepgram-style alias for the same text</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.words</code>
+              </td>
+              <td>Word + start / end / speaker</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.utterances</code>
+              </td>
+              <td>AssemblyAI-style speaker turns</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.to_deepgram()</code>
+              </td>
+              <td>Deepgram-shaped dict for migrations</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.to_dict()</code>
+              </td>
+              <td>Normalized JSON dict</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.content</code> / <code>result.save(path)</code>
+              </td>
+              <td>Raw bytes / write to disk</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <CodeBlock
         language="python"
         code={`dg = result.to_deepgram()

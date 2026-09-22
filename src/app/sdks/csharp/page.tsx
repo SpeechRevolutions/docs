@@ -20,8 +20,8 @@ export default function CsharpSdkPage() {
       </p>
 
       <p>
-        Source on 
-        <a href="https://github.com/SpeechRevolutions/csharp-sdk">GitHub</a> &middot; 
+        Source on{" "}
+        <a href="https://github.com/SpeechRevolutions/csharp-sdk">GitHub</a> &middot;{" "}
         <a href="https://github.com/SpeechRevolutions/csharp-sdk/issues">
           report an issue
         </a>{" "}
@@ -75,132 +75,134 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
         Deepgram-compatible alias for <code>SpeakerLabels</code> (when set, it
         wins).
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Option</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>OutputType</code>
-            </td>
-            <td>
-              <code>OutputType</code>
-            </td>
-            <td>
-              <code>Json</code>
-            </td>
-            <td>
-              <code>Txt | Json | Srt | Vtt | Docx | Pdf</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>WordTimestamps</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Per-word start/end times</td>
-          </tr>
-          <tr>
-            <td>
-              <code>SpeakerLabels</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Label who spoke each segment</td>
-          </tr>
-          <tr>
-            <td>
-              <code>Diarize</code>
-            </td>
-            <td>
-              <code>bool?</code>
-            </td>
-            <td>
-              <code>null</code>
-            </td>
-            <td>
-              Alias for <code>SpeakerLabels</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>Nltk</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Restore punctuation &amp; capitalization</td>
-          </tr>
-          <tr>
-            <td>
-              <code>Tier</code>
-            </td>
-            <td>
-              <code>ProcessingTier</code>
-            </td>
-            <td>
-              <code>Standard</code>
-            </td>
-            <td>
-              <code>Standard</code> — the only tier currently available
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>CustomVocabulary</code>
-            </td>
-            <td>
-              <code>IReadOnlyList&lt;string&gt;?</code>
-            </td>
-            <td>
-              <code>null</code>
-            </td>
-            <td>Domain terms to bias toward</td>
-          </tr>
-          <tr>
-            <td>
-              <code>Progress</code>
-            </td>
-            <td>
-              <code>bool</code>
-            </td>
-            <td>
-              <code>false</code>
-            </td>
-            <td>Render live console bars</td>
-          </tr>
-          <tr>
-            <td>
-              <code>OnUploadProgress</code>
-            </td>
-            <td>
-              <code>Action&lt;ProgressEvent&gt;?</code>
-            </td>
-            <td>
-              <code>null</code>
-            </td>
-            <td>Upload-progress callback</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>OutputType</code>
+              </td>
+              <td>
+                <code>OutputType</code>
+              </td>
+              <td>
+                <code>Json</code>
+              </td>
+              <td>
+                <code>Txt | Json | Srt | Vtt | Docx | Pdf</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>WordTimestamps</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Per-word start/end times</td>
+            </tr>
+            <tr>
+              <td>
+                <code>SpeakerLabels</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Label who spoke each segment</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Diarize</code>
+              </td>
+              <td>
+                <code>bool?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>
+                Alias for <code>SpeakerLabels</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>Nltk</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Restore punctuation &amp; capitalization</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Tier</code>
+              </td>
+              <td>
+                <code>ProcessingTier</code>
+              </td>
+              <td>
+                <code>Standard</code>
+              </td>
+              <td>
+                <code>Standard</code> — the only tier currently available
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>CustomVocabulary</code>
+              </td>
+              <td>
+                <code>IReadOnlyList&lt;string&gt;?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>Domain terms to bias toward</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Progress</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Render live console bars</td>
+            </tr>
+            <tr>
+              <td>
+                <code>OnUploadProgress</code>
+              </td>
+              <td>
+                <code>Action&lt;ProgressEvent&gt;?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>Upload-progress callback</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <CodeBlock
         language="csharp"
         code={`var result = await client.TranscribeAsync("a.mp3", new TranscribeOptions
@@ -251,54 +253,56 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
       </p>
 
       <h2>Result shape</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Member</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>result.Text</code>
-            </td>
-            <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.Transcript</code>
-            </td>
-            <td>Deepgram-style alias</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.Words</code>
-            </td>
-            <td>
-              Word + <code>Start</code> / <code>End</code> / <code>Speaker</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.Utterances</code>
-            </td>
-            <td>AssemblyAI-style speaker turns</td>
-          </tr>
-          <tr>
-            <td>
-              <code>result.Content</code>
-            </td>
-            <td>Raw response bytes</td>
-          </tr>
-          <tr>
-            <td>
-              <code>await result.SaveAsync(path)</code>
-            </td>
-            <td>Write to disk</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Member</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>result.Text</code>
+              </td>
+              <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.Transcript</code>
+              </td>
+              <td>Deepgram-style alias</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.Words</code>
+              </td>
+              <td>
+                Word + <code>Start</code> / <code>End</code> / <code>Speaker</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.Utterances</code>
+              </td>
+              <td>AssemblyAI-style speaker turns</td>
+            </tr>
+            <tr>
+              <td>
+                <code>result.Content</code>
+              </td>
+              <td>Raw response bytes</td>
+            </tr>
+            <tr>
+              <td>
+                <code>await result.SaveAsync(path)</code>
+              </td>
+              <td>Write to disk</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p>
         <code>SaveAsync("output")</code> writes{" "}
         <code>output.&lt;OutputType&gt;</code> (extension inferred when the path

@@ -43,8 +43,8 @@ SPEECHREVOLUTIONS_API_KEY=stt_...`}
 
       <h2>A shared server-only client</h2>
       <p>
-        Create the client once in a module you only import from server code. The
-        <code> import &quot;server-only&quot;</code> guard turns any accidental
+        Create the client once in a module you only import from server code. The{" "}
+        <code>import &quot;server-only&quot;</code> guard turns any accidental
         client-side import into a build error.
       </p>
       <CodeBlock

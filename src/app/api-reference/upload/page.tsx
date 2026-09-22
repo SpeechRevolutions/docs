@@ -38,90 +38,92 @@ export default function UploadApiPage() {
       />
 
       <h3>Request body</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Default</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>file_size</code>
-            </td>
-            <td>int</td>
-            <td>required (unless audio_url)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>audio_url</code>
-            </td>
-            <td>string (uri)</td>
-            <td>alternative to file_size</td>
-          </tr>
-          <tr>
-            <td>
-              <code>output_type</code>
-            </td>
-            <td>string</td>
-            <td>
-              <code>json</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>word_timestamps</code>
-            </td>
-            <td>bool</td>
-            <td>
-              <code>true</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>speaker_labels</code>
-            </td>
-            <td>bool</td>
-            <td>
-              <code>true</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>nltk</code>
-            </td>
-            <td>bool</td>
-            <td>
-              <code>true</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>tier</code>
-            </td>
-            <td>string</td>
-            <td>
-              <code>standard</code> — the only tier currently available
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>custom_vocabulary</code>
-            </td>
-            <td>string[]</td>
-            <td>optional</td>
-          </tr>
-          <tr>
-            <td>
-              <code>callback_url</code>
-            </td>
-            <td>string (uri)</td>
-            <td>optional</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>file_size</code>
+              </td>
+              <td>int</td>
+              <td>required (unless audio_url)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>audio_url</code>
+              </td>
+              <td>string (uri)</td>
+              <td>alternative to file_size</td>
+            </tr>
+            <tr>
+              <td>
+                <code>output_type</code>
+              </td>
+              <td>string</td>
+              <td>
+                <code>json</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>word_timestamps</code>
+              </td>
+              <td>bool</td>
+              <td>
+                <code>true</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>speaker_labels</code>
+              </td>
+              <td>bool</td>
+              <td>
+                <code>true</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>nltk</code>
+              </td>
+              <td>bool</td>
+              <td>
+                <code>true</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>tier</code>
+              </td>
+              <td>string</td>
+              <td>
+                <code>standard</code> — the only tier currently available
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>custom_vocabulary</code>
+              </td>
+              <td>string[]</td>
+              <td>optional</td>
+            </tr>
+            <tr>
+              <td>
+                <code>callback_url</code>
+              </td>
+              <td>string (uri)</td>
+              <td>optional</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p>
         Provide exactly one of <code>file_size</code> or <code>audio_url</code>.
         With <code>audio_url</code> (an http(s) URL) the platform fetches the
@@ -138,53 +140,55 @@ export default function UploadApiPage() {
         </code>
         , with these headers:
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Header</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>X-SR-Signature</code>
-            </td>
-            <td>
-              <code>sha256=&lt;hex&gt;</code>, an HMAC-SHA256 of the raw request
-              body. Verify it against the exact bytes you received, with a
-              constant-time comparison.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>X-SR-Event</code>
-            </td>
-            <td>
-              <code>completed</code> or <code>failed</code>, the same value as{" "}
-              <code>status</code> in the body, so you can route a delivery
-              before parsing it.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>X-SR-Delivery</code>
-            </td>
-            <td>
-              A unique id for this delivery. Retries of the same delivery reuse
-              it, so use it to ignore duplicates.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>User-Agent</code>
-            </td>
-            <td>
-              <code>SpeechRevolutions-Webhook/1</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Header</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>X-SR-Signature</code>
+              </td>
+              <td>
+                <code>sha256=&lt;hex&gt;</code>, an HMAC-SHA256 of the raw request
+                body. Verify it against the exact bytes you received, with a
+                constant-time comparison.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>X-SR-Event</code>
+              </td>
+              <td>
+                <code>completed</code> or <code>failed</code>, the same value as{" "}
+                <code>status</code> in the body, so you can route a delivery
+                before parsing it.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>X-SR-Delivery</code>
+              </td>
+              <td>
+                A unique id for this delivery. Retries of the same delivery reuse
+                it, so use it to ignore duplicates.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>User-Agent</code>
+              </td>
+              <td>
+                <code>SpeechRevolutions-Webhook/1</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p>
         Respond with any <code>2xx</code> to acknowledge. A <code>5xx</code>,
         a timeout (10 seconds per attempt) or a connection error is retried with

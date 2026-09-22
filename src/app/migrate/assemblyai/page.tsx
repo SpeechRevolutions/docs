@@ -42,77 +42,81 @@ export default function MigrateAssemblyAIPage() {
         <code>Bearer</code> prefix). Speech Revolutions uses <code>X-API-Key</code>, read from
         the environment by the SDK.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>AssemblyAI</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>authorization: ASSEMBLYAI_API_KEY</code>
-            </td>
-            <td>
-              <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>ASSEMBLYAI_API_KEY</code> env var
-            </td>
-            <td>
-              <code>SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>AssemblyAI</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>authorization: ASSEMBLYAI_API_KEY</code>
+              </td>
+              <td>
+                <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>ASSEMBLYAI_API_KEY</code> env var
+              </td>
+              <td>
+                <code>SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Endpoint &amp; method mapping</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>AssemblyAI</th>
-            <th>Speech Revolutions REST</th>
-            <th>Speech Revolutions SDK</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>POST /v2/upload</code> (raw bytes → <code>upload_url</code>)
-            </td>
-            <td>
-              <code>POST /api/v1/upload</code> → PUT to presigned URL
-            </td>
-            <td rowSpan={2}>
-              <code>submit()</code> (or <code>transcribe()</code> to also wait)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>POST /v2/transcript</code> (<code>audio_url</code> → job id)
-            </td>
-            <td>
-              <code>POST /api/v1/upload/complete</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>GET /v2/transcript/{`{id}`}</code> (poll until{" "}
-              <code>completed</code>)
-            </td>
-            <td>
-              <code>GET /api/v1/jobs/{`{id}`}</code> or{" "}
-              <code>/stream</code> (SSE)
-            </td>
-            <td>
-              <code>get_job_status()</code> / <code>get_transcript()</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>AssemblyAI</th>
+              <th>Speech Revolutions REST</th>
+              <th>Speech Revolutions SDK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>POST /v2/upload</code> (raw bytes → <code>upload_url</code>)
+              </td>
+              <td>
+                <code>POST /api/v1/upload</code> → PUT to presigned URL
+              </td>
+              <td rowSpan={2}>
+                <code>submit()</code> (or <code>transcribe()</code> to also wait)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>POST /v2/transcript</code> (<code>audio_url</code> → job id)
+              </td>
+              <td>
+                <code>POST /api/v1/upload/complete</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>GET /v2/transcript/{`{id}`}</code> (poll until{" "}
+                <code>completed</code>)
+              </td>
+              <td>
+                <code>GET /api/v1/jobs/{`{id}`}</code> or{" "}
+                <code>/stream</code> (SSE)
+              </td>
+              <td>
+                <code>get_job_status()</code> / <code>get_transcript()</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <EndpointBadge method="POST" path="/api/v1/upload" />
       <p>
         Note the ordering difference: AssemblyAI uploads first and gets an{" "}
@@ -141,50 +145,52 @@ export default function MigrateAssemblyAIPage() {
         <strong>milliseconds</strong>. Speech Revolutions returns times in{" "}
         <strong>seconds</strong>.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>AssemblyAI field</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>text</code>
-            </td>
-            <td>
-              <code>result.text</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>words[]</code> (<code>text</code>, <code>start</code>/
-              <code>end</code> in <strong>ms</strong>, <code>speaker</code>)
-            </td>
-            <td>
-              <code>result.words</code> (<code>text</code>, <code>start</code>/
-              <code>end</code> in <strong>seconds</strong>, <code>speaker</code>)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>utterances[]</code> (speaker turns)
-            </td>
-            <td>
-              <code>result.utterances</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>language_code</code>
-            </td>
-            <td>
-              <code>result.languages</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>AssemblyAI field</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>text</code>
+              </td>
+              <td>
+                <code>result.text</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>words[]</code> (<code>text</code>, <code>start</code>/
+                <code>end</code> in <strong>ms</strong>, <code>speaker</code>)
+              </td>
+              <td>
+                <code>result.words</code> (<code>text</code>, <code>start</code>/
+                <code>end</code> in <strong>seconds</strong>, <code>speaker</code>)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>utterances[]</code> (speaker turns)
+              </td>
+              <td>
+                <code>result.utterances</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>language_code</code>
+              </td>
+              <td>
+                <code>result.languages</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <Callout title="Watch the units" tone="warn">
         <p>
           AssemblyAI timestamps are milliseconds; Speech Revolutions timestamps are seconds.

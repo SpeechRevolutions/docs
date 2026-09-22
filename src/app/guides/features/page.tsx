@@ -18,120 +18,124 @@ export default function FeaturesPage() {
       </p>
 
       <h2>Transcription options</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Option</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>word_timestamps</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Start/end time per word (seconds)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>speaker_labels</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Diarization / speaker turns</td>
-          </tr>
-          <tr>
-            <td>
-              <code>diarize</code>
-            </td>
-            <td>—</td>
-            <td>
-              Deepgram-compatible alias for <code>speaker_labels</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>nltk</code>
-            </td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Restore punctuation &amp; capitalization</td>
-          </tr>
-          <tr>
-            <td>
-              <code>custom_vocabulary</code>
-            </td>
-            <td>—</td>
-            <td>List of names / jargon to recover</td>
-          </tr>
-          <tr>
-            <td>
-              <code>tier</code>
-            </td>
-            <td>
-              <code>standard</code>
-            </td>
-            <td>
-              <code>standard</code> — the only tier currently available
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>output_type</code>
-            </td>
-            <td>
-              <code>json</code>
-            </td>
-            <td>Result file format</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>word_timestamps</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Start/end time per word (seconds)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>speaker_labels</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Diarization / speaker turns</td>
+            </tr>
+            <tr>
+              <td>
+                <code>diarize</code>
+              </td>
+              <td>—</td>
+              <td>
+                Deepgram-compatible alias for <code>speaker_labels</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>nltk</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Restore punctuation &amp; capitalization</td>
+            </tr>
+            <tr>
+              <td>
+                <code>custom_vocabulary</code>
+              </td>
+              <td>—</td>
+              <td>List of names / jargon to recover</td>
+            </tr>
+            <tr>
+              <td>
+                <code>tier</code>
+              </td>
+              <td>
+                <code>standard</code>
+              </td>
+              <td>
+                <code>standard</code> — the only tier currently available
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>output_type</code>
+              </td>
+              <td>
+                <code>json</code>
+              </td>
+              <td>Result file format</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Output types</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Use for</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>json</code>
-            </td>
-            <td>
-              Structured <code>words</code> (+ optional diarization). SDKs parse
-              this into <code>text</code>, <code>words</code>,{" "}
-              <code>utterances</code>.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>txt</code>
-            </td>
-            <td>Plain transcript (speaker blocks when labels on)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>srt</code> / <code>vtt</code>
-            </td>
-            <td>Subtitles / captions</td>
-          </tr>
-          <tr>
-            <td>
-              <code>docx</code> / <code>pdf</code>
-            </td>
-            <td>Shareable documents</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Use for</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>json</code>
+              </td>
+              <td>
+                Structured <code>words</code> (+ optional diarization). SDKs parse
+                this into <code>text</code>, <code>words</code>,{" "}
+                <code>utterances</code>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>txt</code>
+              </td>
+              <td>Plain transcript (speaker blocks when labels on)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>srt</code> / <code>vtt</code>
+              </td>
+              <td>Subtitles / captions</td>
+            </tr>
+            <tr>
+              <td>
+                <code>docx</code> / <code>pdf</code>
+              </td>
+              <td>Shareable documents</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>JSON shape (native)</h2>
       <p>Default JSON looks like:</p>

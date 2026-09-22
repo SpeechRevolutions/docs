@@ -35,51 +35,53 @@ export default function BenchmarksPage() {
 
       <h2>What we measure</h2>
       <p>Six benchmarks, each from public data:</p>
-      <table>
-        <thead>
-          <tr>
-            <th>Benchmark</th>
-            <th>Dataset(s)</th>
-            <th>Measures</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>WER</td>
-            <td>LibriSpeech clean/other, Earnings21, SPGISpeech</td>
-            <td>Word error rate (accuracy)</td>
-          </tr>
-          <tr>
-            <td>Entity accuracy</td>
-            <td>Earnings21 (spaCy NER)</td>
-            <td>Precision / recall / F1 on named entities</td>
-          </tr>
-          <tr>
-            <td>Diarization</td>
-            <td>AMI-SDM, AMI Mix-Headset, Earnings21, NotSoFar, DiPCo</td>
-            <td>
-              DER at the standard 0.25 s collar (the figure on our site), strict
-              DER at collar 0, cpWER, speaker error, missed speech, false alarm —
-              overall and per dataset, all overlap-aware
-            </td>
-          </tr>
-          <tr>
-            <td>Timestamps</td>
-            <td>AMI (word-level refs)</td>
-            <td>Word start/end MAE, within-50/100/200 ms</td>
-          </tr>
-          <tr>
-            <td>Multilingual</td>
-            <td>FLEURS (14 langs)</td>
-            <td>WER per language (CER for zh/ja/th)</td>
-          </tr>
-          <tr>
-            <td>Language switching</td>
-            <td>FLEURS (generated)</td>
-            <td>Switch-boundary WER, switch latency</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Benchmark</th>
+              <th>Dataset(s)</th>
+              <th>Measures</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>WER</td>
+              <td>LibriSpeech clean/other, Earnings21, SPGISpeech</td>
+              <td>Word error rate (accuracy)</td>
+            </tr>
+            <tr>
+              <td>Entity accuracy</td>
+              <td>Earnings21 (spaCy NER)</td>
+              <td>Precision / recall / F1 on named entities</td>
+            </tr>
+            <tr>
+              <td>Diarization</td>
+              <td>AMI-SDM, AMI Mix-Headset, Earnings21, NotSoFar, DiPCo</td>
+              <td>
+                DER at the standard 0.25 s collar (the figure on our site), strict
+                DER at collar 0, cpWER, speaker error, missed speech, false alarm —
+                overall and per dataset, all overlap-aware
+              </td>
+            </tr>
+            <tr>
+              <td>Timestamps</td>
+              <td>AMI (word-level refs)</td>
+              <td>Word start/end MAE, within-50/100/200 ms</td>
+            </tr>
+            <tr>
+              <td>Multilingual</td>
+              <td>FLEURS (14 langs)</td>
+              <td>WER per language (CER for zh/ja/th)</td>
+            </tr>
+            <tr>
+              <td>Language switching</td>
+              <td>FLEURS (generated)</td>
+              <td>Switch-boundary WER, switch latency</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Reproduce it yourself</h2>
       <p>

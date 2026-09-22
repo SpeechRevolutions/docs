@@ -43,66 +43,70 @@ export default function MigrateOpenAIWhisperPage() {
         OpenAI uses <code>Authorization: Bearer &lt;key&gt;</code>. Speech Revolutions uses{" "}
         <code>X-API-Key</code>, read from the environment by the SDK.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>OpenAI</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>Authorization: Bearer OPENAI_API_KEY</code>
-            </td>
-            <td>
-              <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>OPENAI_API_KEY</code> env var
-            </td>
-            <td>
-              <code>SPEECHREVOLUTIONS_API_KEY</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>OpenAI</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>Authorization: Bearer OPENAI_API_KEY</code>
+              </td>
+              <td>
+                <code>X-API-Key: SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>OPENAI_API_KEY</code> env var
+              </td>
+              <td>
+                <code>SPEECHREVOLUTIONS_API_KEY</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Endpoint &amp; method mapping</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>OpenAI</th>
-            <th>Speech Revolutions REST</th>
-            <th>Speech Revolutions SDK</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>POST /v1/audio/transcriptions</code> (sync multipart)
-            </td>
-            <td>
-              <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
-              <code>POST /api/v1/upload/complete</code>
-            </td>
-            <td>
-              <code>transcribe()</code> (blocks until done)
-            </td>
-          </tr>
-          <tr>
-            <td>— (response is inline)</td>
-            <td>
-              <code>GET /api/v1/jobs/{`{id}`}</code> / <code>/stream</code>
-            </td>
-            <td>
-              <code>get_transcript()</code> / <code>on_progress</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>OpenAI</th>
+              <th>Speech Revolutions REST</th>
+              <th>Speech Revolutions SDK</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>POST /v1/audio/transcriptions</code> (sync multipart)
+              </td>
+              <td>
+                <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
+                <code>POST /api/v1/upload/complete</code>
+              </td>
+              <td>
+                <code>transcribe()</code> (blocks until done)
+              </td>
+            </tr>
+            <tr>
+              <td>— (response is inline)</td>
+              <td>
+                <code>GET /api/v1/jobs/{`{id}`}</code> / <code>/stream</code>
+              </td>
+              <td>
+                <code>get_transcript()</code> / <code>on_progress</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <EndpointBadge method="POST" path="/api/v1/upload" />
 
       <h2>Upload differences &amp; the 25 MB limit</h2>
@@ -128,46 +132,48 @@ export default function MigrateOpenAIWhisperPage() {
         <code>gpt-4o-transcribe</code> returns essentially <code>{`{ text }`}</code>
         {" "}— no words, no segments, no speakers. Speech Revolutions returns those too:
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>OpenAI field</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>text</code>
-            </td>
-            <td>
-              <code>result.text</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              — (not returned by <code>gpt-4o-transcribe</code>)
-            </td>
-            <td>
-              <code>result.words</code> (word + start/end/speaker, seconds)
-            </td>
-          </tr>
-          <tr>
-            <td>— (not returned)</td>
-            <td>
-              <code>result.utterances</code> (speaker turns)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>language</code> (with <code>verbose_json</code>)
-            </td>
-            <td>
-              <code>result.languages</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>OpenAI field</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>text</code>
+              </td>
+              <td>
+                <code>result.text</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                — (not returned by <code>gpt-4o-transcribe</code>)
+              </td>
+              <td>
+                <code>result.words</code> (word + start/end/speaker, seconds)
+              </td>
+            </tr>
+            <tr>
+              <td>— (not returned)</td>
+              <td>
+                <code>result.utterances</code> (speaker turns)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>language</code> (with <code>verbose_json</code>)
+              </td>
+              <td>
+                <code>result.languages</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Diarization</h2>
       <p>

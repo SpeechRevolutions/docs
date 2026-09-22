@@ -56,80 +56,82 @@ curl -N -X POST \\
         Options are passed in the query string (the request body is the raw
         audio). Same options as <Link href="/api-reference/upload">upload</Link>:
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Field</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>output_type</code>
-            </td>
-            <td>string</td>
-            <td>
-              <code>json</code>
-            </td>
-            <td>
-              <code>txt | json | srt | vtt | docx | pdf</code>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>word_timestamps</code>
-            </td>
-            <td>bool</td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Per-word timing</td>
-          </tr>
-          <tr>
-            <td>
-              <code>speaker_labels</code>
-            </td>
-            <td>bool</td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Diarization</td>
-          </tr>
-          <tr>
-            <td>
-              <code>nltk</code>
-            </td>
-            <td>bool</td>
-            <td>
-              <code>true</code>
-            </td>
-            <td>Punctuation / cleanup</td>
-          </tr>
-          <tr>
-            <td>
-              <code>tier</code>
-            </td>
-            <td>string</td>
-            <td>
-              <code>standard</code>
-            </td>
-            <td>
-              <code>standard</code> — the only tier currently available
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>custom_vocabulary</code>
-            </td>
-            <td>string</td>
-            <td>—</td>
-            <td>Comma-separated terms (optional)</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>output_type</code>
+              </td>
+              <td>string</td>
+              <td>
+                <code>json</code>
+              </td>
+              <td>
+                <code>txt | json | srt | vtt | docx | pdf</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>word_timestamps</code>
+              </td>
+              <td>bool</td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Per-word timing</td>
+            </tr>
+            <tr>
+              <td>
+                <code>speaker_labels</code>
+              </td>
+              <td>bool</td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Diarization</td>
+            </tr>
+            <tr>
+              <td>
+                <code>nltk</code>
+              </td>
+              <td>bool</td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>Punctuation / cleanup</td>
+            </tr>
+            <tr>
+              <td>
+                <code>tier</code>
+              </td>
+              <td>string</td>
+              <td>
+                <code>standard</code>
+              </td>
+              <td>
+                <code>standard</code> — the only tier currently available
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>custom_vocabulary</code>
+              </td>
+              <td>string</td>
+              <td>—</td>
+              <td>Comma-separated terms (optional)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2>Progress stream</h2>
       <p>

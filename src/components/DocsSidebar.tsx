@@ -131,9 +131,11 @@ export function DocsSidebar() {
 
   return (
     <>
+      {/* z-20, under the header's z-30: the search dialog renders inside the header's
+          stacking context, so anything above z-30 here would sit on top of it. */}
       <button
         type="button"
-        className="fixed right-4 bottom-4 z-40 inline-flex items-center gap-2 rounded-full border border-white/15 bg-surface-900 px-4 py-2.5 text-sm text-white shadow-lg lg:hidden"
+        className="fixed right-4 bottom-4 z-20inline-flex items-center gap-2 rounded-full border border-white/15 bg-surface-900 px-4 py-2.5 text-sm text-white shadow-lg lg:hidden"
         onClick={() => setOpen(true)}
         aria-expanded={open}
       >

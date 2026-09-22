@@ -78,34 +78,36 @@ data: {"job_id":"…","download_url":"https://…","output_type":"json"}`}
       />
 
       <h2>Errors</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Meaning</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>401</code>
-            </td>
-            <td>Unauthorized</td>
-          </tr>
-          <tr>
-            <td>
-              <code>413</code>
-            </td>
-            <td>File too large for this route</td>
-          </tr>
-          <tr>
-            <td>
-              <code>429</code>
-            </td>
-            <td>Rate limited</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>401</code>
+              </td>
+              <td>Unauthorized</td>
+            </tr>
+            <tr>
+              <td>
+                <code>413</code>
+              </td>
+              <td>File too large for this route</td>
+            </tr>
+            <tr>
+              <td>
+                <code>429</code>
+              </td>
+              <td>Rate limited</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <p>
         Guide: <Link href="/guides/terminal">Terminal & cURL</Link>

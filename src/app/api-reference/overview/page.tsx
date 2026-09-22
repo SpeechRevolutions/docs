@@ -21,43 +21,45 @@ export default function ApiOverviewPage() {
       </p>
 
       <h2>Limits</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Limit</th>
-            <th>Value</th>
-            <th>Applies to</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Maximum file size</td>
-            <td>
-              <code>{LIMITS.sdkUploadMax}</code>
-            </td>
-            <td>
-              SDK upload flow (<code>/api/v1/upload</code> + presigned PUT or
-              multipart)
-            </td>
-          </tr>
-          <tr>
-            <td>Maximum file size</td>
-            <td>
-              <code>{LIMITS.apiUploadMax}</code>
-            </td>
-            <td>
-              Direct REST upload (<code>/api/v1/transcribe</code>)
-            </td>
-          </tr>
-          <tr>
-            <td>Audio retention</td>
-            <td>
-              <code>{LIMITS.dataRetentionMinutes} minutes</code>
-            </td>
-            <td>Uploaded audio is deleted after processing</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Limit</th>
+              <th>Value</th>
+              <th>Applies to</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Maximum file size</td>
+              <td>
+                <code>{LIMITS.sdkUploadMax}</code>
+              </td>
+              <td>
+                SDK upload flow (<code>/api/v1/upload</code> + presigned PUT or
+                multipart)
+              </td>
+            </tr>
+            <tr>
+              <td>Maximum file size</td>
+              <td>
+                <code>{LIMITS.apiUploadMax}</code>
+              </td>
+              <td>
+                Direct REST upload (<code>/api/v1/transcribe</code>)
+              </td>
+            </tr>
+            <tr>
+              <td>Audio retention</td>
+              <td>
+                <code>{LIMITS.dataRetentionMinutes} minutes</code>
+              </td>
+              <td>Uploaded audio is deleted after processing</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p>
         A file larger than the limit for its path is rejected at job creation,
         before any upload starts. Send anything above{" "}
@@ -72,24 +74,26 @@ export default function ApiOverviewPage() {
         automatically, so most applications never see one; if you call the API
         directly, wait a few seconds and retry with exponential backoff.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Endpoint</th>
-            <th>Requests / minute</th>
-          </tr>
-        </thead>
-        <tbody>
-          {RATE_LIMITS.map((r) => (
-            <tr key={r.endpoint}>
-              <td>
-                <code>{r.endpoint}</code>
-              </td>
-              <td>{r.perMinute}</td>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Endpoint</th>
+              <th>Requests / minute</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {RATE_LIMITS.map((r) => (
+              <tr key={r.endpoint}>
+                <td>
+                  <code>{r.endpoint}</code>
+                </td>
+                <td>{r.perMinute}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <p>
         Each upload creates one job, so the upload limit is also your job
         submission rate: 120 new jobs a minute, 7,200 an hour. If you need more,
@@ -97,80 +101,82 @@ export default function ApiOverviewPage() {
       </p>
 
       <h2>Endpoints</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Method</th>
-            <th>Path</th>
-            <th>Audience</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>POST</code>
-            </td>
-            <td>
-              <Link href="/api-reference/upload">/api/v1/upload</Link>
-            </td>
-            <td>SDK — create job + presigned URLs</td>
-          </tr>
-          <tr>
-            <td>
-              <code>POST</code>
-            </td>
-            <td>
-              <Link href="/api-reference/upload">/api/v1/upload/progress</Link>
-            </td>
-            <td>SDK — keep upload session alive</td>
-          </tr>
-          <tr>
-            <td>
-              <code>POST</code>
-            </td>
-            <td>
-              <Link href="/api-reference/upload">/api/v1/upload/complete</Link>
-            </td>
-            <td>SDK — enqueue after storage PUT</td>
-          </tr>
-          <tr>
-            <td>
-              <code>POST</code>
-            </td>
-            <td>
-              <Link href="/api-reference/transcribe">/api/v1/transcribe</Link>
-            </td>
-            <td>Terminal — stream file + progress</td>
-          </tr>
-          <tr>
-            <td>
-              <code>GET</code>
-            </td>
-            <td>
-              <Link href="/api-reference/jobs">/api/v1/jobs/{"{id}"}/stream</Link>
-            </td>
-            <td>SSE progress (SDK wait path)</td>
-          </tr>
-          <tr>
-            <td>
-              <code>POST</code>
-            </td>
-            <td>
-              <Link href="/api-reference/jobs">/api/v1/jobs/cancel</Link>
-            </td>
-            <td>Cancel a job</td>
-          </tr>
-          <tr>
-            <td>
-              <code>POST</code>
-            </td>
-            <td>
-              <Link href="/api-reference/jobs">/api/v1/jobs/check-failed</Link>
-            </td>
-            <td>Batch failure check</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Path</th>
+              <th>Audience</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>POST</code>
+              </td>
+              <td>
+                <Link href="/api-reference/upload">/api/v1/upload</Link>
+              </td>
+              <td>SDK — create job + presigned URLs</td>
+            </tr>
+            <tr>
+              <td>
+                <code>POST</code>
+              </td>
+              <td>
+                <Link href="/api-reference/upload">/api/v1/upload/progress</Link>
+              </td>
+              <td>SDK — keep upload session alive</td>
+            </tr>
+            <tr>
+              <td>
+                <code>POST</code>
+              </td>
+              <td>
+                <Link href="/api-reference/upload">/api/v1/upload/complete</Link>
+              </td>
+              <td>SDK — enqueue after storage PUT</td>
+            </tr>
+            <tr>
+              <td>
+                <code>POST</code>
+              </td>
+              <td>
+                <Link href="/api-reference/transcribe">/api/v1/transcribe</Link>
+              </td>
+              <td>Terminal — stream file + progress</td>
+            </tr>
+            <tr>
+              <td>
+                <code>GET</code>
+              </td>
+              <td>
+                <Link href="/api-reference/jobs">/api/v1/jobs/{"{id}"}/stream</Link>
+              </td>
+              <td>SSE progress (SDK wait path)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>POST</code>
+              </td>
+              <td>
+                <Link href="/api-reference/jobs">/api/v1/jobs/cancel</Link>
+              </td>
+              <td>Cancel a job</td>
+            </tr>
+            <tr>
+              <td>
+                <code>POST</code>
+              </td>
+              <td>
+                <Link href="/api-reference/jobs">/api/v1/jobs/check-failed</Link>
+              </td>
+              <td>Batch failure check</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <Callout title="Upload styles" tone="info">
         <p>

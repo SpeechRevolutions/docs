@@ -54,46 +54,48 @@ export default function MigrateSelfHostedWhisperPage() {
         compute off your box — the SDK uploads the file and waits for the result —
         but the call site stays a single line.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Self-hosted</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              <code>WhisperModel(&quot;large-v3&quot;, device=&quot;cuda&quot;)</code>{" "}
-              (loads weights into VRAM)
-            </td>
-            <td>
-              <code>SpeechRevolutions()</code> (just reads the API key)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>model.transcribe(path, ...)</code> (runs on your GPU)
-            </td>
-            <td>
-              <code>client.transcribe(path, ...)</code> (runs on Speech Revolutions)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              lazy <code>segments</code> generator you must iterate
-            </td>
-            <td>
-              a materialized result: <code>.text</code>, <code>.words</code>,{" "}
-              <code>.utterances</code>
-            </td>
-          </tr>
-          <tr>
-            <td>you operate the GPU, queue, and scaling</td>
-            <td>hosted; nothing to operate</td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Self-hosted</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>WhisperModel(&quot;large-v3&quot;, device=&quot;cuda&quot;)</code>{" "}
+                (loads weights into VRAM)
+              </td>
+              <td>
+                <code>SpeechRevolutions()</code> (just reads the API key)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>model.transcribe(path, ...)</code> (runs on your GPU)
+              </td>
+              <td>
+                <code>client.transcribe(path, ...)</code> (runs on Speech Revolutions)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                lazy <code>segments</code> generator you must iterate
+              </td>
+              <td>
+                a materialized result: <code>.text</code>, <code>.words</code>,{" "}
+                <code>.utterances</code>
+              </td>
+            </tr>
+            <tr>
+              <td>you operate the GPU, queue, and scaling</td>
+              <td>hosted; nothing to operate</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <EndpointBadge method="POST" path="/api/v1/upload" />
 
       <h2>Input / upload differences</h2>
@@ -114,48 +116,50 @@ export default function MigrateSelfHostedWhisperPage() {
         <code>info</code> with the detected <code>language</code>. Speech Revolutions returns a
         transcript-first object.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>faster-whisper</th>
-            <th>Speech Revolutions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              join <code>segment.text</code> across the generator
-            </td>
-            <td>
-              <code>result.text</code> (already assembled)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>segment.words[]</code> (<code>word</code>, <code>start</code>,{" "}
-              <code>end</code>)
-            </td>
-            <td>
-              <code>result.words</code> (<code>text</code>, <code>start</code>,{" "}
-              <code>end</code>, <code>speaker</code>)
-            </td>
-          </tr>
-          <tr>
-            <td>— (no speaker labels)</td>
-            <td>
-              <code>result.utterances</code> (speaker turns)
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <code>info.language</code>
-            </td>
-            <td>
-              <code>result.languages</code>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>faster-whisper</th>
+              <th>Speech Revolutions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                join <code>segment.text</code> across the generator
+              </td>
+              <td>
+                <code>result.text</code> (already assembled)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>segment.words[]</code> (<code>word</code>, <code>start</code>,{" "}
+                <code>end</code>)
+              </td>
+              <td>
+                <code>result.words</code> (<code>text</code>, <code>start</code>,{" "}
+                <code>end</code>, <code>speaker</code>)
+              </td>
+            </tr>
+            <tr>
+              <td>— (no speaker labels)</td>
+              <td>
+                <code>result.utterances</code> (speaker turns)
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>info.language</code>
+              </td>
+              <td>
+                <code>result.languages</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <Callout title="No more draining the generator" tone="info">
         <p>
           <code>faster-whisper</code>&apos;s <code>segments</code> is a lazy

@@ -46,7 +46,9 @@ export function DocsHeader() {
                 height={22}
                 className="h-6 w-auto"
               />
-              <span className="text-sm font-semibold tracking-tight text-white">
+              {/* Below sm the full name doesn't fit beside search and Console, so the
+                  mark stands alone; sr-only keeps the link's accessible name. */}
+              <span className="sr-only text-sm font-semibold tracking-tight text-white sm:not-sr-only">
                 Speech Revolutions
               </span>
             </Link>

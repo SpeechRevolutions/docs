@@ -24,8 +24,7 @@ export default function DjangoIntegrationPage() {
       <Callout title="Keep the key server-side" tone="warn">
         <p>
           <code>SpeechRevolutions()</code> reads{" "}
-          <code>SPEECHREVOLUTIONS_API_KEY</code>
-          from the environment. Views run on the server, so the client and key
+          <code>SPEECHREVOLUTIONS_API_KEY</code> from the environment. Views run on the server, so the client and key
           never ship to templates or JavaScript.
         </p>
       </Callout>
