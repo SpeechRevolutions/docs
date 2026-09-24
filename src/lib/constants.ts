@@ -18,10 +18,14 @@ export const PRICING = {
  * user_cluster/configs/constants.py:
  *   TRANSCRIBE_MAX_UPLOAD_BYTES = 200 MB  (cURL / transcribe path)
  *   MAX_UPLOAD_BYTES            = 5 GB    (SDK upload path)
+ *
+ * NOTE 2026-09-24: the advertised SDK maximum was raised to 10 GB by decision, and the
+ * server still rejects anything over MAX_UPLOAD_BYTES (5 GB). Raise that constant before
+ * this number is true, or a 6 GB file is refused by the very API these pages document.
  */
 export const LIMITS = {
   apiUploadMax: "200 MB",
-  sdkUploadMax: "5 GB",
+  sdkUploadMax: "10 GB",
   jobDeadlineMinutes: 10,
   dataRetentionMinutes: 30,
 } as const;
