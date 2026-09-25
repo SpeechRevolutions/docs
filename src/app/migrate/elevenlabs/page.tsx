@@ -209,11 +209,10 @@ export default function MigrateElevenLabsPage() {
       <h2>Language selection</h2>
       <p>
         ElevenLabs takes <code>language_code</code>. Speech Revolutions always
-        auto-detects, including code-switching mid-file — there&apos;s no
-        language parameter to set. <code>result.languages</code> is a list of{" "}
-        <code>{`{start, end, language}`}</code> segments covering the whole
-        file, and every word in <code>result.words</code> also carries a{" "}
-        <code>language</code>.
+        auto-detects, and detects changes <em>within</em> a file, so a
+        recording that switches languages mid-sentence comes back correctly rather than
+        forced into one. Each word carries its own <code>language</code>, which is what you
+        want if you are cutting subtitles per language rather than per file.
       </p>
 
       <h2>Side by side</h2>

@@ -219,12 +219,10 @@ export default function MigrateAssemblyAIPage() {
       <p>
         AssemblyAI takes <code>language_code</code>, or{" "}
         <code>language_detection: true</code> to auto-detect. Speech Revolutions always
-        auto-detects, including code-switching mid-file — there&apos;s no
-        language parameter to set. Read the detected language(s) back from{" "}
-        <code>result.languages</code>, a list of{" "}
-        <code>{`{start, end, language}`}</code> segments covering the whole
-        file (and every word in <code>result.words</code> also carries a{" "}
-        <code>language</code>).
+        auto-detects, so both of those parameters come out of your
+        request with nothing to replace them. Detection is per-segment, so{" "}
+        <code>result.languages</code> reports spans rather than one verdict for the file —
+        closer to what <code>language_detection</code> gave you, but without a second pass.
       </p>
 
       <h2>Side by side</h2>

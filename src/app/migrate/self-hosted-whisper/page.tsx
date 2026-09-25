@@ -194,11 +194,10 @@ export default function MigrateSelfHostedWhisperPage() {
       <p>
         <code>faster-whisper</code> auto-detects, or you pass{" "}
         <code>language=</code> to <code>transcribe()</code>. Speech Revolutions always
-        auto-detects, including code-switching mid-file — there&apos;s no
-        language parameter to set. <code>result.languages</code> is a list of{" "}
-        <code>{`{start, end, language}`}</code> segments covering the whole
-        file, and every word in <code>result.words</code> also carries a{" "}
-        <code>language</code>.
+        auto-detects. This is one of the parameters you stop
+        tuning: no language flag, no per-language model choice, and code-switching handled
+        without you splitting the file first. The detected spans come back in{" "}
+        <code>result.languages</code>.
       </p>
 
       <h2>Side by side</h2>

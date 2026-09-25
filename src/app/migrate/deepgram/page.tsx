@@ -242,11 +242,10 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
       <p>
         Deepgram takes a BCP-47 <code>language</code> query param, or{" "}
         <code>detect_language=true</code> to auto-detect. Speech Revolutions always
-        auto-detects, including code-switching mid-file — there&apos;s no
-        language parameter to set. <code>result.languages</code> is a list of{" "}
-        <code>{`{start, end, language}`}</code> segments covering the whole
-        file, and every word in <code>result.words</code> also carries a{" "}
-        <code>language</code>.
+        auto-detects and cannot be pinned, so there is nothing to
+        migrate: drop the parameter. The difference worth knowing is that detection is
+        per-segment rather than per-request — <code>result.languages</code> gives you the
+        spans, so a bilingual call is labelled as two, not averaged into one.
       </p>
 
       <h2>Side by side</h2>

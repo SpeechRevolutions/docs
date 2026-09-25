@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "API overview",
   description:
-    "Base URL: https://api.speechrevolutions.com",
+    "Base URL, authentication, file-size limits, per-endpoint rate limits, supported audio formats and every error code for the Speech Revolutions speech-to-text API.",
 };
 
 export default function ApiOverviewPage() {

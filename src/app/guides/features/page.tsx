@@ -163,8 +163,8 @@ export default function FeaturesPage() {
         <code>step</code>, and a computed <code>percent</code>. It is derived
         from the{" "}
         <Link href="/api-reference/jobs">job SSE stream</Link>&apos;s{" "}
-        <code>completed</code>/<code>total</code> counts, and neither AssemblyAI
-        nor Deepgram exposes it for pre-recorded audio.
+        <code>completed</code>/<code>total</code> counts, so the bar moves against real
+        work done rather than an estimate.
       </p>
 
       <Callout title="SDK adapters" tone="tip">

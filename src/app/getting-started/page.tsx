@@ -171,8 +171,7 @@ foreach (var u in result.Utterances)
       <p>
         The SDKs surface real-time upload <em>and</em> transcription progress —
         as console bars (<code>progress=True</code>) or callbacks with a{" "}
-        <code>percent</code> field. Neither AssemblyAI nor Deepgram exposes this
-        for pre-recorded audio.
+        <code>percent</code> field, so a long file is never a silent wait.
       </p>
       <CodeTabs
         tabs={[

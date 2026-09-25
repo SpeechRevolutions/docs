@@ -197,11 +197,9 @@ export default function MigrateOpenAIWhisperPage() {
       <h2>Language selection</h2>
       <p>
         OpenAI takes an ISO-639-1 <code>language</code> hint. Speech Revolutions always
-        auto-detects, including code-switching mid-file — there&apos;s no
-        language parameter to set. <code>result.languages</code> is a list of{" "}
-        <code>{`{start, end, language}`}</code> segments covering the whole
-        file, and every word in <code>result.words</code> also carries a{" "}
-        <code>language</code>.
+        auto-detects, and unlike a hint you cannot get it wrong: a
+        mislabelled <code>language</code> on Whisper quietly degrades the transcript, where
+        here the detected spans come back in <code>result.languages</code> for you to check.
       </p>
 
       <h2>Custom vocabulary</h2>
