@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  applyTheme,
   readAppliedTheme,
   systemTheme,
   THEME_STORAGE_KEY,
+  transitionTheme,
   type Theme,
 } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -32,16 +32,17 @@ export function ThemeToggle({ className }: { className?: string }) {
         if (localStorage.getItem(THEME_STORAGE_KEY)) return;
       } catch {}
       const next = systemTheme();
-      applyTheme(next);
+      transitionTheme(next);
       setTheme(next);
     };
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
   }, []);
 
-  function toggle() {
+  function toggle(event: React.MouseEvent<HTMLButtonElement>) {
     const next: Theme = theme === "dark" ? "light" : "dark";
-    applyTheme(next);
+    const rect = event.currentTarget.getBoundingClientRect();
+    transitionTheme(next, { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
     setTheme(next);
     try {
       if (next === systemTheme()) localStorage.removeItem(THEME_STORAGE_KEY);
