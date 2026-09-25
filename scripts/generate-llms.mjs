@@ -159,7 +159,7 @@ const llms = [
   "- For clean Markdown of any page, append `.md` to the page URL",
   `- Machine-readable OpenAPI 3.1 description of every public endpoint: ${SITE}/openapi.json`,
   `- The same reference in prose starts at ${SITE}/api-reference/overview/`,
-  `- Authenticate with the \`X-API-Key\` header against https://api.speechrevolutions.com`,
+  `- Authenticate with the \`X-API-Key\` header against https://api.speechrevolutions.com — details in ${SITE}/auth.md`,
   "- SDKs: Python, JavaScript/TypeScript, Go, C#",
   "",
   "## Docs",

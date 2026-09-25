@@ -68,6 +68,16 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable}`}
     >
+      <head>
+        {/*
+          RFC 8631: the standard way an HTML page advertises the machine-readable
+          description of the API it documents. Without it, a client has to guess at
+          /openapi.json — which is exactly what an agent-readiness scan reported us as
+          lacking while the file sat there, served and valid.
+        */}
+        <link rel="service-desc" type="application/json" href="/openapi.json" />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt" />
+      </head>
       <body className="font-sans">
         {/*
           JSON-LD for search engines and for the crawlers behind assistants. It is inert to
