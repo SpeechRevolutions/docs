@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       <h2>Or a Server Action</h2>
       <p>
         Prefer a form that posts directly to a Server Action? Same rule — the
-        function body runs only on the server, so the client stays server-side.
+        function body runs only on the server, so the key never reaches the browser.
       </p>
       <CodeBlock
         language="ts"
@@ -250,7 +250,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const runtime = "nodejs";
 
-const SECRET = process.env.STT_WEBHOOK_SECRET!; // your signing secret
+const SECRET = process.env.SPEECHREVOLUTIONS_WEBHOOK_SECRET!; // your signing secret
 
 function verify(raw: string, header: string | null): boolean {
   const expected = "sha256=" + createHmac("sha256", SECRET).update(raw).digest("hex");

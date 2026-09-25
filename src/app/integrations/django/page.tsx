@@ -130,7 +130,7 @@ def job_progress(request, job_id):
         completion or permanent failure. The signature is HMAC-SHA256 over the
         raw body in the <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header.
         Verify against <code>request.body</code> (the exact bytes) and exempt the
-        view from CSRF — it&apos;s a server-to-server POST, not a browser form.
+        view from CSRF — it&apos;s a server-to-server POST, not a browser form. Ask us for your signing secret — it is issued by Speech Revolutions and is not self-serve in the console yet. Until you have one, treat an unsigned request as unverified and confirm the job through the API before acting on it.
       </p>
       <CodeBlock
         language="python"
@@ -149,7 +149,7 @@ from .models import TranscriptionJob
 
 def verify_signature(raw_body: bytes, signature_header: str) -> bool:
     expected = "sha256=" + hmac.new(
-        settings.STT_WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256
+        settings.SPEECHREVOLUTIONS_WEBHOOK_SECRET.encode(), raw_body, hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(expected, signature_header or "")
 

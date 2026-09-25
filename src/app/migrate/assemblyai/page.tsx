@@ -320,8 +320,8 @@ if status.is_completed:
         </li>
         <li>
           <strong>Keyword biasing.</strong> AssemblyAI&apos;s{" "}
-          <code>word_boost</code> becomes{" "}
-          <code>custom_vocabulary</code>.
+          <code>keyterms_prompt</code> — and the older <code>word_boost</code>, which it
+          deprecated — both become <code>custom_vocabulary</code>.
         </li>
       </ul>
 

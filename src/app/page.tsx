@@ -37,7 +37,7 @@ export default function DocsHomePage() {
           {
             href: "/sdks/javascript",
             title: "JavaScript",
-            body: "TypeScript types, Node and edge runtimes.",
+            body: "TypeScript types, Node runtime.",
             install: "npm install speechrevolutions",
           },
           {

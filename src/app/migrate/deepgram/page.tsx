@@ -184,7 +184,7 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
               </td>
               <td>
                 per-word <code>speaker</code> (string, e.g.{" "}
-                <code>speaker_0</code>) plus <code>result.utterances</code>{" "}
+                <code>SPEAKER_1</code>) plus <code>result.utterances</code>{" "}
                 (grouped speaker turns)
               </td>
             </tr>
@@ -253,9 +253,9 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
       <p>
         Diarized transcription, before and after. The &quot;before&quot; column
         is <code>deepgram-sdk</code> v3, which is what most existing integrations
-        are running; Deepgram has since reshaped its client, so if you are on v4
-        or newer your code will differ from the left-hand side. The right-hand
-        side is unaffected either way.
+        are running. Deepgram kept that shape through v4 and reshaped the client in v5, so
+        if you are on v5 or newer your code will differ from the left-hand side. The
+        right-hand side is unaffected either way.
       </p>
       <CodeTabs
         tabs={[
@@ -325,7 +325,7 @@ console.log(dg.results.channels[0].alternatives[0].transcript);`,
         </li>
         <li>
           <strong>Speaker type changes.</strong> Speech Revolutions speakers are strings
-          (<code>speaker_0</code>), not integers. Use{" "}
+          (<code>SPEAKER_1</code>), not integers. Use{" "}
           <code>result.utterances</code> instead of grouping words yourself, or
           call <code>to_deepgram()</code> for the integer form.
         </li>

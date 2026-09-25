@@ -45,8 +45,8 @@ export default function MeetingAppTutorialPage() {
       <ul>
         <li>
           <code>utterance.speaker</code> — the speaker label, a stable string id
-          within the job (e.g. <code>&quot;SPEAKER_0&quot;</code>,{" "}
-          <code>&quot;SPEAKER_1&quot;</code>). Map them to display names yourself;
+          within the job (e.g. <code>&quot;SPEAKER_1&quot;</code>,{" "}
+          <code>&quot;SPEAKER_2&quot;</code>). Map them to display names yourself;
           the API does not know who is who.
         </li>
         <li>
@@ -372,7 +372,7 @@ def get(job_id: str):
         raise HTTPException(status_code=404, detail="unknown meeting")
     return meeting.snapshot()
     # -> {"phase": "transcribe", "percent": 63.5, "turns": []}
-    #    ...and once done: "turns": [{"speaker": "SPEAKER_0", "text": "...", "start": 0.4, "end": 5.1}, ...]`,
+    #    ...and once done: "turns": [{"speaker": "SPEAKER_1", "text": "...", "start": 0.4, "end": 5.1}, ...]`,
           },
           {
             label: "JavaScript",
@@ -394,7 +394,7 @@ app.get("/meetings/:jobId", (req, res) => {
   const meeting = meetings.get(req.params.jobId);
   if (!meeting) return res.status(404).json({ error: "unknown meeting" });
   res.json(meeting.snapshot());
-  // -> { phase: "done", percent: 100, turns: [{ speaker: "SPEAKER_0", text, start, end }, ...] }
+  // -> { phase: "done", percent: 100, turns: [{ speaker: "SPEAKER_1", text, start, end }, ...] }
 });`,
           },
           {
@@ -435,7 +435,7 @@ http.HandleFunc("GET /meetings/{job_id}", func(w http.ResponseWriter, r *http.Re
 		"phase": phase, "percent": percent, "turns": turns,
 	})
 	// -> {"phase":"transcribe","percent":63.5,"turns":[]}
-	//    ...and once done: "turns":[{"speaker":"SPEAKER_0","text":"...","start":0.4,"end":5.1}, ...]
+	//    ...and once done: "turns":[{"speaker":"SPEAKER_1","text":"...","start":0.4,"end":5.1}, ...]
 })`,
           },
           {
@@ -460,7 +460,7 @@ app.MapGet("/meetings/{jobId}", (string jobId) =>
     meetings.TryGetValue(jobId, out var meeting)
         ? Results.Ok(meeting.Snapshot())
         : Results.NotFound());
-// -> { phase: "done", percent: 100, turns: [{ speaker: "SPEAKER_0", text, start, end }, ...] }
+// -> { phase: "done", percent: 100, turns: [{ speaker: "SPEAKER_1", text, start, end }, ...] }
 
 public record StartMeeting(string Url);`,
           },

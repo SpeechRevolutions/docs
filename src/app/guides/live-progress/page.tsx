@@ -307,14 +307,16 @@ public static class Transcriber
             label: "Python",
             language: "python",
             filename: "FastAPI",
-            code: `from fastapi import FastAPI, BackgroundTasks, HTTPException
+            code: `import uuid
+
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 
 app = FastAPI()
 JOBS: dict[str, JobProgress] = {}
 
 @app.post("/transcribe")
 async def start(url: str, background: BackgroundTasks):
-    job_id = url  # or your own id
+    job_id = str(uuid.uuid4())
     JOBS[job_id] = JobProgress()
     background.add_task(transcribe_with_progress, url, JOBS[job_id])
     return {"job_id": job_id}          # returns immediately; runs in background

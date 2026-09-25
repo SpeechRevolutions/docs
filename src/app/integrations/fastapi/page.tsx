@@ -44,7 +44,7 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
         <code>on_upload_progress</code> and <code>on_progress</code> callbacks
         write into a per-job store; the <code>/progress/{`{job_id}`}</code>{" "}
         endpoint reads the latest snapshot. This mirrors the{" "}
-        <code>progress_webapp.py</code> pattern from the SDK examples.
+        <code>live_progress_webapp.py</code> pattern from the cookbook.
       </p>
       <CodeBlock
         language="python"
@@ -157,8 +157,8 @@ def progress(job_id: str):
         on completion. The platform signs the raw body with HMAC-SHA256 in the{" "}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Verify against
         the exact bytes you received — not a re-serialized dict — with a
-        constant-time compare. This mirrors <code>webhooks.py</code> from the
-        SDK examples.
+        constant-time compare. This mirrors <code>webhook_receiver_fastapi.py</code> from the
+        cookbook. Ask us for your signing secret — it is issued by Speech Revolutions and is not self-serve in the console yet. Until you have one, treat an unsigned request as unverified and confirm the job through the API before acting on it.
       </p>
       <CodeBlock
         language="python"
@@ -170,7 +170,7 @@ import os
 
 from fastapi import Request, HTTPException
 
-SIGNING_SECRET = os.environ["STT_WEBHOOK_SECRET"]
+SIGNING_SECRET = os.environ["SPEECHREVOLUTIONS_WEBHOOK_SECRET"]
 
 
 def verify_signature(raw_body: bytes, signature_header: str) -> bool:

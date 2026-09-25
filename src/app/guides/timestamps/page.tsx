@@ -177,8 +177,8 @@ foreach (var w in result.Words.Take(5))
         filename="json output (abridged)"
         code={`{
   "words": [
-    { "word": "Hello",    "start": 0.48, "end": 0.71, "speaker": "SPEAKER_0" },
-    { "word": "everyone", "start": 0.71, "end": 1.02, "speaker": "SPEAKER_0" }
+    { "word": "Hello",    "start": 0.48, "end": 0.71, "speaker": "SPEAKER_1" },
+    { "word": "everyone", "start": 0.71, "end": 1.02, "speaker": "SPEAKER_1" }
   ]
 }`}
       />

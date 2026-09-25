@@ -394,7 +394,7 @@ if status.IsCompleted() {
       />
       <CodeBlock
         language="go"
-        code={`client, _ := stt.NewClient("")           // reads the env vars above
+        code={`client, _ := stt.NewClient("")           // reads the variable above
 explicit, _ := stt.NewClient("stt_...")  // or pass it directly`}
       />
 

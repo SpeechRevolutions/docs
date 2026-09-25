@@ -470,7 +470,7 @@ except AuthenticationError as e:
       />
 
       <h2>Auth</h2>
-      <p>The SDK reads the key from either environment variable:</p>
+      <p>The SDK reads the key from the environment:</p>
       <CodeBlock
         language="bash"
         code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}

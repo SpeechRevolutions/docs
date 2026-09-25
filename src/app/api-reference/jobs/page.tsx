@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Jobs API",
   description:
-    "Used primarily by the SDK after /upload/complete to wait for a result, retrieve a job by id, or list recent jobs. These are the real user-cluster job…",
+    "Used primarily by the SDK after /upload/complete to wait for a result, retrieve a job by id, or list recent jobs.",
 };
 
 export default function JobsApiPage() {
@@ -15,8 +15,7 @@ export default function JobsApiPage() {
       <h1>Jobs API</h1>
       <p>
         Used primarily by the SDK after <code>/upload/complete</code> to wait
-        for a result, retrieve a job by id, or list recent jobs. These are the
-        real user-cluster job endpoints.
+        for a result, retrieve a job by id, or list recent jobs.
       </p>
 
       <h2>Retrieve a job</h2>

@@ -110,11 +110,11 @@ export default function OutputFormatsGuidePage() {
         filename="json output"
         code={`{
   "words": [
-    { "word": "Hi",      "start": 0.50, "end": 0.68, "speaker": "SPEAKER_0", "language": "en" },
-    { "word": "there",   "start": 0.68, "end": 0.94, "speaker": "SPEAKER_0", "language": "en" }
+    { "word": "Hi",      "start": 0.50, "end": 0.68, "speaker": "SPEAKER_1", "language": "en" },
+    { "word": "there",   "start": 0.68, "end": 0.94, "speaker": "SPEAKER_1", "language": "en" }
   ],
   "diarization": [
-    { "speaker": "SPEAKER_0", "start": 0.50, "end": 0.94 }
+    { "speaker": "SPEAKER_1", "start": 0.50, "end": 0.94 }
   ],
   "languages": [
     { "language": "en", "start": 0.50, "end": 0.94 }
@@ -133,10 +133,10 @@ export default function OutputFormatsGuidePage() {
   "status": "completed",
   "text": "Hi there ...",
   "words": [
-    { "word": "Hi", "text": "Hi", "start": 0.5, "end": 0.68, "speaker": "SPEAKER_0", "language": "en" }
+    { "word": "Hi", "text": "Hi", "start": 0.5, "end": 0.68, "speaker": "SPEAKER_1", "language": "en" }
   ],
   "utterances": [
-    { "text": "Hi there", "transcript": "Hi there", "speaker": "SPEAKER_0",
+    { "text": "Hi there", "transcript": "Hi there", "speaker": "SPEAKER_1",
       "start": 0.5, "end": 0.94, "words": [ ... ] }
   ],
   "languages": [

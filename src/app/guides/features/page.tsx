@@ -142,11 +142,11 @@ export default function FeaturesPage() {
       <pre className="mt-5 overflow-x-auto rounded-xl border border-white/10 bg-[#0b1220] p-4 text-[13px] leading-6 text-zinc-200">
         <code>{`{
   "words": [
-    {"word": "Hello,", "start": 0.12, "end": 0.40, "speaker": "SPEAKER_0", "language": "en"},
-    {"word": "world.", "start": 0.41, "end": 0.70, "speaker": "SPEAKER_0", "language": "en"}
+    {"word": "Hello,", "start": 0.12, "end": 0.40, "speaker": "SPEAKER_1", "language": "en"},
+    {"word": "world.", "start": 0.41, "end": 0.70, "speaker": "SPEAKER_1", "language": "en"}
   ],
   "diarization": [
-    {"start": 0.12, "end": 0.70, "speaker": "SPEAKER_0"}
+    {"start": 0.12, "end": 0.70, "speaker": "SPEAKER_1"}
   ],
   "languages": [
     {"start": 0.12, "end": 0.70, "language": "en"}

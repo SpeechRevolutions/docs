@@ -26,8 +26,7 @@ export default function DiarizationGuidePage() {
           Zephyr ranks <strong>#1 on diarization error rate (DER)</strong> across
           every subset, well ahead of the field — and some providers can&apos;t
           diarize at all, including OpenAI&apos;s <code>gpt-4o-transcribe</code>{" "}
-          (as of the model available on 2026-07-23; check OpenAI&apos;s current
-          docs before relying on this). See the{" "}
+          (as of July 2026). See the{" "}
           <Link href="/benchmarks">benchmarks page</Link> for the full
           provider-by-provider numbers and methodology.
         </p>
@@ -102,8 +101,8 @@ result = await client.TranscribeAsync("meeting.mp3",
 
 for u in result.utterances:
     print(f"[{u.start:.1f}s] Speaker {u.speaker}: {u.text}")
-# [0.5s] Speaker SPEAKER_0: Hi, thanks for joining.
-# [3.2s] Speaker SPEAKER_1: Happy to be here.`,
+# [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
+# [3.2s] Speaker SPEAKER_2: Happy to be here.`,
           },
           {
             label: "JavaScript",
@@ -113,8 +112,8 @@ for u in result.utterances:
 for (const u of result.utterances) {
   console.log(\`[\${u.start.toFixed(1)}s] Speaker \${u.speaker}: \${u.text}\`);
 }
-// [0.5s] Speaker SPEAKER_0: Hi, thanks for joining.
-// [3.2s] Speaker SPEAKER_1: Happy to be here.`,
+// [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
+// [3.2s] Speaker SPEAKER_2: Happy to be here.`,
           },
           {
             label: "Go",
@@ -133,8 +132,8 @@ for _, u := range result.Utterances {
 	}
 	fmt.Printf("[%.1fs] Speaker %s: %s\\n", start, u.Speaker, u.Text)
 }
-// [0.5s] Speaker SPEAKER_0: Hi, thanks for joining.
-// [3.2s] Speaker SPEAKER_1: Happy to be here.`,
+// [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
+// [3.2s] Speaker SPEAKER_2: Happy to be here.`,
           },
           {
             label: "C#",
@@ -144,8 +143,8 @@ for _, u := range result.Utterances {
 
 foreach (var u in result.Utterances)
     Console.WriteLine($"[{u.Start:F1}s] Speaker {u.Speaker}: {u.Text}");
-// [0.5s] Speaker SPEAKER_0: Hi, thanks for joining.
-// [3.2s] Speaker SPEAKER_1: Happy to be here.`,
+// [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
+// [3.2s] Speaker SPEAKER_2: Happy to be here.`,
           },
         ]}
       />
@@ -163,8 +162,8 @@ foreach (var u in result.Utterances)
         language="python"
         code={`for w in result.words[:4]:
     print(w.speaker, w.word, w.start, w.end)
-# SPEAKER_0 Hi 0.50 0.68
-# SPEAKER_0 thanks 0.68 0.99`}
+# SPEAKER_1 Hi 0.50 0.68
+# SPEAKER_1 thanks 0.68 0.99`}
       />
 
       <h2 id="render">Render speaker turns</h2>
@@ -172,14 +171,14 @@ foreach (var u in result.Utterances)
         To display a conversation, iterate <code>utterances</code> and print a new
         block whenever the speaker changes. Since utterances are already grouped
         by turn, this is a direct loop — optionally mapping raw labels like{" "}
-        <code>SPEAKER_0</code> to friendly names.
+        <code>SPEAKER_1</code> to friendly names.
       </p>
       <CodeTabs
         tabs={[
           {
             label: "Python",
             language: "python",
-            code: `NAMES = {"SPEAKER_0": "Host", "SPEAKER_1": "Guest"}
+            code: `NAMES = {"SPEAKER_1": "Host", "SPEAKER_2": "Guest"}
 
 def format_ts(seconds: float) -> str:
     m, s = divmod(int(seconds), 60)
@@ -192,7 +191,7 @@ for u in result.utterances:
           {
             label: "JavaScript",
             language: "ts",
-            code: `const NAMES = { SPEAKER_0: "Host", SPEAKER_1: "Guest" };
+            code: `const NAMES = { SPEAKER_1: "Host", SPEAKER_2: "Guest" };
 
 const formatTs = (s) => {
   const m = Math.floor(s / 60);
@@ -208,7 +207,7 @@ for (const u of result.utterances) {
           {
             label: "Go",
             language: "go",
-            code: `var names = map[string]string{"SPEAKER_0": "Host", "SPEAKER_1": "Guest"}
+            code: `var names = map[string]string{"SPEAKER_1": "Host", "SPEAKER_2": "Guest"}
 
 formatTs := func(seconds float64) string {
 	d := int(seconds)
@@ -232,8 +231,8 @@ for _, u := range result.Utterances {
             language: "csharp",
             code: `var names = new Dictionary<string, string>
 {
-    ["SPEAKER_0"] = "Host",
-    ["SPEAKER_1"] = "Guest",
+    ["SPEAKER_1"] = "Host",
+    ["SPEAKER_2"] = "Guest",
 };
 
 static string FormatTs(double seconds) =>
@@ -251,7 +250,7 @@ foreach (var u in result.Utterances)
       <Callout title="Speaker label format" tone="info">
         <p>
           Speakers are stable string ids within a job (e.g.{" "}
-          <code>SPEAKER_0</code>, <code>SPEAKER_1</code>). If you export a
+          <code>SPEAKER_1</code>, <code>SPEAKER_2</code>). If you export a
           Deepgram-shaped response with <code>result.to_deepgram()</code>, those
           ids are mapped to integer speaker indices to match Deepgram&apos;s
           schema.

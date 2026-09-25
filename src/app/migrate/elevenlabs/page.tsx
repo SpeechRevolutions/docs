@@ -286,9 +286,9 @@ for (const u of result.utterances) {
           over regrouping per-word <code>speaker_id</code> values.
         </li>
         <li>
-          <strong>No keyword API on ElevenLabs.</strong> If you needed domain-term
-          biasing and couldn&apos;t get it, Speech Revolutions adds{" "}
-          <code>custom_vocabulary</code>.
+          <strong>Keyword biasing.</strong> ElevenLabs biases Scribe v2 with keyterm
+          prompting; the equivalent here is <code>custom_vocabulary</code>, which takes the
+          same kind of list of domain terms.
         </li>
       </ul>
 

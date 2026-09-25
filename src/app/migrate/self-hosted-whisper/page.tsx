@@ -22,8 +22,9 @@ export default function MigrateSelfHostedWhisperPage() {
         pinning CUDA/cuDNN, sizing VRAM for <code>large-v3</code>, warming models
         to avoid cold starts, batching for throughput, autoscaling for load,
         bolting on a separate diarization stack, and keeping all of it patched.
-        Speech Revolutions is the same Whisper-class quality as a hosted API call — no GPUs to
-        run — and it ships word timestamps and diarization in one response.
+        Speech Revolutions gives you a Whisper-class model as a hosted API call — no GPUs to
+        run — with word timestamps and diarization in one response, and a diarization error
+        rate that leads every subset we publish.
       </p>
 
       <Callout title="The real cost of self-hosting" tone="tip">

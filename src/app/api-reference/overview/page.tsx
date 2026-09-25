@@ -55,7 +55,7 @@ export default function ApiOverviewPage() {
               <td>
                 <code>{LIMITS.dataRetentionMinutes} minutes</code>
               </td>
-              <td>Uploaded audio is deleted after processing</td>
+              <td>Uploaded audio is deleted within 30 minutes of job completion</td>
             </tr>
           </tbody>
         </table>

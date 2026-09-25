@@ -23,7 +23,7 @@ export default function MigrateOpenAIWhisperPage() {
         <code>gpt-4o-transcribe</code> model — <strong>no word-level
         timestamps</strong> and <strong>no speaker diarization</strong>. Speech Revolutions
         returns transcript, word timestamps, and diarized speaker turns from a
-        single call, with no file-size ceiling in the request body.
+        single call, for files up to 10 GB through the SDK.
       </p>
 
       <Callout title="The capability gap this closes" tone="tip">
@@ -178,9 +178,8 @@ export default function MigrateOpenAIWhisperPage() {
       <h2>Diarization</h2>
       <p>
         <code>gpt-4o-transcribe</code> cannot diarize — you would switch to the
-        separate <code>gpt-4o-transcribe-diarize</code> model (true as of the
-        models available on 2026-07-23; check OpenAI&apos;s current docs before
-        relying on this). Speech Revolutions diarizes in the same call: set{" "}
+        separate <code>gpt-4o-transcribe-diarize</code> model (as of July 2026).
+        Speech Revolutions diarizes in the same call: set{" "}
         <code>speaker_labels</code> (on by default) and read{" "}
         <code>result.utterances</code>. Diarization is one of Zephyr&apos;s headline strengths; the <Link href="/benchmarks">benchmarks</Link> and{" "}
         <a href={SITE.landingUrl}>comparison table</a> have the measured numbers.

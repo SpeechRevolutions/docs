@@ -30,12 +30,6 @@ export default function CsharpSdkPage() {
 
       <h2>Install</h2>
       <CodeBlock language="bash" code={`dotnet add package SpeechRevolutions`} />
-      <p>Or reference the project directly:</p>
-      <CodeBlock
-        language="xml"
-        code={`<ProjectReference Include="path/to/SpeechRevolutions/SpeechRevolutions.csproj" />`}
-      />
-
       <h2>Quickstart</h2>
       <p>
         <code>TranscribeAsync</code> accepts a local path, an{" "}
