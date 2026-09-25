@@ -23,13 +23,71 @@ export default function BenchmarksPage() {
         own — nothing here is hand-picked.
       </p>
 
-      <Callout title="The numbers" tone="info">
+      <h2>Headline results</h2>
+      <p>
+        Measured by Speech Revolutions on public datasets, last run 2026-07-12/13 against
+        each provider&apos;s then-current model. Lower is better throughout.
+      </p>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Benchmark</th>
+              <th>Dataset</th>
+              <th>Zephyr</th>
+              <th>Best other provider</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Diarization error rate</td>
+              <td>AMI-SDM</td>
+              <td>
+                <strong>9.7%</strong>
+              </td>
+              <td>25.3% (AssemblyAI)</td>
+            </tr>
+            <tr>
+              <td>Diarization error rate</td>
+              <td>NotSoFar</td>
+              <td>
+                <strong>10.9%</strong>
+              </td>
+              <td>23.3% (AssemblyAI)</td>
+            </tr>
+            <tr>
+              <td>Word error rate</td>
+              <td>SPGISpeech</td>
+              <td>
+                <strong>2.54%</strong>
+              </td>
+              <td>2.6% (Deepgram)</td>
+            </tr>
+            <tr>
+              <td>Timestamp accuracy (start MAE)</td>
+              <td>Word alignment</td>
+              <td>
+                <strong>40 ms</strong>
+              </td>
+              <td>58 ms (ElevenLabs)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        <strong>The diarization figures are scored at a 0.25 s collar, overlap-aware.</strong>{" "}
+        That is the lenient condition, and it is the one quoted throughout this site; the
+        strict collar-0 figures are emitted alongside it by the same run, and are the
+        condition the DiariZen and pyannote model cards report, so they are what to compare
+        against a published model card. Neither is a default you have to infer — the suite
+        prints both, overall and per dataset.
+      </p>
+
+      <Callout title="The full table" tone="info">
         <p>
-          The full cross-provider comparison table (WER, diarization, timestamps,
-          multilingual, and more) lives on our{" "}
-          <a href={SITE.landingUrl}>landing page</a>, kept in one place so it
-          never drifts. This page explains <em>what</em> is measured and{" "}
-          <em>how to reproduce it yourself</em>.
+          Every provider, every benchmark, including multilingual and language switching,
+          is on our <a href={SITE.landingUrl}>landing page</a>. This page explains{" "}
+          <em>what</em> is measured and <em>how to reproduce it yourself</em>.
         </p>
       </Callout>
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, Geist, Geist_Mono } from "next/font/google";
 import { DocsShell } from "@/components/DocsShell";
 import { SITE } from "@/lib/constants";
+import { docsJsonLd } from "@/lib/structured-data";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -68,6 +69,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable}`}
     >
       <body className="font-sans">
+        {/*
+          JSON-LD for search engines and for the crawlers behind assistants. It is inert to
+          the page — no styles, no hydration — and is the only machine-readable statement of
+          what this company is, what the API does and what it costs.
+        */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(docsJsonLd()) }}
+        />
         <DocsShell>{children}</DocsShell>
       </body>
     </html>

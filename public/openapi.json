@@ -1,0 +1,738 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Speech Revolutions API",
+    "version": "1.0.0",
+    "summary": "Batch speech-to-text with speaker diarization and word-level timestamps.",
+    "description": "Batch transcription API. Submit audio, get back a transcript with word-level timestamps and diarized speaker turns, in any of six output formats.\n\nThis document is written and maintained by hand against the documented, public surface. It deliberately omits internal routes. Every field here is checked against the running service; where behaviour and this document disagree, the service is right and this is a bug — report it.\n\nFlow for a file: `POST /api/v1/upload` returns a presigned `upload_url`; PUT the bytes to it; `POST /api/v1/upload/complete` enqueues the job; watch `GET /api/v1/jobs/{job_id}/stream` or poll `GET /api/v1/jobs/{job_id}`; fetch the transcript from `download_url`. Files above 100 MB should use the multipart routes. A shell one-liner can instead stream the audio to `POST /api/v1/transcribe` and read the transcript straight back.",
+    "termsOfService": "https://www.speechrevolutions.com/terms",
+    "contact": {
+      "name": "Speech Revolutions",
+      "url": "https://docs.speechrevolutions.com",
+      "email": "support@speechrevolutions.com"
+    },
+    "license": { "name": "Proprietary", "identifier": "LicenseRef-Proprietary" }
+  },
+  "servers": [{ "url": "https://api.speechrevolutions.com", "description": "Production" }],
+  "externalDocs": { "description": "Documentation", "url": "https://docs.speechrevolutions.com" },
+  "security": [{ "ApiKeyAuth": [] }],
+  "tags": [
+    { "name": "Upload", "description": "Create a job, upload the bytes, enqueue it." },
+    { "name": "Multipart", "description": "The same flow for large files, part by part." },
+    { "name": "Jobs", "description": "Status, progress, listing and cancellation." },
+    { "name": "Transcribe", "description": "One-shot streaming upload for shells and scripts." }
+  ],
+  "paths": {
+    "/api/v1/upload": {
+      "post": {
+        "operationId": "createUploadJob",
+        "tags": ["Upload"],
+        "summary": "Create a job and get a presigned upload URL",
+        "description": "Creates the job and returns a URL to PUT the audio to. The job is not queued until `/api/v1/upload/complete` is called. Rate limit: 120 requests per minute.\n\nThis request is NOT safe to retry blindly: the job is created the moment the server handles it, so a retry after an ambiguous failure creates a second job for the same audio. The official SDKs retry it only on a connect timeout or a 429.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UploadRequest" },
+              "examples": {
+                "file": {
+                  "summary": "Upload a local file",
+                  "value": { "file_size": 10485760, "output_type": "json", "speaker_labels": true }
+                },
+                "url": {
+                  "summary": "Transcribe audio already on the web",
+                  "value": { "audio_url": "https://example.com/meeting.mp3", "output_type": "srt" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job created.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UploadResponse" } }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "402": { "$ref": "#/components/responses/PaymentRequired" },
+          "413": { "$ref": "#/components/responses/PayloadTooLarge" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/upload/progress": {
+      "post": {
+        "operationId": "reportUploadProgress",
+        "tags": ["Upload"],
+        "summary": "Keep a pending upload alive",
+        "description": "Called by the SDKs roughly every ten seconds while the bytes are still being uploaded, so a slow upload is not treated as abandoned. Rate limit: 600 requests per minute.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/JobIdBody" } }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Status" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/upload/complete": {
+      "post": {
+        "operationId": "completeUpload",
+        "tags": ["Upload"],
+        "summary": "Enqueue the job once the bytes are uploaded",
+        "description": "Call this after the PUT to `upload_url` has finished. The server checks the real size of the stored object here, so a job whose bytes never arrived is rejected now rather than failing later. Rate limit: 120 requests per minute.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/JobIdBody" } }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Status" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/upload/multipart/create": {
+      "post": {
+        "operationId": "createMultipartUpload",
+        "tags": ["Multipart"],
+        "summary": "Start a multipart upload and get per-part URLs",
+        "description": "For large files. Returns one presigned URL per part; PUT each part and keep its ETag. `file_size` is required and is used only to plan `part_size` and `num_parts`. Rate limit: 120 requests per minute.\n\nLike `/api/v1/upload`, this creates the job and is not safe to retry blindly.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MultipartCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Multipart upload started.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MultipartCreateResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "402": { "$ref": "#/components/responses/PaymentRequired" },
+          "413": { "$ref": "#/components/responses/PayloadTooLarge" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/upload/multipart/complete": {
+      "post": {
+        "operationId": "completeMultipartUpload",
+        "tags": ["Multipart"],
+        "summary": "Finish a multipart upload and enqueue the job",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MultipartCompleteRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Status" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/upload/multipart/abort": {
+      "post": {
+        "operationId": "abortMultipartUpload",
+        "tags": ["Multipart"],
+        "summary": "Abandon a multipart upload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/JobIdBody" } }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Status" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/jobs": {
+      "get": {
+        "operationId": "listJobs",
+        "tags": ["Jobs"],
+        "summary": "List recent jobs, newest first",
+        "description": "Cursor-paginated. Pass the returned `next_before` as `before` to get the next page; it is null on the last page. Rate limit: 120 requests per minute.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 50 },
+            "description": "Maximum jobs to return."
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Cursor from a previous page's `next_before`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of jobs.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/ListJobsResponse" } }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/jobs/{job_id}": {
+      "get": {
+        "operationId": "getJob",
+        "tags": ["Jobs"],
+        "summary": "Retrieve one job",
+        "description": "Poll this if you are not using the SSE stream. Rate limit: 120 requests per minute.",
+        "parameters": [{ "$ref": "#/components/parameters/JobId" }],
+        "responses": {
+          "200": {
+            "description": "The job.",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/GetJobResponse" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/jobs/{job_id}/stream": {
+      "get": {
+        "operationId": "streamJobProgress",
+        "tags": ["Jobs"],
+        "summary": "Server-sent progress events for a job",
+        "description": "An SSE stream of progress events, ending when the job completes or fails. Steps are `preprocess`, `chunk:N` and `aggregation`, each reporting `completed` out of `total`. Rate limit: 120 requests per minute.\n\nProgress is best effort: when the stream pool is saturated the connection is still accepted and sends `waiting` heartbeats with an ETA rather than refusing.",
+        "parameters": [{ "$ref": "#/components/parameters/JobId" }],
+        "responses": {
+          "200": {
+            "description": "An event stream.",
+            "content": {
+              "text/event-stream": {
+                "schema": { "type": "string" },
+                "example": "event: progress\ndata: {\"step\": \"chunk:3\", \"completed\": 3, \"total\": 8}\n\nevent: completed\ndata: {\"job_id\": \"7c1f...\", \"download_url\": \"https://...\"}\n\n"
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/jobs/cancel": {
+      "post": {
+        "operationId": "cancelJob",
+        "tags": ["Jobs"],
+        "summary": "Cancel a job",
+        "description": "Rate limit: 30 requests per minute.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/JobIdBody" } }
+          }
+        },
+        "responses": {
+          "200": { "$ref": "#/components/responses/Status" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/jobs/check-failed": {
+      "post": {
+        "operationId": "checkFailedJobs",
+        "tags": ["Jobs"],
+        "summary": "Check many jobs for failure in one call",
+        "description": "Returns one boolean per submitted id, in the same order. Rate limit: 60 requests per minute.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CheckFailedJobsRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "One boolean per job id.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CheckFailedJobsResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    },
+    "/api/v1/transcribe": {
+      "post": {
+        "operationId": "transcribe",
+        "tags": ["Transcribe"],
+        "summary": "Stream audio in, get the transcript back",
+        "description": "One shot: the request body is the audio itself and the response is an SSE stream ending in the transcript. Intended for shells and simple scripts; files above 200 MB belong on the upload routes. Rate limit: 120 requests per minute.\n\nThe first event is `accepted` and carries the `job_id` and a `download_url`, emitted before any waiting — so a caller whose connection drops can still retrieve the job it has been billed for. The id is also mirrored in the `X-Job-Id` response header.",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/Model" }
+          },
+          {
+            "name": "output_type",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/OutputType" }
+          },
+          {
+            "name": "word_timestamps",
+            "in": "query",
+            "schema": { "type": "boolean", "default": true }
+          },
+          {
+            "name": "speaker_labels",
+            "in": "query",
+            "schema": { "type": "boolean", "default": true }
+          },
+          {
+            "name": "nltk",
+            "in": "query",
+            "schema": { "type": "boolean", "default": true },
+            "description": "Punctuation and sentence segmentation."
+          },
+          {
+            "name": "custom_vocabulary",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Comma-separated domain terms to bias towards. A query string cannot carry a JSON array, so this route takes the list as one comma-separated string.",
+            "example": "Kubernetes,Grafana,Zephyr"
+          },
+          {
+            "name": "callback_url",
+            "in": "query",
+            "schema": { "type": "string", "format": "uri" },
+            "description": "Webhook to POST on completion or permanent failure."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The audio bytes.",
+          "content": {
+            "audio/mpeg": { "schema": { "type": "string", "format": "binary" } },
+            "audio/wav": { "schema": { "type": "string", "format": "binary" } },
+            "audio/mp4": { "schema": { "type": "string", "format": "binary" } },
+            "audio/ogg": { "schema": { "type": "string", "format": "binary" } },
+            "audio/flac": { "schema": { "type": "string", "format": "binary" } },
+            "video/mp4": { "schema": { "type": "string", "format": "binary" } },
+            "application/octet-stream": { "schema": { "type": "string", "format": "binary" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "An event stream ending in the transcript.",
+            "headers": {
+              "X-Job-Id": {
+                "description": "The job id, also sent in the `accepted` event.",
+                "schema": { "type": "string", "format": "uuid" }
+              }
+            },
+            "content": {
+              "text/event-stream": {
+                "schema": { "type": "string" },
+                "example": "event: accepted\ndata: {\"job_id\": \"7c1f...\", \"download_url\": \"https://...\"}\n\nevent: transcript\ndata: {\"text\": \"Hi there\", \"words\": [...]}\n\n"
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "402": { "$ref": "#/components/responses/PaymentRequired" },
+          "413": { "$ref": "#/components/responses/PayloadTooLarge" },
+          "422": { "$ref": "#/components/responses/ValidationError" },
+          "429": { "$ref": "#/components/responses/RateLimited" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "An API key from the console, of the form `stt_` followed by 64 hex characters. Send it on every request. There is no OAuth flow and no scopes: a key carries the full permissions of the account that owns it, so treat it as a server-side secret and never ship it to a browser."
+      }
+    },
+    "parameters": {
+      "JobId": {
+        "name": "job_id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" }
+      }
+    },
+    "responses": {
+      "Status": {
+        "description": "Accepted.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/StatusResponse" } }
+        }
+      },
+      "BadRequest": {
+        "description": "The request was understood but cannot be acted on — for example, completing an upload whose bytes never arrived.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+        }
+      },
+      "Unauthorized": {
+        "description": "Missing, malformed or revoked API key.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": { "detail": "Unauthorized" }
+          }
+        }
+      },
+      "PaymentRequired": {
+        "description": "The account is out of credit. Top up, or turn on auto-recharge, and retry. Reads and cancellations keep working.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+        }
+      },
+      "NotFound": {
+        "description": "No such job for this account.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+        }
+      },
+      "PayloadTooLarge": {
+        "description": "The file exceeds the limit for this route: 10 GB through the upload routes, 200 MB streaming to `/api/v1/transcribe`.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+        }
+      },
+      "ValidationError": {
+        "description": "A field is missing or the wrong type. The body names the offending field.",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ValidationError" },
+            "example": {
+              "detail": [
+                {
+                  "type": "missing",
+                  "loc": ["header", "X-API-Key"],
+                  "msg": "Field required",
+                  "input": null
+                }
+              ]
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Too many requests for this endpoint. Back off and retry; the official SDKs do this for you.",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/Error" } }
+        }
+      }
+    },
+    "schemas": {
+      "Model": {
+        "type": "string",
+        "enum": ["zephyr"],
+        "default": "zephyr",
+        "description": "The transcription model. One today."
+      },
+      "OutputType": {
+        "type": "string",
+        "enum": ["json", "txt", "srt", "vtt", "docx", "pdf"],
+        "default": "json",
+        "description": "Format of the stored transcript at `download_url`."
+      },
+      "TranscriptionOptions": {
+        "type": "object",
+        "properties": {
+          "model": { "$ref": "#/components/schemas/Model" },
+          "output_type": { "$ref": "#/components/schemas/OutputType" },
+          "word_timestamps": {
+            "type": "boolean",
+            "default": true,
+            "description": "Per-word start and end times."
+          },
+          "speaker_labels": {
+            "type": "boolean",
+            "default": true,
+            "description": "Diarize, labelling turns `SPEAKER_1`, `SPEAKER_2` and so on, dense and numbered from one in order of first appearance."
+          },
+          "nltk": {
+            "type": "boolean",
+            "default": true,
+            "description": "Punctuation and sentence segmentation."
+          },
+          "custom_vocabulary": {
+            "type": ["array", "null"],
+            "items": { "type": "string" },
+            "description": "Domain terms to bias towards — names, jargon, product names.",
+            "example": ["Kubernetes", "Grafana", "Zephyr"]
+          },
+          "callback_url": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "Webhook to POST on completion or permanent failure. The body is signed with HMAC-SHA256 in `X-SR-Signature`, and carries `X-SR-Event` and `X-SR-Delivery`."
+          }
+        }
+      },
+      "UploadRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/TranscriptionOptions" },
+          {
+            "type": "object",
+            "properties": {
+              "file_size": {
+                "type": ["integer", "null"],
+                "description": "Size in bytes of the file you are about to upload. Used to plan the upload; the real size is checked at complete."
+              },
+              "audio_url": {
+                "type": ["string", "null"],
+                "format": "uri",
+                "description": "Fetch the audio from here instead of uploading it. When set, no `upload_url` is returned and the job is queued immediately."
+              }
+            }
+          }
+        ]
+      },
+      "UploadResponse": {
+        "type": "object",
+        "required": ["job_id", "download_url", "content_type", "expires_in"],
+        "properties": {
+          "job_id": { "type": "string", "format": "uuid" },
+          "upload_url": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "PUT the audio here. Null when `audio_url` was given."
+          },
+          "download_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Where the finished transcript will be readable."
+          },
+          "content_type": {
+            "type": "string",
+            "description": "The Content-Type to send with the PUT. The signature covers it, so it must match exactly."
+          },
+          "expires_in": {
+            "type": "integer",
+            "description": "Seconds until the presigned URLs expire."
+          }
+        }
+      },
+      "MultipartCreateRequest": {
+        "allOf": [
+          { "$ref": "#/components/schemas/TranscriptionOptions" },
+          {
+            "type": "object",
+            "required": ["file_size"],
+            "properties": {
+              "file_size": { "type": "integer", "exclusiveMinimum": 0 },
+              "part_size": {
+                "type": ["integer", "null"],
+                "description": "Bytes per part. Clamped to what S3 allows, and raised automatically if the file would otherwise need more than 10,000 parts."
+              }
+            }
+          }
+        ]
+      },
+      "MultipartCreateResponse": {
+        "type": "object",
+        "required": [
+          "job_id",
+          "upload_id",
+          "download_url",
+          "part_size",
+          "num_parts",
+          "parts",
+          "expires_in"
+        ],
+        "properties": {
+          "job_id": { "type": "string", "format": "uuid" },
+          "upload_id": { "type": "string" },
+          "download_url": { "type": "string", "format": "uri" },
+          "part_size": { "type": "integer" },
+          "num_parts": { "type": "integer" },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["part_number", "url"],
+              "properties": {
+                "part_number": { "type": "integer" },
+                "url": { "type": "string", "format": "uri" }
+              }
+            }
+          },
+          "expires_in": { "type": "integer" }
+        }
+      },
+      "MultipartCompleteRequest": {
+        "type": "object",
+        "required": ["job_id", "parts"],
+        "properties": {
+          "job_id": { "type": "string", "format": "uuid" },
+          "parts": {
+            "type": "array",
+            "minItems": 1,
+            "description": "One entry per uploaded part, with the ETag the storage returned.",
+            "items": {
+              "type": "object",
+              "required": ["part_number", "etag"],
+              "properties": {
+                "part_number": { "type": "integer" },
+                "etag": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "JobIdBody": {
+        "type": "object",
+        "required": ["job_id"],
+        "properties": { "job_id": { "type": "string", "format": "uuid" } }
+      },
+      "StatusResponse": {
+        "type": "object",
+        "required": ["status"],
+        "properties": { "status": { "type": "string", "example": "ok" } }
+      },
+      "GetJobResponse": {
+        "type": "object",
+        "required": ["job_id", "status"],
+        "properties": {
+          "job_id": { "type": "string", "format": "uuid" },
+          "status": {
+            "type": "string",
+            "enum": ["processing", "completed", "failed"]
+          },
+          "download_url": {
+            "type": ["string", "null"],
+            "format": "uri",
+            "description": "Present once status is `completed`."
+          },
+          "failed_stage": {
+            "type": ["string", "null"],
+            "description": "Which stage failed, when status is `failed`."
+          },
+          "reason": {
+            "type": ["string", "null"],
+            "description": "Why it failed, when status is `failed`."
+          }
+        }
+      },
+      "ListJobsResponse": {
+        "type": "object",
+        "required": ["jobs"],
+        "properties": {
+          "jobs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["job_id", "created_at"],
+              "properties": {
+                "job_id": { "type": "string" },
+                "created_at": { "type": "string", "format": "date-time" }
+              }
+            }
+          },
+          "next_before": {
+            "type": ["string", "null"],
+            "description": "Cursor for the next page, or null on the last page."
+          }
+        }
+      },
+      "CheckFailedJobsRequest": {
+        "type": "object",
+        "required": ["job_ids"],
+        "properties": {
+          "job_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "format": "uuid" }
+          }
+        }
+      },
+      "CheckFailedJobsResponse": {
+        "type": "object",
+        "required": ["failed_jobs"],
+        "properties": {
+          "failed_jobs": {
+            "type": "array",
+            "items": { "type": "boolean" },
+            "description": "One per submitted id, in the same order."
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["detail"],
+        "properties": { "detail": { "type": "string" } }
+      },
+      "ValidationError": {
+        "type": "object",
+        "required": ["detail"],
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" },
+                "loc": { "type": "array", "items": { "type": ["string", "integer"] } },
+                "msg": { "type": "string" },
+                "input": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

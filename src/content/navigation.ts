@@ -33,6 +33,7 @@ export const NAV: NavSection[] = [
       { title: "Transcribe (cURL)", href: "/api-reference/transcribe" },
       { title: "Jobs", href: "/api-reference/jobs" },
       { title: "Benchmarks", href: "/benchmarks" },
+      { title: "Changelog", href: "/changelog" },
     ],
   },
   {
