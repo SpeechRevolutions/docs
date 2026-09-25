@@ -78,7 +78,7 @@ export function TableOfContents() {
       <p className="text-[11px] font-semibold tracking-[0.14em] text-zinc-500 uppercase">
         On this page
       </p>
-      <ul className="mt-3 space-y-0.5 border-l border-white/10">
+      <ul className="mt-3 space-y-0.5 border-l border-hairline/10">
         {headings.map((h) => (
           <li key={h.id}>
             <a

@@ -17,23 +17,23 @@ export function Callout({
       data-callout={tone}
       data-callout-title={title}
       className={cn(
-        "mt-6 rounded-xl border px-4 py-3 text-[14px] leading-6",
-        tone === "info" && "border-brand-500/25 bg-brand-500/8 text-zinc-300",
-        tone === "tip" && "border-emerald-500/25 bg-emerald-500/8 text-zinc-300",
-        tone === "warn" && "border-amber-500/25 bg-amber-500/8 text-zinc-300",
+        "mt-6 rounded-lg border px-4 py-3.5 text-[14px] leading-6",
+        tone === "info" && "border-brand-500/25 bg-brand-500/[0.06] text-zinc-300",
+        tone === "tip" && "border-emerald-600/25 bg-emerald-500/[0.06] text-zinc-300",
+        tone === "warn" && "border-amber-500/30 bg-amber-500/[0.07] text-zinc-300",
       )}
     >
       {title && (
-        <p
+        <div
           className={cn(
-            "mb-1 text-xs font-semibold tracking-wide uppercase",
+            "mb-1 text-sm font-medium",
             tone === "info" && "text-brand-link",
-            tone === "tip" && "text-emerald-400",
-            tone === "warn" && "text-amber-400",
+            tone === "tip" && "text-emerald-700 dark:text-emerald-400",
+            tone === "warn" && "text-amber-700 dark:text-amber-400",
           )}
         >
           {title}
-        </p>
+        </div>
       )}
       <div className="[&_p]:mt-0 [&_p]:text-[14px] [&_p]:leading-6 [&_p]:text-zinc-300">
         {children}
@@ -51,16 +51,16 @@ export function EndpointBadge({
 }) {
   const color =
     method === "GET"
-      ? "bg-sky-500/15 text-sky-300"
+      ? "bg-sky-500/15 text-sky-700 dark:text-sky-300"
       : method === "PUT"
         ? "bg-amber-500/15 text-amber-300"
-        : "bg-emerald-500/15 text-emerald-300";
+        : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
 
   return (
-    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 font-mono text-sm">
-      <span className={cn("rounded-md px-2 py-0.5 text-xs font-bold", color)}>
+    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-hairline/10 bg-surface-900 px-4 py-3 font-mono text-sm">
+      <span className={cn("rounded px-2 py-0.5 text-xs font-semibold", color)}>
         {method}
-      </span>
+      </span>{" "}
       <span className="min-w-0 break-words text-zinc-200">{path}</span>
     </div>
   );

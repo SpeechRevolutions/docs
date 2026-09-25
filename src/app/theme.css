@@ -1,0 +1,282 @@
+/*
+ * Speech Revolutions design tokens — shared by landing, docs and console.
+ *
+ * THIS FILE IS IDENTICAL IN ALL THREE APPS (src/app/theme.css). Edit one, copy it to the
+ * other two; `diff` between them must stay empty. It lives in three repos because the
+ * apps do, and a shared npm package for one stylesheet is not yet worth its release step.
+ *
+ * Two themes, chosen per visitor: the device setting by default, an explicit choice once
+ * they make one. ThemeScript resolves it onto <html data-theme> before first paint, so
+ * nothing here depends on prefers-color-scheme directly.
+ *
+ * Direction (2026-09-25): formal and restrained. Near-black ink on warm off-white, neutral
+ * black rather than navy for dark, and one blue accent. The purple→cyan gradient belongs to
+ * the logo mark and nowhere else.
+ */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  /* Fixed across themes: safe to fill with. 500 is the logo's blue; 600 is the accent
+     fill, dark enough to carry white text at 4.5:1+ on either page. */
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e3a8a;
+  --color-brand-900: #172554;
+
+  --height-nav: 4rem;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-archivo), var(--font-geist-sans), ui-sans-serif,
+    system-ui, sans-serif;
+}
+
+/*
+ * Theme-dependent colours. `inline` makes each utility emit var(--c-*), so flipping
+ * data-theme reskins everything with no `dark:` variant on each element.
+ */
+@theme inline {
+  --color-page: var(--c-page);
+  --color-header: var(--c-header);
+
+  /* Elevation, read as depth: 950 furthest back (page), 900 chrome and inputs, 850 raised
+     (cards, menus). Dark raises by lightening; light raises to white on an off-white page. */
+  --color-surface-950: var(--c-surface-950);
+  --color-surface-900: var(--c-surface-900);
+  --color-surface-850: var(--c-surface-850);
+  --color-surface-800: var(--c-surface-800);
+  --color-surface-700: var(--c-surface-700);
+  --color-surface-600: var(--c-surface-600);
+
+  /* Primary text. `text-white` still means literally white — for labels on brand fills. */
+  --color-fg: var(--c-fg);
+
+  /* Hairlines and faint fills; always with an opacity (border-hairline/10, bg-hairline/5). */
+  --color-hairline: var(--c-hairline);
+
+  --color-tooltip: var(--c-tooltip);
+  --color-dot: var(--c-dot);
+
+  /* Accent as text or border: links, active nav, the highlighted benchmark row. Themed so
+     it holds 4.5:1 on both pages. Never a background fill — use brand-600 for that. */
+  --color-brand-200: var(--c-brand-200);
+  --color-brand-300: var(--c-brand-300);
+  --color-brand-400: var(--c-brand-400);
+  --color-brand-link: var(--c-brand-link);
+
+  /* Neutral ramp, mirrored for light so hierarchy holds: 100 strongest text, 400/500 muted,
+     700 faintest. Light uses warm greys to sit on the warm page. */
+  --color-zinc-50: var(--c-zinc-50);
+  --color-zinc-100: var(--c-zinc-100);
+  --color-zinc-200: var(--c-zinc-200);
+  --color-zinc-300: var(--c-zinc-300);
+  --color-zinc-400: var(--c-zinc-400);
+  --color-zinc-500: var(--c-zinc-500);
+  --color-zinc-600: var(--c-zinc-600);
+  --color-zinc-700: var(--c-zinc-700);
+  --color-zinc-800: var(--c-zinc-800);
+  --color-zinc-900: var(--c-zinc-900);
+  --color-zinc-950: var(--c-zinc-950);
+
+  /* Syntax colours for code blocks, so code reads in both themes. */
+  --color-code-bg: var(--c-code-bg);
+  --color-code-fg: var(--c-code-fg);
+  --color-code-comment: var(--c-code-comment);
+  --color-code-keyword: var(--c-code-keyword);
+  --color-code-string: var(--c-code-string);
+  --color-code-number: var(--c-code-number);
+  --color-code-function: var(--c-code-function);
+  --color-code-property: var(--c-code-property);
+}
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --c-page: #0a0a0b;
+  --c-header: #0a0a0b;
+
+  --c-surface-950: #0a0a0b;
+  --c-surface-900: #111113;
+  --c-surface-850: #161618;
+  --c-surface-800: #1c1c1f;
+  --c-surface-700: #27272a;
+  --c-surface-600: #3f3f46;
+
+  --c-fg: #fafafa;
+  --c-hairline: #ffffff;
+  --c-tooltip: #1c1c1f;
+  --c-dot: rgb(255 255 255 / 0.08);
+
+  --c-brand-200: #bfdbfe;
+  --c-brand-300: #93c5fd;
+  --c-brand-400: #60a5fa;
+  --c-brand-link: #60a5fa;
+
+  --c-zinc-50: #fafafa;
+  --c-zinc-100: #f4f4f5;
+  --c-zinc-200: #e4e4e7;
+  --c-zinc-300: #d4d4d8;
+  --c-zinc-400: #a1a1aa;
+  --c-zinc-500: #7c7c86;
+  --c-zinc-600: #52525b;
+  --c-zinc-700: #3f3f46;
+  --c-zinc-800: #27272a;
+  --c-zinc-900: #18181b;
+  --c-zinc-950: #09090b;
+
+  /* Primary CTA: the page's own ink, inverted. */
+  --c-cta-bg: #fafafa;
+  --c-cta-fg: #0a0a0b;
+  --c-cta-hover: #e4e4e7;
+
+  --c-code-bg: #111113;
+  --c-code-fg: #e4e4e7;
+  --c-code-comment: #71717a;
+  --c-code-keyword: #f0abfc;
+  --c-code-string: #86efac;
+  --c-code-number: #fdba74;
+  --c-code-function: #93c5fd;
+  --c-code-property: #7dd3fc;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --c-page: #fbfaf8;
+  --c-header: #fbfaf8;
+
+  --c-surface-950: #fbfaf8;
+  --c-surface-900: #ffffff;
+  --c-surface-850: #ffffff;
+  --c-surface-800: #f5f4f1;
+  --c-surface-700: #edece8;
+  --c-surface-600: #e0ded8;
+
+  --c-fg: #141413;
+  --c-hairline: #141413;
+  --c-tooltip: #ffffff;
+  --c-dot: rgb(20 20 19 / 0.08);
+
+  --c-brand-200: #1e3a8a;
+  --c-brand-300: #1e40af;
+  --c-brand-400: #1d4ed8;
+  --c-brand-link: #1d4ed8;
+
+  --c-zinc-50: #0c0a09;
+  --c-zinc-100: #1c1917;
+  --c-zinc-200: #292524;
+  --c-zinc-300: #44403c;
+  --c-zinc-400: #57534e;
+  --c-zinc-500: #6f6a64;
+  --c-zinc-600: #a8a29e;
+  --c-zinc-700: #d6d3d1;
+  --c-zinc-800: #e7e5e4;
+  --c-zinc-900: #f5f5f4;
+  --c-zinc-950: #fafaf9;
+
+  --c-cta-bg: #141413;
+  --c-cta-fg: #fbfaf8;
+  --c-cta-hover: #2e2d2a;
+
+  --c-code-bg: #f5f4f1;
+  --c-code-fg: #1c1917;
+  --c-code-comment: #78716c;
+  --c-code-keyword: #9d174d;
+  --c-code-string: #166534;
+  --c-code-number: #b45309;
+  --c-code-function: #1d4ed8;
+  --c-code-property: #0e7490;
+}
+
+@layer base {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    @apply bg-page text-zinc-100 antialiased;
+  }
+
+  /* Set by applyTheme() for the single frame a theme change lands in. */
+  .theme-switching,
+  .theme-switching * {
+    transition: none !important;
+  }
+
+  ::selection {
+    @apply bg-brand-500/25 text-fg;
+  }
+
+  /* Headings carry the display face. Weight is set per heading: 500–600, never 700 — a
+     bold grotesk at display sizes is what made every page shout. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  /* The one place the brand gradient survives outside the logo artwork. */
+  .bg-brand-gradient {
+    background-image: linear-gradient(90deg, #7c3aed 0%, #5b4cf5 40%, #3b82f6 75%, #22d3ee 100%);
+  }
+
+  /* Small monospace label above a section heading. */
+  .eyebrow {
+    @apply font-mono text-xs font-medium tracking-[0.08em] text-brand-link uppercase;
+  }
+
+  /* Solid accent fill — primary actions inside the product (forms, dialogs). */
+  .btn-brand-primary {
+    font-weight: 500;
+    color: white;
+    background-color: var(--color-brand-600);
+    transition: background-color 150ms ease;
+  }
+
+  .btn-brand-primary:hover {
+    background-color: var(--color-brand-700);
+  }
+
+  /* Primary marketing CTA: the page's ink, inverted. Black on light, white on dark. */
+  .btn-brand-signup {
+    font-weight: 500;
+    color: var(--c-cta-fg);
+    background-color: var(--c-cta-bg);
+    transition: background-color 150ms ease;
+  }
+
+  .btn-brand-signup:hover {
+    background-color: var(--c-cta-hover);
+  }
+
+  /* Secondary CTA: hairline border on the page. */
+  .btn-brand-outline {
+    font-weight: 500;
+    color: var(--c-fg);
+    border: 1px solid color-mix(in srgb, var(--c-hairline) 18%, transparent);
+    background-color: transparent;
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+
+  .btn-brand-outline:hover {
+    border-color: color-mix(in srgb, var(--c-hairline) 32%, transparent);
+    background-color: color-mix(in srgb, var(--c-hairline) 4%, transparent);
+  }
+
+  .btn-brand-primary:focus-visible,
+  .btn-brand-signup:focus-visible,
+  .btn-brand-outline:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}

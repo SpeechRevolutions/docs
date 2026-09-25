@@ -37,13 +37,13 @@ export function CopyButton({
       onClick={copy}
       aria-label={copied ? "Copied" : "Copy code"}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200 focus-visible:ring-2 focus-visible:ring-brand-link/60 focus-visible:outline-none",
+        "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-hairline/5 hover:text-zinc-200 focus-visible:ring-2 focus-visible:ring-brand-link/60 focus-visible:outline-none",
         className,
       )}
     >
       {copied ? (
         <>
-          <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden />
+          <Check className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" aria-hidden />
           Copied
         </>
       ) : (

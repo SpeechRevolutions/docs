@@ -162,9 +162,9 @@ const ENTRIES: Entry[] = [
 ];
 
 const KIND_CLASS: Record<string, string> = {
-  Added: "text-emerald-400",
+  Added: "text-emerald-700 dark:text-emerald-400",
   Changed: "text-amber-400",
-  Fixed: "text-sky-400",
+  Fixed: "text-sky-700 dark:text-sky-400",
   Removed: "text-rose-400",
 };
 

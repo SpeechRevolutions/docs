@@ -169,12 +169,12 @@ export function SearchDialog() {
           restoreFocus.current = document.activeElement as HTMLElement;
           setOpen(true);
         }}
-        className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-zinc-500 transition-colors hover:border-white/20 hover:text-zinc-300"
+        className="flex items-center gap-2 rounded-lg border border-hairline/10 bg-hairline/[0.04] px-3 py-1.5 text-sm text-zinc-500 transition-colors hover:border-hairline/20 hover:text-zinc-300"
         aria-label="Search docs"
       >
         <Search className="h-4 w-4" aria-hidden />
         <span className="hidden sm:inline">Search</span>
-        <kbd className="ml-4 hidden rounded border border-white/10 px-1.5 py-0.5 font-sans text-[10px] text-zinc-500 sm:inline">
+        <kbd className="ml-4 hidden rounded border border-hairline/10 px-1.5 py-0.5 font-sans text-[10px] text-zinc-500 sm:inline">
           ⌘K
         </kbd>
       </button>
@@ -187,8 +187,8 @@ export function SearchDialog() {
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={close}
           />
-          <div className="absolute inset-x-0 top-[10vh] mx-auto w-[min(40rem,92vw)] overflow-hidden rounded-xl border border-white/10 bg-surface-900 shadow-2xl">
-            <div className="flex items-center gap-3 border-b border-white/10 px-4">
+          <div className="absolute inset-x-0 top-[10vh] mx-auto w-[min(40rem,92vw)] overflow-hidden rounded-xl border border-hairline/10 bg-surface-900 shadow-2xl">
+            <div className="flex items-center gap-3 border-b border-hairline/10 px-4">
               <Search className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden />
               <input
                 ref={inputRef}
@@ -224,7 +224,7 @@ export function SearchDialog() {
                         onMouseEnter={() => setCursor(i)}
                         className={cn(
                           "flex gap-3 rounded-lg px-3 py-2.5 transition-colors",
-                          i === cursor ? "bg-brand-500/15" : "hover:bg-white/5",
+                          i === cursor ? "bg-brand-500/15" : "hover:bg-hairline/5",
                         )}
                       >
                         <FileText className="mt-0.5 h-4 w-4 shrink-0 text-zinc-600" aria-hidden />
@@ -257,7 +257,7 @@ export function SearchDialog() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 border-t border-white/10 px-4 py-2 text-[11px] text-zinc-600">
+            <div className="flex items-center gap-4 border-t border-hairline/10 px-4 py-2 text-[11px] text-zinc-600">
               <span>↑↓ navigate</span>
               <span>↵ open</span>
               <span>esc close</span>

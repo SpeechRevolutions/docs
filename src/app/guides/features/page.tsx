@@ -139,7 +139,7 @@ export default function FeaturesPage() {
 
       <h2>JSON shape (native)</h2>
       <p>Default JSON looks like:</p>
-      <pre className="mt-5 overflow-x-auto rounded-xl border border-white/10 bg-[#0b1220] p-4 text-[13px] leading-6 text-zinc-200">
+      <pre className="mt-5 overflow-x-auto rounded-lg border border-hairline/10 bg-code-bg p-4 text-[13px] leading-6 text-zinc-200">
         <code>{`{
   "words": [
     {"word": "Hello,", "start": 0.12, "end": 0.40, "speaker": "SPEAKER_1", "language": "en"},

@@ -2,6 +2,7 @@ import { Callout } from "@/components/DocsUI";
 import { LIMITS, RATE_LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ENDPOINTS, TAGS } from "@/lib/openapi";
 
 export const metadata: Metadata = {
   title: "API overview",
@@ -233,82 +234,33 @@ export default function ApiOverviewPage() {
       </Callout>
 
       <h2>Endpoints</h2>
-      <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Path</th>
-              <th>Audience</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <code>POST</code>
-              </td>
-              <td>
-                <Link href="/api-reference/upload">/api/v1/upload</Link>
-              </td>
-              <td>SDK — create job + presigned URLs</td>
-            </tr>
-            <tr>
-              <td>
-                <code>POST</code>
-              </td>
-              <td>
-                <Link href="/api-reference/upload">/api/v1/upload/progress</Link>
-              </td>
-              <td>SDK — keep upload session alive</td>
-            </tr>
-            <tr>
-              <td>
-                <code>POST</code>
-              </td>
-              <td>
-                <Link href="/api-reference/upload">/api/v1/upload/complete</Link>
-              </td>
-              <td>SDK — enqueue after storage PUT</td>
-            </tr>
-            <tr>
-              <td>
-                <code>POST</code>
-              </td>
-              <td>
-                <Link href="/api-reference/transcribe">/api/v1/transcribe</Link>
-              </td>
-              <td>Terminal — stream file + progress</td>
-            </tr>
-            <tr>
-              <td>
-                <code>GET</code>
-              </td>
-              <td>
-                <Link href="/api-reference/jobs">/api/v1/jobs/{"{id}"}/stream</Link>
-              </td>
-              <td>SSE progress (SDK wait path)</td>
-            </tr>
-            <tr>
-              <td>
-                <code>POST</code>
-              </td>
-              <td>
-                <Link href="/api-reference/jobs">/api/v1/jobs/cancel</Link>
-              </td>
-              <td>Cancel a job</td>
-            </tr>
-            <tr>
-              <td>
-                <code>POST</code>
-              </td>
-              <td>
-                <Link href="/api-reference/jobs">/api/v1/jobs/check-failed</Link>
-              </td>
-              <td>Batch failure check</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <p>
+        Every endpoint has its own page with parameters, request samples and response
+        examples, generated from the{" "}
+        <a href="/openapi.json">OpenAPI 3.1 document</a>.
+      </p>
+      {TAGS.map((tag) => (
+        <div key={tag}>
+          <h3>{tag}</h3>
+          <div className="table-scroll">
+            <table>
+              <tbody>
+                {ENDPOINTS.filter((e) => e.tag === tag).map((e) => (
+                  <tr key={e.slug}>
+                    <td className="w-16">
+                      <code>{e.method}</code>
+                    </td>
+                    <td>
+                      <Link href={`/api-reference/endpoints/${e.slug}`}>{e.path}</Link>
+                    </td>
+                    <td>{e.summary}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
 
       <Callout title="Upload styles" tone="info">
         <p>

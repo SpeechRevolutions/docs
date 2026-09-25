@@ -68,7 +68,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={() => toggle(section.title)}
                 aria-expanded={isOpen}
                 aria-controls={panelId}
-                className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-1 text-[11px] font-semibold tracking-[0.14em] text-zinc-500 uppercase transition-colors hover:text-zinc-300 focus-visible:ring-2 focus-visible:ring-brand-link/60 focus-visible:outline-none"
+                className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-1 font-mono text-xs text-zinc-500 transition-colors hover:text-zinc-300 focus-visible:ring-2 focus-visible:ring-brand-link/60 focus-visible:outline-none"
               >
                 {section.title}
                 <ChevronRight
@@ -80,7 +80,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                 />
               </button>
             ) : (
-              <p className="px-3 py-1 text-[11px] font-semibold tracking-[0.14em] text-zinc-500 uppercase">
+              <p className="px-3 py-1 font-mono text-xs text-zinc-500">
                 {section.title}
               </p>
             )}
@@ -98,8 +98,8 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                         className={cn(
                           "block rounded-md px-3 py-1 text-[15px] leading-6 transition-colors",
                           active
-                            ? "bg-brand-500/15 font-medium text-brand-link"
-                            : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200",
+                            ? "bg-hairline/[0.06] font-medium text-fg"
+                            : "text-zinc-400 hover:bg-hairline/5 hover:text-zinc-200",
                         )}
                       >
                         {item.title}
@@ -135,7 +135,7 @@ export function DocsSidebar() {
           stacking context, so anything above z-30 here would sit on top of it. */}
       <button
         type="button"
-        className="fixed right-4 bottom-4 z-20inline-flex items-center gap-2 rounded-full border border-white/15 bg-surface-900 px-4 py-2.5 text-sm text-white shadow-lg lg:hidden"
+        className="fixed right-4 bottom-4 z-20 inline-flex items-center gap-2 rounded-full border border-hairline/15 bg-surface-900 px-4 py-2.5 text-sm text-fg shadow-lg lg:hidden"
         onClick={() => setOpen(true)}
         aria-expanded={open}
       >
@@ -151,14 +151,14 @@ export function DocsSidebar() {
             aria-label="Close menu"
             onClick={() => setOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col border-r border-white/10 bg-page">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-              <span className="text-sm font-semibold text-white">Docs</span>
+          <aside className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col border-r border-hairline/10 bg-page">
+            <div className="flex items-center justify-between border-b border-hairline/10 px-4 py-4">
+              <span className="text-sm font-semibold text-fg">Docs</span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
-                className="rounded-lg p-2 text-zinc-400 hover:bg-white/5 hover:text-white"
+                className="rounded-lg p-2 text-zinc-400 hover:bg-hairline/5 hover:text-fg"
               >
                 <X className="h-4 w-4" aria-hidden />
               </button>
@@ -166,10 +166,10 @@ export function DocsSidebar() {
             <div className="thin-scrollbar flex-1 overflow-y-auto px-3 py-5">
               <NavLinks onNavigate={() => setOpen(false)} />
             </div>
-            <div className="border-t border-white/10 p-4">
+            <div className="border-t border-hairline/10 p-4">
               <a
                 href={SITE.consoleUrl}
-                className="block rounded-lg bg-brand-500/15 px-3 py-2 text-center text-sm font-medium text-brand-link"
+                className="btn-brand-signup block rounded-md px-3 py-2 text-center text-sm"
               >
                 Get API key
               </a>
@@ -178,7 +178,7 @@ export function DocsSidebar() {
         </div>
       )}
 
-      <aside className="thin-scrollbar sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-white/10 px-4 py-6 lg:block">
+      <aside className="thin-scrollbar sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 overflow-y-auto border-r border-hairline/10 px-4 py-6 lg:block">
         <NavLinks />
       </aside>
     </>

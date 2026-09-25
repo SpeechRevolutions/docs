@@ -56,11 +56,11 @@ export default function DocsHomePage() {
           <Link
             key={card.href}
             href={card.href}
-            className="flex min-w-0 flex-col rounded-xl border border-white/10 bg-white/[0.03] p-4 no-underline transition-colors hover:border-brand-500/30 hover:bg-brand-500/5"
+            className="flex min-w-0 flex-col rounded-lg border border-hairline/10 bg-surface-900 p-4 no-underline transition-colors hover:border-hairline/25 hover:no-underline"
           >
-            <p className="text-sm font-semibold text-white">{card.title}</p>
-            <p className="mt-1 flex-1 text-sm text-zinc-400">{card.body}</p>
-            <code className="mt-3 block truncate rounded-md bg-black/30 px-2 py-1.5 font-mono text-[11px] text-zinc-500">
+            <p className="!mt-0 text-[15px] font-medium text-fg">{card.title}</p>
+            <p className="!mt-1 flex-1 text-sm !leading-6 text-zinc-400">{card.body}</p>
+            <code className="mt-3 block truncate rounded bg-surface-950 px-2 py-1.5 font-mono text-xs text-zinc-400">
               {card.install}
             </code>
           </Link>

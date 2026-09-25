@@ -25,16 +25,16 @@ export async function CodeBlock({
   return (
     <div
       className={cn(
-        "group relative mt-5 overflow-hidden rounded-xl border border-white/10 bg-[#0b1220]",
+        "group relative mt-5 overflow-hidden rounded-lg border border-hairline/10 bg-code-bg",
         className,
       )}
     >
       {/* Chrome, not content — keeps "bash"/"Copy" out of search excerpts. */}
       <div
         data-pagefind-ignore
-        className="flex items-center justify-between border-b border-white/8 px-4 py-2"
+        className="flex items-center justify-between border-b border-hairline/8 px-4 py-2"
       >
-        <span className="font-mono text-[11px] tracking-wide text-zinc-500 uppercase">
+        <span className="font-mono text-xs text-zinc-500">
           {filename ?? language ?? lang}
         </span>
         <CopyButton code={code} />

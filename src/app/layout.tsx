@@ -3,6 +3,7 @@ import { Archivo, Geist, Geist_Mono } from "next/font/google";
 import { DocsShell } from "@/components/DocsShell";
 import { SITE } from "@/lib/constants";
 import { docsJsonLd } from "@/lib/structured-data";
+import { ThemeScript } from "@/components/theme/ThemeScript";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -64,11 +65,16 @@ export default function RootLayout({
     // Font variables belong on <html>: Tailwind's @theme emits --font-sans on
     // :root, and a var() there cannot see a property defined on a descendant.
     // On <body> they resolved to nothing and the page fell back to system fonts.
+    // data-theme is the SSR default; ThemeScript overwrites it before paint from the stored
+    // choice or the device setting, hence suppressHydrationWarning.
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable}`}
+      data-theme="dark"
+      suppressHydrationWarning
     >
       <head>
+        <ThemeScript />
         {/*
           RFC 8631: the standard way an HTML page advertises the machine-readable
           description of the API it documents. Without it, a client has to guess at

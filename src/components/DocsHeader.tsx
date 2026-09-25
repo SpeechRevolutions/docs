@@ -1,6 +1,7 @@
 "use client";
 
 import { SearchDialog } from "@/components/SearchDialog";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { SITE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -33,7 +34,7 @@ export function DocsHeader() {
   const pathname = normalize(usePathname());
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-header/90 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-hairline/10 bg-header/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-6 px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-8">
           <div className="flex shrink-0 items-center gap-3">
@@ -48,13 +49,13 @@ export function DocsHeader() {
               />
               {/* Below sm the full name doesn't fit beside search and Console, so the
                   mark stands alone; sr-only keeps the link's accessible name. */}
-              <span className="sr-only text-sm font-semibold tracking-tight text-white sm:not-sr-only">
+              <span className="sr-only text-sm font-semibold tracking-tight text-fg sm:not-sr-only">
                 Speech Revolutions
               </span>
             </Link>
             {/* A rule rather than a margin: "Docs" labels the site, it isn't part of
                 the wordmark, and crowding it against the name read as a typo. */}
-            <span aria-hidden className="h-4 w-px bg-white/15" />
+            <span aria-hidden className="h-4 w-px bg-hairline/15" />
             <span className="text-sm text-zinc-400">Docs</span>
           </div>
 
@@ -68,10 +69,10 @@ export function DocsHeader() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "rounded-lg px-2.5 py-1.5 text-sm transition-colors",
+                    "rounded-md px-2.5 py-1.5 text-sm transition-colors",
                     active
-                      ? "text-white"
-                      : "text-zinc-400 hover:bg-white/5 hover:text-white",
+                      ? "text-fg"
+                      : "text-zinc-400 hover:bg-hairline/5 hover:text-fg",
                   )}
                 >
                   {item.title}
@@ -83,15 +84,16 @@ export function DocsHeader() {
 
         <div className="flex shrink-0 items-center gap-3 text-sm">
           <SearchDialog />
+          <ThemeToggle />
           <a
             href={SITE.landingUrl}
-            className="hidden text-zinc-400 transition-colors hover:text-white sm:inline"
+            className="hidden text-zinc-400 transition-colors hover:text-fg sm:inline"
           >
             Home
           </a>
           <a
             href={SITE.consoleUrl}
-            className="rounded-lg bg-white/10 px-3 py-1.5 font-medium text-white transition-colors hover:bg-white/15"
+            className="btn-brand-signup inline-flex h-8 items-center rounded-md px-3"
           >
             Console
           </a>

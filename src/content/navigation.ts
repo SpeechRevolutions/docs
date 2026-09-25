@@ -16,6 +16,26 @@ export type NavSection = {
   collapsible?: boolean;
 };
 
+/**
+ * One entry per operation in public/openapi.json, in the file's order. Written out rather
+ * than derived so the sidebar does not ship the 30 KB spec to every browser; lib/openapi.ts
+ * fails the build if this list and the spec ever disagree.
+ */
+export const ENDPOINT_NAV: NavItem[] = [
+  { title: "Create upload job", href: "/api-reference/endpoints/create-upload-job" },
+  { title: "Report upload progress", href: "/api-reference/endpoints/report-upload-progress" },
+  { title: "Complete upload", href: "/api-reference/endpoints/complete-upload" },
+  { title: "Create multipart upload", href: "/api-reference/endpoints/create-multipart-upload" },
+  { title: "Complete multipart upload", href: "/api-reference/endpoints/complete-multipart-upload" },
+  { title: "Abort multipart upload", href: "/api-reference/endpoints/abort-multipart-upload" },
+  { title: "List jobs", href: "/api-reference/endpoints/list-jobs" },
+  { title: "Get job", href: "/api-reference/endpoints/get-job" },
+  { title: "Stream job progress", href: "/api-reference/endpoints/stream-job-progress" },
+  { title: "Cancel job", href: "/api-reference/endpoints/cancel-job" },
+  { title: "Check failed jobs", href: "/api-reference/endpoints/check-failed-jobs" },
+  { title: "Transcribe", href: "/api-reference/endpoints/transcribe" },
+];
+
 export const NAV: NavSection[] = [
   {
     title: "Get started",
@@ -35,6 +55,11 @@ export const NAV: NavSection[] = [
       { title: "Benchmarks", href: "/benchmarks" },
       { title: "Changelog", href: "/changelog" },
     ],
+  },
+  {
+    title: "Endpoints",
+    collapsible: true,
+    items: ENDPOINT_NAV,
   },
   {
     title: "Guides",
