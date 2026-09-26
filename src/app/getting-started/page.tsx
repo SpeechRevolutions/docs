@@ -1,3 +1,4 @@
+import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
@@ -9,6 +10,9 @@ export const metadata: Metadata = {
   description:
     "Get an API key, install an SDK (or use cURL), and transcribe a file.",
 };
+
+/** Ours to publish: synthesized, two voices, so speaker labels have something to show. */
+const SAMPLE = `https://${SITE.docsDomain}/samples/two-speakers.mp3`;
 
 export default function QuickstartPage() {
   return (
@@ -62,7 +66,10 @@ export default function QuickstartPage() {
           },
         ]}
       />
-      <p>Then transcribe a file:</p>
+      <p>
+        Then transcribe something. The code below uses a 22-second sample conversation we
+        host — swap in a local path or your own URL when you&apos;re ready.
+      </p>
       <CodeTabs
         tabs={[
           {
@@ -72,7 +79,7 @@ export default function QuickstartPage() {
             code: `from speechrevolutions import SpeechRevolutions
 
 client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY
-result = client.transcribe("audio.mp3", speaker_labels=True)
+result = client.transcribe("${SAMPLE}", speaker_labels=True)
 
 print(result.text)
 for u in result.utterances:
@@ -85,7 +92,7 @@ for u in result.utterances:
             code: `import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions(); // reads SPEECHREVOLUTIONS_API_KEY
-const result = await client.transcribe("audio.mp3", { speakerLabels: true });
+const result = await client.transcribe("${SAMPLE}", { speakerLabels: true });
 
 console.log(result.text);
 for (const u of result.utterances) {
@@ -112,7 +119,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	result, err := client.Transcribe(context.Background(), "audio.mp3",
+	result, err := client.Transcribe(context.Background(), "${SAMPLE}",
 		stt.TranscribeOptions{SpeakerLabels: stt.Bool(true)}, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -131,7 +138,7 @@ func main() {
             code: `using SpeechRevolutions;
 
 using var client = new SpeechRevolutionsClient(); // reads SPEECHREVOLUTIONS_API_KEY
-var result = await client.TranscribeAsync("audio.mp3",
+var result = await client.TranscribeAsync("${SAMPLE}",
     new TranscribeOptions { SpeakerLabels = true });
 
 Console.WriteLine(result.Text);
@@ -139,6 +146,15 @@ foreach (var u in result.Utterances)
     Console.WriteLine($"{u.Speaker}: {u.Text}");`,
           },
         ]}
+      />
+      <p>Output:</p>
+      <CodeBlock
+        language="text"
+        code={`Thanks for joining before we start. Can you confirm the launch date is still October 14th? It is the build is frozen and the release notes go out on the morning of the launch. Good. What is the biggest risk right now? Support volume. We expect twice the usual tickets in the first week, so I've asked two more people to cover the queue.
+SPEAKER_1: Thanks for joining before we start. Can you confirm the launch date is still October 14th?
+SPEAKER_2: It is the build is frozen and the release notes go out on the morning of the launch.
+SPEAKER_1: Good. What is the biggest risk right now?
+SPEAKER_2: Support volume. We expect twice the usual tickets in the first week, so I've asked two more people to cover the queue.`}
       />
 
       <h2>2b. Terminal (one request)</h2>
@@ -152,10 +168,12 @@ foreach (var u in result.Utterances)
           {
             label: "cURL",
             language: "bash",
-            code: `curl -N -X POST \\
+            code: `curl -sO ${SAMPLE}
+
+curl -N -X POST \\
   "${SITE.apiBase}/api/v1/transcribe?output_type=json&word_timestamps=true&speaker_labels=true&nltk=true" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  --data-binary @audio.mp3`,
+  --data-binary @two-speakers.mp3`,
           },
         ]}
       />
