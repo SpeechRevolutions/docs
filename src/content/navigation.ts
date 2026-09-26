@@ -116,7 +116,6 @@ export const NAV: NavSection[] = [
     title: "Resources",
     items: [
       { title: "Benchmarks", href: "/benchmarks" },
-      { title: "Changelog", href: "/changelog" },
     ],
   },
 ];
