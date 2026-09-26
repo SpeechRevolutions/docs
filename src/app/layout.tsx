@@ -1,26 +1,31 @@
 import type { Metadata } from "next";
-import { Archivo, Geist, Geist_Mono } from "next/font/google";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import localFont from "next/font/local";
 import { DocsShell } from "@/components/DocsShell";
 import { SITE } from "@/lib/constants";
 import { docsJsonLd } from "@/lib/structured-data";
 import { ThemeScript } from "@/components/theme/ThemeScript";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+/*
+ * Fonts are bundled, not fetched from Google at build time. next/font/google failed the CI
+ * build on 2026-09-26 when Google served a font URL without a file extension, which this
+ * Next version cannot parse — a deploy should not depend on a third party's response shape.
+ * Geist ships as the `geist` package; Archivo comes from @fontsource/archivo.
+ */
+const geistSans = GeistSans;
+const geistMono = GeistMono;
 
 /** Display face for headings — see landing/src/app/layout.tsx for the pairing. */
-const archivo = Archivo({
+const archivo = localFont({
   variable: "--font-archivo",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  display: "swap",
+  src: [
+    { path: "../../node_modules/@fontsource/archivo/files/archivo-latin-500-normal.woff2", weight: "500" },
+    { path: "../../node_modules/@fontsource/archivo/files/archivo-latin-600-normal.woff2", weight: "600" },
+    { path: "../../node_modules/@fontsource/archivo/files/archivo-latin-700-normal.woff2", weight: "700" },
+  ],
 });
 
 export const metadata: Metadata = {
