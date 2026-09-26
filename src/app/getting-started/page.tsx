@@ -11,8 +11,12 @@ export const metadata: Metadata = {
     "Get an API key, install an SDK (or use cURL), and transcribe a file.",
 };
 
-/** Ours to publish: synthesized, two voices, so speaker labels have something to show. */
-const SAMPLE = `https://${SITE.docsDomain}/samples/two-speakers.mp3`;
+/**
+ * A real two-voice recording: 47 seconds of Maupassant's "The Diamond Necklace" from a LibriVox
+ * dramatic reading (Dramatic Reading Scene and Story Collection, Vol. 2), which is in the public
+ * domain. A different reader voices each part, so speaker labels have something to show.
+ */
+const SAMPLE = `https://${SITE.docsDomain}/samples/diamond-necklace.mp3`;
 
 export default function QuickstartPage() {
   return (
@@ -67,8 +71,20 @@ export default function QuickstartPage() {
         ]}
       />
       <p>
-        Then transcribe something. The code below uses a 22-second sample conversation we
-        host — swap in a local path or your own URL when you&apos;re ready.
+        Then transcribe something. The code below uses a 47-second sample we host — a
+        two-voice passage from Maupassant&apos;s <em>The Diamond Necklace</em> — so you can
+        try it before you have audio of your own. Swap in a local path or your own URL when
+        you&apos;re ready.
+      </p>
+      <audio controls preload="none" src="/samples/diamond-necklace.mp3" className="w-full">
+        <a href="/samples/diamond-necklace.mp3">Download the sample</a>
+      </audio>
+      <p className="text-sm text-zinc-500">
+        Sample: a public-domain{" "}
+        <a href="https://librivox.org/dramatic-reading-scene-and-story-collection-volume-002-by-various/">
+          LibriVox dramatic reading
+        </a>
+        .
       </p>
       <CodeTabs
         tabs={[
@@ -150,11 +166,11 @@ foreach (var u in result.Utterances)
       <p>Output:</p>
       <CodeBlock
         language="text"
-        code={`Thanks for joining before we start. Can you confirm the launch date is still October 14th? It is the build is frozen and the release notes go out on the morning of the launch. Good. What is the biggest risk right now? Support volume. We expect twice the usual tickets in the first week, so I've asked two more people to cover the queue.
-SPEAKER_1: Thanks for joining before we start. Can you confirm the launch date is still October 14th?
-SPEAKER_2: It is the build is frozen and the release notes go out on the morning of the launch.
-SPEAKER_1: Good. What is the biggest risk right now?
-SPEAKER_2: Support volume. We expect twice the usual tickets in the first week, so I've asked two more people to cover the queue.`}
+        code={`Why, my dear? I thought you would be glad you never go out and this is such a fine opportunity. I had great trouble to get it. Every one wants to go. It is very select and they are not giving many invitations to clerks. The whole official world will be there. She looked at him with an irritated glance and said impatiently, And what do you wish me to put on my back? He had not thought of that, he stammered. Why the gown you go to the theater in? It looks very well to me. He stopped distracted, seeing that his wife was weeping, Two great tears ran slowly from the corners of her eyes toward the corners of her mouth.
+SPEAKER_1: Why, my dear? I thought you would be glad you never go out and this is such a fine opportunity. I had great trouble to get it. Every one wants to go. It is very select and they are not giving many invitations to clerks. The whole official world will be there.
+SPEAKER_2: She looked at him with an irritated glance and said impatiently, And what do you wish me to put on my back? He had not thought of that, he stammered.
+SPEAKER_1: Why the gown you go to the theater in? It looks very well to me.
+SPEAKER_2: He stopped distracted, seeing that his wife was weeping, Two great tears ran slowly from the corners of her eyes toward the corners of her mouth.`}
       />
 
       <h2>2b. Terminal (one request)</h2>
@@ -173,7 +189,7 @@ SPEAKER_2: Support volume. We expect twice the usual tickets in the first week, 
 curl -N -X POST \\
   "${SITE.apiBase}/api/v1/transcribe?output_type=json&word_timestamps=true&speaker_labels=true&nltk=true" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  --data-binary @two-speakers.mp3`,
+  --data-binary @diamond-necklace.mp3`,
           },
         ]}
       />
