@@ -309,13 +309,17 @@ export const ENDPOINTS: Endpoint[] = Object.entries(doc.paths).flatMap(([path, o
 {
   const inSpec = ENDPOINTS.map((e) => `/api-reference/endpoints/${e.slug}`);
   const inNav = ENDPOINT_NAV.map((n) => n.href);
+  const wrongMethod = ENDPOINTS.filter(
+    (e) => ENDPOINT_NAV.find((n) => n.href === `/api-reference/endpoints/${e.slug}`)?.method !== e.method,
+  ).map((e) => e.slug);
   const missing = inSpec.filter((h) => !inNav.includes(h));
   const stale = inNav.filter((h) => !inSpec.includes(h));
-  if (missing.length || stale.length) {
+  if (missing.length || stale.length || wrongMethod.length) {
     throw new Error(
       `content/navigation.ts ENDPOINT_NAV is out of step with public/openapi.json.` +
         (missing.length ? ` Missing: ${missing.join(", ")}.` : "") +
-        (stale.length ? ` Not in spec: ${stale.join(", ")}.` : ""),
+        (stale.length ? ` Not in spec: ${stale.join(", ")}.` : "") +
+        (wrongMethod.length ? ` Wrong method tag: ${wrongMethod.join(", ")}.` : ""),
     );
   }
 }

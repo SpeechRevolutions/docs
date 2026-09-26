@@ -1,5 +1,6 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { EndpointBadge } from "@/components/DocsUI";
+import { PageActions } from "@/components/PageActions";
 import { AUTH_HEADER, ENDPOINTS, requestSamples, type Endpoint, type Field } from "@/lib/openapi";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -89,7 +90,10 @@ export async function EndpointPage({ endpoint: e }: { endpoint: Endpoint }) {
     // the right-hand space belongs to the request and response samples here.
     <div className="api-wide grid gap-10 xl:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] xl:gap-12">
       <div className="min-w-0">
-        <p className="eyebrow">API reference · {e.tag}</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="eyebrow !mt-0">API reference · {e.tag}</p>
+          <PageActions />
+        </div>
         <h1 className="mt-3">{e.summary}</h1>
         <EndpointBadge method={e.method as "GET" | "POST" | "PUT"} path={e.path} />
         {e.description ? <Prose text={e.description} /> : null}

@@ -166,3 +166,9 @@
 main:has(.api-wide) + * {
   display: none;
 }
+
+/* On endpoint pages the sticky sample column occupies the top-right corner, so the page
+ * tools move into the prose column (EndpointPage renders its own). */
+.docs-prose:has(.api-wide) > .page-actions {
+  display: none;
+}

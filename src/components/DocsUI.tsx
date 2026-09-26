@@ -1,3 +1,4 @@
+import { MethodTag } from "@/components/MethodTag";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
@@ -49,18 +50,9 @@ export function EndpointBadge({
   method: "GET" | "POST" | "PUT";
   path: string;
 }) {
-  const color =
-    method === "GET"
-      ? "bg-sky-500/15 text-sky-700 dark:text-sky-300"
-      : method === "PUT"
-        ? "bg-amber-500/15 text-amber-300"
-        : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
-
   return (
     <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-hairline/10 bg-surface-900 px-4 py-3 font-mono text-sm">
-      <span className={cn("rounded px-2 py-0.5 text-xs font-semibold", color)}>
-        {method}
-      </span>{" "}
+      <MethodTag method={method} className="w-auto px-2 py-0.5 text-xs" />{" "}
       <span className="min-w-0 break-words text-zinc-200">{path}</span>
     </div>
   );

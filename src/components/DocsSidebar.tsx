@@ -1,5 +1,6 @@
 "use client";
 
+import { MethodTag } from "@/components/MethodTag";
 import { NAV, type NavSection } from "@/content/navigation";
 import { SITE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -96,13 +97,14 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
                         onClick={onNavigate}
                         aria-current={active ? "page" : undefined}
                         className={cn(
-                          "block rounded-md px-3 py-1 text-[15px] leading-6 transition-colors",
+                          "flex items-center gap-2.5 rounded-md px-3 py-1 text-[15px] leading-6 transition-colors",
                           active
                             ? "bg-hairline/[0.06] font-medium text-fg"
                             : "text-zinc-400 hover:bg-hairline/5 hover:text-zinc-200",
                         )}
                       >
-                        {item.title}
+                        {item.method ? <MethodTag method={item.method} /> : null}
+                        <span className="min-w-0 truncate">{item.title}</span>
                       </Link>
                     </li>
                   );

@@ -1,6 +1,10 @@
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "WSS";
+
 export type NavItem = {
   title: string;
   href: string;
+  /** Endpoint pages show their HTTP method as a tag beside the title. */
+  method?: HttpMethod;
 };
 
 export type NavSection = {
@@ -22,20 +26,26 @@ export type NavSection = {
  * fails the build if this list and the spec ever disagree.
  */
 export const ENDPOINT_NAV: NavItem[] = [
-  { title: "Create upload job", href: "/api-reference/endpoints/create-upload-job" },
-  { title: "Report upload progress", href: "/api-reference/endpoints/report-upload-progress" },
-  { title: "Complete upload", href: "/api-reference/endpoints/complete-upload" },
-  { title: "Create multipart upload", href: "/api-reference/endpoints/create-multipart-upload" },
-  { title: "Complete multipart upload", href: "/api-reference/endpoints/complete-multipart-upload" },
-  { title: "Abort multipart upload", href: "/api-reference/endpoints/abort-multipart-upload" },
-  { title: "List jobs", href: "/api-reference/endpoints/list-jobs" },
-  { title: "Get job", href: "/api-reference/endpoints/get-job" },
-  { title: "Stream job progress", href: "/api-reference/endpoints/stream-job-progress" },
-  { title: "Cancel job", href: "/api-reference/endpoints/cancel-job" },
-  { title: "Check failed jobs", href: "/api-reference/endpoints/check-failed-jobs" },
-  { title: "Transcribe", href: "/api-reference/endpoints/transcribe" },
+  { title: "Create upload", href: "/api-reference/endpoints/create-upload-job", method: "POST" },
+  { title: "Upload heartbeat", href: "/api-reference/endpoints/report-upload-progress", method: "POST" },
+  { title: "Complete upload", href: "/api-reference/endpoints/complete-upload", method: "POST" },
+  { title: "Start multipart", href: "/api-reference/endpoints/create-multipart-upload", method: "POST" },
+  { title: "Complete multipart", href: "/api-reference/endpoints/complete-multipart-upload", method: "POST" },
+  { title: "Abort multipart", href: "/api-reference/endpoints/abort-multipart-upload", method: "POST" },
+  { title: "List jobs", href: "/api-reference/endpoints/list-jobs", method: "GET" },
+  { title: "Get job", href: "/api-reference/endpoints/get-job", method: "GET" },
+  { title: "Stream progress", href: "/api-reference/endpoints/stream-job-progress", method: "GET" },
+  { title: "Cancel job", href: "/api-reference/endpoints/cancel-job", method: "POST" },
+  { title: "Check failed jobs", href: "/api-reference/endpoints/check-failed-jobs", method: "POST" },
+  { title: "Transcribe", href: "/api-reference/endpoints/transcribe", method: "POST" },
 ];
 
+/*
+ * Order and openness follow AssemblyAI, Deepgram and ElevenLabs: every top-level section is
+ * always open (a reader scanning for a page should never have to guess which heading hides
+ * it), reading order runs from first call to reference to "pick yours" material, and
+ * endpoints sit flat in the API reference with their method beside them.
+ */
 export const NAV: NavSection[] = [
   {
     title: "Get started",
@@ -46,24 +56,11 @@ export const NAV: NavSection[] = [
     ],
   },
   {
-    title: "API reference",
-    items: [
-      { title: "Overview", href: "/api-reference/overview" },
-      { title: "Upload (SDK)", href: "/api-reference/upload" },
-      { title: "Transcribe (cURL)", href: "/api-reference/transcribe" },
-      { title: "Jobs", href: "/api-reference/jobs" },
-      { title: "Benchmarks", href: "/benchmarks" },
-      { title: "Changelog", href: "/changelog" },
-    ],
-  },
-  {
-    title: "Endpoints",
-    collapsible: true,
-    items: ENDPOINT_NAV,
-  },
-  {
     title: "Guides",
     items: [
+      { title: "Uploading files", href: "/api-reference/upload" },
+      { title: "One-request transcription", href: "/api-reference/transcribe" },
+      { title: "Job lifecycle", href: "/api-reference/jobs" },
       { title: "Terminal & cURL", href: "/guides/terminal" },
       { title: "Live progress", href: "/guides/live-progress" },
       { title: "Timestamps", href: "/guides/timestamps" },
@@ -73,8 +70,11 @@ export const NAV: NavSection[] = [
     ],
   },
   {
+    title: "API reference",
+    items: [{ title: "Overview", href: "/api-reference/overview" }, ...ENDPOINT_NAV],
+  },
+  {
     title: "SDKs",
-    collapsible: true,
     items: [
       { title: "Python", href: "/sdks/python" },
       { title: "JavaScript", href: "/sdks/javascript" },
@@ -84,7 +84,6 @@ export const NAV: NavSection[] = [
   },
   {
     title: "Migrate",
-    collapsible: true,
     items: [
       { title: "Switching STT APIs", href: "/migrate/playbook" },
       { title: "From Deepgram", href: "/migrate/deepgram" },
@@ -96,7 +95,6 @@ export const NAV: NavSection[] = [
   },
   {
     title: "Recipes & tutorials",
-    collapsible: true,
     items: [
       { title: "Cookbook", href: "/cookbook" },
       { title: "Meeting transcription app", href: "/tutorials/meeting-app" },
@@ -106,13 +104,19 @@ export const NAV: NavSection[] = [
   },
   {
     title: "Integrations",
-    collapsible: true,
     items: [
       { title: "Next.js", href: "/integrations/nextjs" },
       { title: "FastAPI", href: "/integrations/fastapi" },
       { title: "Django", href: "/integrations/django" },
       { title: "Amazon S3", href: "/integrations/s3" },
       { title: "Supabase", href: "/integrations/supabase" },
+    ],
+  },
+  {
+    title: "Resources",
+    items: [
+      { title: "Benchmarks", href: "/benchmarks" },
+      { title: "Changelog", href: "/changelog" },
     ],
   },
 ];
