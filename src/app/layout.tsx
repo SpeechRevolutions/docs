@@ -47,12 +47,24 @@ export const metadata: Metadata = {
     title: "Speech Revolutions Docs",
     description:
       "API reference, SDK guides, and quickstarts for the Speech Revolutions speech-to-text API.",
+    // Docs links are shared constantly — in tickets, in Slack, in answers on forums — and
+    // without this every one of them rendered as a bare grey box. Set on the layout so every
+    // page inherits it; a page that wants its own can still override.
+    images: [
+      {
+        url: "/brand/stt_main_logo_card.png",
+        width: 1536,
+        height: 1024,
+        alt: "Speech Revolutions — batch speech-to-text API documentation",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Speech Revolutions Docs",
     description:
       "API reference, SDK guides, and quickstarts for the Speech Revolutions speech-to-text API.",
+    images: ["/brand/stt_main_logo_card.png"],
   },
   robots: {
     index: true,

@@ -115,6 +115,28 @@ jobs:
           aws s3 sync out "s3://${BUCKET}" --only-show-errors
           --exclude "_next/*" --delete
           --cache-control "public, max-age=0, must-revalidate"
+      # Re-upload the text files with an explicit charset.
+      #
+      # `s3 sync` guesses the content type from the extension and, for .txt and .md, guesses
+      # `text/plain` with NO charset. Everything here is UTF-8 and some of it is prose with
+      # typographic punctuation, so a client that defaults to latin-1 renders mojibake — and
+      # these two files exist specifically to be read by machines whose defaults we do not
+      # control. www sends the charset; this makes docs match.
+      - name: Fix the text content types
+        run: |
+          for f in llms.txt auth.md; do
+            [ -f "out/$f" ] || continue
+            aws s3 cp "out/$f" "s3://${BUCKET}/$f" --only-show-errors \
+              --content-type "text/plain; charset=utf-8" \
+              --cache-control "public, max-age=0, must-revalidate"
+          done
+          # Every page's Markdown twin, same reasoning.
+          find out -name "*.md" -not -path "out/_next/*" | while read -r f; do
+            key="${f#out/}"
+            aws s3 cp "$f" "s3://${BUCKET}/${key}" --only-show-errors \
+              --content-type "text/markdown; charset=utf-8" \
+              --cache-control "public, max-age=0, must-revalidate"
+          done
       # One wildcard path counts as one against the 1,000 free paths a month.
       - name: Invalidate CloudFront
         run: |

@@ -12,7 +12,9 @@
 
 import { PRICING, SITE } from "@/lib/constants";
 
-const ORG_ID = `https://${SITE.domain}/#organization`;
+// Byte-identical to landing/src/lib/structured-data.ts. The @id is what tells a crawler
+// these two hosts describe ONE organization; if they differ, they describe two.
+const ORG_ID = `https://www.${SITE.domain}/#organization`;
 const SITE_ID = `https://${SITE.docsDomain}/#website`;
 
 export function docsJsonLd() {

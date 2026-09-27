@@ -143,6 +143,7 @@
         "operationId": "completeMultipartUpload",
         "tags": ["Multipart"],
         "summary": "Finish a multipart upload and enqueue the job",
+        "description": "Call this once every part has been uploaded, passing the `part_number` and `etag` of each one. Order does not matter — they are sorted server-side — but the set must be complete, and each `etag` must be the one the storage service returned on that part's PUT. The parts are assembled into a single object, the job is routed from the object's actual size, and the response is `{\"status\": \"enqueued\"}`. Rate limit: 120 requests per minute.\n\nSafe to retry. The pending upload session is consumed on success, so a second call for a job that was already enqueued returns 404 rather than submitting it twice — which is the answer you want when the first call succeeded but its response never reached you.",
         "requestBody": {
           "required": true,
           "content": {
@@ -166,6 +167,7 @@
         "operationId": "abortMultipartUpload",
         "tags": ["Multipart"],
         "summary": "Abandon a multipart upload",
+        "description": "Call this when you abandon an upload, so the parts already stored are discarded and the job never enters the queue. Nothing is transcribed and nothing is billed — a multipart upload only costs money once `complete` enqueues it. Returns `{\"status\": \"aborted\"}`. Rate limit: 120 requests per minute.\n\nSafe to call more than once, and safe to skip: aborting an upload that is already gone still returns 200, and parts left behind by a client that vanished are removed by the bucket's lifecycle rule anyway. Calling it simply frees the storage sooner.",
         "requestBody": {
           "required": true,
           "content": {

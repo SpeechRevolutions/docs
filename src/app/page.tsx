@@ -5,7 +5,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Introduction",
+  /*
+   * Absolute, and not just "Introduction".
+   *
+   * The root layout's `title.template` applies to CHILD segments, not to the root segment's
+   * own page — so while every other page rendered "API overview · Speech Revolutions Docs",
+   * the docs home shipped a bare <title>Introduction</title>. That is the single most
+   * valuable string on the most-linked page of the site, and it named neither the product
+   * nor what it does.
+   */
+  title: {
+    absolute: "Speech Revolutions Docs — batch speech-to-text API reference and SDKs",
+  },
   description:
     "Production speech-to-text for developers. Transcribe audio with speaker labels, word timestamps, and multiple output formats, via SDK or one terminal command.",
 };
