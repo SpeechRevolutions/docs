@@ -25,9 +25,18 @@ export function docsJsonLd() {
         "@type": "Organization",
         "@id": ORG_ID,
         name: SITE.name,
+        // Kept in step with landing/src/lib/structured-data.ts. Two hosts claiming one @id
+        // have to agree about the entity, or they are two conflicting descriptions of it.
+        alternateName: ["SpeechRevolutions", "Speech Revolutions LLC"],
         url: SITE.landingUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: `https://www.${SITE.domain}/brand/logo-square.png`,
+          width: 512,
+          height: 512,
+        },
         description:
-          "Batch speech-to-text API with speaker diarization and word-level timestamps.",
+          "Speech Revolutions is a batch speech-to-text API with speaker diarization and word-level timestamps.",
         sameAs: [
           "https://github.com/SpeechRevolutions",
           "https://pypi.org/project/speechrevolutions/",

@@ -52,9 +52,9 @@ export const metadata: Metadata = {
     // page inherits it; a page that wants its own can still override.
     images: [
       {
-        url: "/brand/stt_main_logo_card.png",
-        width: 1536,
-        height: 1024,
+        url: "/brand/og-card.png",
+        width: 1200,
+        height: 630,
         alt: "Speech Revolutions — batch speech-to-text API documentation",
       },
     ],
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     title: "Speech Revolutions Docs",
     description:
       "API reference, SDK guides, and quickstarts for the Speech Revolutions speech-to-text API.",
-    images: ["/brand/stt_main_logo_card.png"],
+    images: ["/brand/og-card.png"],
   },
   robots: {
     index: true,
