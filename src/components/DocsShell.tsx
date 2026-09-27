@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { DocsHeader } from "@/components/DocsHeader";
 import { DocsSidebar } from "@/components/DocsSidebar";
 import { PageActions } from "@/components/PageActions";
@@ -7,6 +8,7 @@ import type { ReactNode } from "react";
 export function DocsShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
+      <Breadcrumbs />
       <DocsHeader />
       <div className="mx-auto flex max-w-[90rem]">
         <DocsSidebar />

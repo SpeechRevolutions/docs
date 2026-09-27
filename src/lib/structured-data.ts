@@ -40,6 +40,7 @@ export function docsJsonLd() {
         sameAs: [
           "https://github.com/SpeechRevolutions",
         "https://www.linkedin.com/company/speech-revolutions",
+        "https://www.wikidata.org/wiki/Q141581139",
           "https://pypi.org/project/speechrevolutions/",
           "https://www.npmjs.com/package/speechrevolutions",
           "https://www.nuget.org/packages/SpeechRevolutions",
