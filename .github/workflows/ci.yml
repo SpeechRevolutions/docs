@@ -68,6 +68,11 @@ jobs:
         with:
           name: site
           path: docs/out
+          # upload-artifact v4 drops dot-prefixed paths unless told otherwise, so
+          # out/.well-known/ silently never reached the deploy job — the build was
+          # green, the files were in out/, and the URLs 404'd in production. Anything
+          # under .well-known/ is by definition hidden, so this is not optional here.
+          include-hidden-files: true
           retention-days: 7
 
   deploy:
@@ -122,6 +127,17 @@ jobs:
       # typographic punctuation, so a client that defaults to latin-1 renders mojibake — and
       # these two files exist specifically to be read by machines whose defaults we do not
       # control. www sends the charset; this makes docs match.
+      # Belt and braces for the discovery files. They are the ones most likely to be
+      # dropped by a tooling default (see include-hidden-files above) and the least
+      # likely to be noticed missing, since nothing on the site links to them.
+      - name: Upload the well-known files
+        run: |
+          for f in ard.json ai-catalog.json; do
+            [ -f "out/.well-known/$f" ] || { echo "::error::out/.well-known/$f is missing"; exit 1; }
+            aws s3 cp "out/.well-known/$f" "s3://${BUCKET}/.well-known/$f" --only-show-errors \
+              --content-type "application/json; charset=utf-8" \
+              --cache-control "public, max-age=0, must-revalidate"
+          done
       - name: Fix the text content types
         run: |
           for f in llms.txt auth.md; do
