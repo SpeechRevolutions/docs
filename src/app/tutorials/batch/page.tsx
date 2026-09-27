@@ -595,13 +595,12 @@ var jobId = await client.SubmitAsync(path, new TranscribeOptions
         The webhook body is{" "}
         <code>{`{ job_id, status, download_url?, step?, reason? }`}</code>, signed
         with HMAC-SHA256 in the <code>X-SR-Signature: sha256=&lt;hmac&gt;</code>{" "}
-        header — always verify it against the raw request bytes before trusting
-        the payload. In the handler, look up which file the <code>job_id</code>{" "}
+        header, keyed with your organization&apos;s signing secret from the console
+        (<strong>API Keys → Webhook signing secret</strong>) — always verify it against
+        the raw request bytes before trusting the payload (see{" "}
+        <Link href="/guides/webhooks">Webhooks</Link>). In the handler, look up which file the <code>job_id</code>{" "}
         belongs to, then call <code>get_transcript(job_id)</code> (or download{" "}
-        <code>download_url</code> directly) and save it. See the{" "}
-        <Link href="/sdks/python">Python SDK</Link> and{" "}
-        <Link href="/api-reference/jobs">Jobs API</Link> pages for the full
-        signature-verification receiver.
+        <code>download_url</code> directly) and save it.
       </p>
 
       <Callout title="Polling or webhooks?" tone="info">

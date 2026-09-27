@@ -336,7 +336,8 @@ const path = await result.save("output"); // -> "output.json"`}
         , signed with HMAC-SHA256 over the raw body in the{" "}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
         <code>X-SR-Delivery</code> id). Verify against the <em>raw</em> body
-        bytes with a constant-time comparison.
+        bytes with a constant-time comparison. Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeBlock
         language="ts"

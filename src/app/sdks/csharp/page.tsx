@@ -321,6 +321,8 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
         <code>X-SR-Delivery</code> id). Verify it against the raw request bytes
         with <code>HMACSHA256</code> +{" "}
         <code>CryptographicOperations.FixedTimeEquals</code>.
+        Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeBlock
         language="csharp"

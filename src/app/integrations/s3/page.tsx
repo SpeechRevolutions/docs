@@ -344,10 +344,10 @@ var jobId = await client.SubmitAsync(audioUrl, new TranscribeOptions
           The completion POST is signed with HMAC-SHA256 in the{" "}
           <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header — always verify
           it against the raw request bytes before trusting{" "}
-          <code>download_url</code>. The{" "}
-          <Link href="/integrations/fastapi">FastAPI</Link> and{" "}
-          <Link href="/integrations/nextjs">Next.js</Link> guides show complete
-          receivers.
+          <code>download_url</code>, using your organization&apos;s signing secret
+          from the console (<strong>API Keys → Webhook signing secret</strong>). The{" "}
+          <Link href="/guides/webhooks">webhooks guide</Link> shows how in every
+          language.
         </p>
       </Callout>
 

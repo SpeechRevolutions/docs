@@ -158,7 +158,8 @@ def progress(job_id: str):
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Verify against
         the exact bytes you received — not a re-serialized dict — with a
         constant-time compare. This mirrors <code>webhook_receiver_fastapi.py</code> from the
-        cookbook. Ask us for your signing secret — it is issued by Speech Revolutions and is not self-serve in the console yet. Until you have one, treat an unsigned request as unverified and confirm the job through the API before acting on it.
+        cookbook. Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeBlock
         language="python"

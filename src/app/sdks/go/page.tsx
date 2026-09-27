@@ -340,6 +340,8 @@ fmt.Println("saved to", out)`}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
         <code>X-SR-Delivery</code> id). Verify it against the raw request bytes
         with <code>hmac</code> + <code>crypto/subtle.ConstantTimeCompare</code>.
+        Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeBlock
         language="go"

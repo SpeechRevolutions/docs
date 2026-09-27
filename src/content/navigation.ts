@@ -63,6 +63,7 @@ export const NAV: NavSection[] = [
       { title: "Job lifecycle", href: "/api-reference/jobs" },
       { title: "Terminal & cURL", href: "/guides/terminal" },
       { title: "Live progress", href: "/guides/live-progress" },
+      { title: "Webhooks", href: "/guides/webhooks" },
       { title: "Timestamps", href: "/guides/timestamps" },
       { title: "Speaker diarization", href: "/guides/diarization" },
       { title: "Output formats & subtitles", href: "/guides/output-formats" },

@@ -581,6 +581,8 @@ foreach (var (jobId, result) in results)
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
         <code>X-SR-Delivery</code> id). Always verify against the raw bytes you
         received — not a re-serialized dict — with a constant-time comparison.
+        Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeTabs
         tabs={[
@@ -591,6 +593,7 @@ foreach (var (jobId, result) in results)
             code: `import hashlib
 import hmac
 import json
+import os
 
 from fastapi import FastAPI, Request, HTTPException
 from speechrevolutions import SpeechRevolutions
@@ -602,7 +605,7 @@ client.submit("meeting.mp3", callback_url="https://you.example.com/hook")
 
 # 2. Receive + verify the notification.
 app = FastAPI()
-SECRET = "your-signing-secret"  # the same secret configured server-side
+SECRET = os.environ["SPEECHREVOLUTIONS_WEBHOOK_SECRET"]  # Console → API Keys → Webhook signing secret
 
 def verify_signature(raw_body: bytes, signature_header: str, secret: str) -> bool:
     expected = "sha256=" + hmac.new(secret.encode(), raw_body, hashlib.sha256).hexdigest()
@@ -634,7 +637,7 @@ const client = new SpeechRevolutions();
 await client.submit("meeting.mp3", { callbackUrl: "https://you.example.com/hook" });
 
 // 2. Receive + verify the notification.
-const SECRET = process.env.SR_WEBHOOK_SECRET; // same secret configured server-side
+const SECRET = process.env.SPEECHREVOLUTIONS_WEBHOOK_SECRET; // Console → API Keys → Webhook signing secret
 
 function verifySignature(rawBody, signatureHeader, secret) {
   const expected = "sha256=" + createHmac("sha256", secret).update(rawBody).digest("hex");
@@ -677,8 +680,8 @@ import (
 	stt "github.com/speechrevolutions/speechrevolutions-go"
 )
 
-// The same secret configured server-side.
-var secret = []byte(os.Getenv("SR_WEBHOOK_SECRET"))
+// Console → API Keys → Webhook signing secret.
+var secret = []byte(os.Getenv("SPEECHREVOLUTIONS_WEBHOOK_SECRET"))
 
 func main() {
 	client, err := stt.NewClient("")
@@ -753,9 +756,9 @@ using SpeechRevolutions;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-// The same secret configured server-side.
+// Console → API Keys → Webhook signing secret.
 var secret = Encoding.UTF8.GetBytes(
-    Environment.GetEnvironmentVariable("SR_WEBHOOK_SECRET")!);
+    Environment.GetEnvironmentVariable("SPEECHREVOLUTIONS_WEBHOOK_SECRET")!);
 
 using var client = new SpeechRevolutionsClient();
 

@@ -241,6 +241,8 @@ export function Upload() {
         platform signs the raw body with HMAC-SHA256 in the{" "}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Read the raw
         bytes — not a re-serialized object — and compare in constant time.
+        Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeBlock
         language="ts"
@@ -250,7 +252,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const runtime = "nodejs";
 
-const SECRET = process.env.SPEECHREVOLUTIONS_WEBHOOK_SECRET!; // your signing secret
+const SECRET = process.env.SPEECHREVOLUTIONS_WEBHOOK_SECRET!; // Console → API Keys → Webhook signing secret
 
 function verify(raw: string, header: string | null): boolean {
   const expected = "sha256=" + createHmac("sha256", SECRET).update(raw).digest("hex");

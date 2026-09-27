@@ -382,7 +382,8 @@ print("saved to", out)`}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
         <code>X-SR-Delivery</code> id). Always verify the signature against the
         raw bytes you received — not a re-serialized dict — using a
-        constant-time comparison.
+        constant-time comparison. Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeBlock
         language="python"

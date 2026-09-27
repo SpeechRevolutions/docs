@@ -130,7 +130,8 @@ def job_progress(request, job_id):
         completion or permanent failure. The signature is HMAC-SHA256 over the
         raw body in the <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header.
         Verify against <code>request.body</code> (the exact bytes) and exempt the
-        view from CSRF — it&apos;s a server-to-server POST, not a browser form. Ask us for your signing secret — it is issued by Speech Revolutions and is not self-serve in the console yet. Until you have one, treat an unsigned request as unverified and confirm the job through the API before acting on it.
+        view from CSRF — it&apos;s a server-to-server POST, not a browser form. Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
       <CodeBlock
         language="python"

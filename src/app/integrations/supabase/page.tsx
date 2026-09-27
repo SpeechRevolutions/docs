@@ -334,7 +334,8 @@ const channel = supabase
           For long recordings, use <code>submit()</code> with a{" "}
           <code>callback_url</code> instead of blocking on{" "}
           <code>transcribe()</code>, and update the row from a signed webhook
-          handler (verify <code>X-SR-Signature</code>). The{" "}
+          handler (verify <code>X-SR-Signature</code> with your signing secret — see{" "}
+          <Link href="/guides/webhooks">Webhooks</Link>). The{" "}
           <Link href="/integrations/nextjs">Next.js</Link> and{" "}
           <Link href="/integrations/fastapi">FastAPI</Link> guides show complete
           receivers, and{" "}

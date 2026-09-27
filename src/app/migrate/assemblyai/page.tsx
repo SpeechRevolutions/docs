@@ -298,8 +298,9 @@ if status.is_completed:
     print(result.text)`}
       />
       <p>
-        Or skip polling entirely with a <code>callback_url</code> webhook — the
-        platform POSTs a signed notification when the job finishes.
+        Or skip polling entirely with a <code>callback_url</code>{" "}
+        <Link href="/guides/webhooks">webhook</Link> — the platform POSTs a signed
+        notification when the job finishes.
       </p>
 
       <h2>Common pitfalls</h2>
