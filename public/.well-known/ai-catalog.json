@@ -1,0 +1,57 @@
+{
+  "$comment": "Agentic Resource Discovery. Spec v0.91 (github.com/ards-project/ard-spec), authored at Google, Microsoft and Hugging Face on the Linux Foundation AI Catalog data model. It points an agent at the machine-readable things we publish instead of making it guess from HTML. Mirrored at /.well-known/ai-catalog.json, the predecessor path, for readers written before the rename. Keep the two byte-identical.",
+  "entries": [
+    {
+      "identifier": "urn:air:speechrevolutions.com:api:speech-to-text",
+      "displayName": "Speech Revolutions Speech-to-Text API",
+      "description": "Batch speech-to-text: submit recorded audio, receive a transcript with speaker labels and word-level timestamps in JSON, TXT, SRT, VTT, DOCX or PDF. Automatic language detection across 99+ languages. $0.003 per audio minute with every feature included.",
+      "type": "application/openapi+json",
+      "url": "https://docs.speechrevolutions.com/openapi.json",
+      "representativeQueries": [
+        "transcribe an audio file",
+        "speech to text API",
+        "transcribe a recording with speaker labels",
+        "who said what in this meeting recording",
+        "get word-level timestamps from audio",
+        "transcribe a podcast episode",
+        "generate SRT subtitles from a video"
+      ]
+    },
+    {
+      "identifier": "urn:air:speechrevolutions.com:mcp:transcription",
+      "displayName": "Speech Revolutions MCP Server",
+      "description": "Local stdio MCP server exposing five tools: transcribe_audio, submit_transcription_job, check_job, get_transcript and list_jobs. Runs via `npx -y speechrevolutions mcp` and authenticates with SPEECHREVOLUTIONS_API_KEY.",
+      "type": "application/vnd.mcp-server+json",
+      "url": "https://docs.speechrevolutions.com/mcp",
+      "representativeQueries": [
+        "MCP server for transcription",
+        "speech to text MCP",
+        "transcribe audio from Claude",
+        "give my assistant the ability to transcribe audio"
+      ]
+    },
+    {
+      "identifier": "urn:air:speechrevolutions.com:docs:index",
+      "displayName": "Speech Revolutions Documentation",
+      "description": "API reference, SDK guides and quickstarts. Every page has a Markdown twin at the same URL with .md appended.",
+      "type": "text/plain",
+      "url": "https://docs.speechrevolutions.com/llms.txt",
+      "representativeQueries": [
+        "Speech Revolutions documentation",
+        "Speech Revolutions API reference",
+        "how do I authenticate with Speech Revolutions"
+      ]
+    },
+    {
+      "identifier": "urn:air:speechrevolutions.com:docs:auth",
+      "displayName": "Speech Revolutions Authentication Guide",
+      "description": "How to obtain and send an API key. Keys are self-serve from the console; new accounts receive $10 of credit with no card required.",
+      "type": "text/markdown",
+      "url": "https://docs.speechrevolutions.com/auth.md",
+      "representativeQueries": [
+        "Speech Revolutions API key",
+        "how to authenticate with the Speech Revolutions API"
+      ]
+    }
+  ]
+}

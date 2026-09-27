@@ -115,6 +115,8 @@ export const NAV: NavSection[] = [
   {
     title: "Resources",
     items: [
+      { title: "MCP server", href: "/mcp" },
+      { title: "Versioning & deprecation", href: "/versioning" },
       { title: "Benchmarks", href: "/benchmarks" },
     ],
   },
