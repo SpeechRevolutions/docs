@@ -39,6 +39,7 @@ export function docsJsonLd() {
           "Speech Revolutions is a batch speech-to-text API with speaker diarization and word-level timestamps.",
         sameAs: [
           "https://github.com/SpeechRevolutions",
+        "https://www.linkedin.com/company/speech-revolutions",
           "https://pypi.org/project/speechrevolutions/",
           "https://www.npmjs.com/package/speechrevolutions",
           "https://www.nuget.org/packages/SpeechRevolutions",
