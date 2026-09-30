@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
-import { Callout, EndpointBadge } from "@/components/DocsUI";
+import { Callout } from "@/components/DocsUI";
 import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -115,13 +115,12 @@ export default function MigrateAssemblyAIPage() {
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/transcribe" />
       <p>
         Note the shape difference: AssemblyAI uploads first, gets an <code>upload_url</code>,
-        then creates a transcript from it. Without an SDK, Speech Revolutions does both in one
-        call: send the bytes to <code>/api/v1/transcribe</code> and the transcript comes back on
-        the same connection. Above {LIMITS.apiUploadMax}, use an SDK, which uploads in parts
-        and waits for you.
+        then creates a transcript from it. With a Speech Revolutions SDK that is one call:
+        pass a path or URL to <code>transcribe()</code> and it uploads, waits, and returns the
+        transcript. For a quick test from a terminal, <code>/api/v1/transcribe</code> does the
+        same in one request.
       </p>
 
       <h2>Upload differences</h2>
@@ -313,8 +312,8 @@ if status.is_completed:
         </li>
         <li>
           <strong>Upload shape.</strong> AssemblyAI uploads, then references the upload URL in a
-          second request. Speech Revolutions takes the bytes and returns the transcript in one
-          call to <code>/api/v1/transcribe</code>, and the SDKs handle larger files for you.
+          second request. The Speech Revolutions SDK does both in one <code>transcribe()</code>{" "}
+          call.
         </li>
         <li>
           <strong>Keyword biasing.</strong> AssemblyAI&apos;s{" "}

@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
+import { CodeTabs } from "@/components/CodeTabs";
 import { Callout, EndpointBadge } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,8 +14,8 @@ export default function JobsApiPage() {
     <>
       <h1>Jobs API</h1>
       <p>
-        Wait for a result, retrieve a job by id, list recent jobs, or cancel one — for jobs
-        started with <code>/api/v1/transcribe</code> or from an SDK.
+        Look up a job by id, list recent jobs, follow one to completion, or cancel it. The SDKs
+        wrap every call here; the endpoints and response shapes are listed for reference.
       </p>
 
       <h2>Retrieve a job</h2>
@@ -23,15 +23,57 @@ export default function JobsApiPage() {
       <p>
         Returns a job&apos;s current status plus a freshly-generated{" "}
         <code>download_url</code> once it has completed — valid even long after
-        the original upload response. Backs the SDK&apos;s{" "}
-        <code>get_job_status</code> / <code>getJobStatus</code> /{" "}
-        <code>GetJobStatus</code> / <code>GetJobStatusAsync</code> and{" "}
-        <code>get_transcript</code> methods.
+        the original upload response.
       </p>
-      <CodeBlock
-        language="bash"
-        code={`curl "${SITE.apiBase}/api/v1/jobs/$JOB_ID" \\
-  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY"`}
+      <CodeTabs
+        tabs={[
+          {
+            label: "Python",
+            language: "python",
+            code: `status = client.get_job_status(job_id)
+if status.is_completed:
+    result = client.get_transcript(job_id)
+    print(result.text)
+elif status.is_failed:
+    print(status.failed_stage, status.reason)`,
+          },
+          {
+            label: "JavaScript",
+            language: "ts",
+            code: `const status = await client.getJobStatus(jobId);
+if (status.status === "completed") {
+  const result = await client.getTranscript(jobId);
+  console.log(result.text);
+} else if (status.status === "failed") {
+  console.log(status.failedStage, status.reason);
+}`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `status, err := client.GetJobStatus(ctx, jobID)
+if err != nil {
+	log.Fatal(err)
+}
+if status.IsCompleted() {
+	result, err := client.GetTranscript(ctx, jobID, stt.OutputJSON)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(result.Text())
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var status = await client.GetJobStatusAsync(jobId);
+if (status.IsCompleted)
+{
+    var result = await client.GetTranscriptAsync(jobId);
+    Console.WriteLine(result.Text);
+}`,
+          },
+        ]}
       />
       <p>
         Response (<code>JobStatusResponse</code>):
@@ -53,14 +95,46 @@ export default function JobsApiPage() {
         The caller&apos;s most-recent jobs (newest first), cursor-paginated.
         Query params: <code>limit</code> (default 50, 1–100) and{" "}
         <code>before</code> (an ISO-8601 <code>created_at</code> cursor — pass
-        back the previous page&apos;s <code>next_before</code>). Backs the
-        SDK&apos;s <code>list_jobs</code> / <code>listJobs</code> /{" "}
-        <code>ListJobs</code> / <code>ListJobsAsync</code>.
+        back the previous page&apos;s <code>next_before</code>).
       </p>
-      <CodeBlock
-        language="bash"
-        code={`curl "${SITE.apiBase}/api/v1/jobs?limit=50" \\
-  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY"`}
+      <CodeTabs
+        tabs={[
+          {
+            label: "Python",
+            language: "python",
+            code: `page = client.list_jobs(limit=50)
+for job in page["jobs"]:
+    print(job["job_id"], job["created_at"])
+older = client.list_jobs(limit=50, before=page["next_before"])  # next page`,
+          },
+          {
+            label: "JavaScript",
+            language: "ts",
+            code: `const page = await client.listJobs({ limit: 50 });
+for (const job of page.jobs) console.log(job.jobId, job.createdAt);
+// next page: client.listJobs({ limit: 50, before: page.nextBefore ?? undefined })`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `page, err := client.ListJobs(ctx, 50, "")
+if err != nil {
+	log.Fatal(err)
+}
+for _, job := range page.Jobs {
+	fmt.Println(job.JobID, job.CreatedAt)
+}
+// next page: client.ListJobs(ctx, 50, page.NextBefore)`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var page = await client.ListJobsAsync(limit: 50);
+foreach (var job in page.Jobs)
+    Console.WriteLine($"{job.JobId} {job.CreatedAt}");
+// next page: await client.ListJobsAsync(50, page.NextBefore)`,
+          },
+        ]}
       />
       <p>
         Response (<code>JobListResponse</code>):
@@ -78,15 +152,11 @@ export default function JobsApiPage() {
       <h2>SSE stream</h2>
       <EndpointBadge method="GET" path="/api/v1/jobs/{job_id}/stream" />
       <p>
-        Open a Server-Sent Events stream for a job. Reconnect with the{" "}
-        <code>Last-Event-ID</code> header to resume without missing events.
+        A Server-Sent Events stream of a job&apos;s progress, ending in its result. You rarely
+        open it yourself: the SDKs follow it inside <code>transcribe()</code>, reconnect with{" "}
+        <code>Last-Event-ID</code> if the connection drops, and report progress through the{" "}
+        <a href="/guides/live-progress">progress callbacks</a>.
       </p>
-      <CodeBlock
-        language="bash"
-        code={`curl -N "${SITE.apiBase}/api/v1/jobs/$JOB_ID/stream" \\
-  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -H "Accept: text/event-stream"`}
-      />
 
       <h3>Events</h3>
       <p>
@@ -165,7 +235,14 @@ data: {"job_id": "…", "download_url": "https://…", "output_type": "json"}`}
 
       <h2>Cancel</h2>
       <EndpointBadge method="POST" path="/api/v1/jobs/cancel" />
-      <CodeBlock language="json" code={`{"job_id": "…"}`} />
+      <CodeTabs
+        tabs={[
+          { label: "Python", language: "python", code: `client.cancel_job(job_id)` },
+          { label: "JavaScript", language: "ts", code: `await client.cancelJob(jobId);` },
+          { label: "Go", language: "go", code: `err := client.CancelJob(ctx, jobID)` },
+          { label: "C#", language: "csharp", code: `await client.CancelJobAsync(jobId);` },
+        ]}
+      />
       <p>
         You can only cancel a job that hasn&apos;t already been processed, and
         only for the portion that hasn&apos;t been processed yet. If a job is

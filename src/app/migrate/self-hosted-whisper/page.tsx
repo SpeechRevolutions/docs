@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
-import { Callout, EndpointBadge } from "@/components/DocsUI";
+import { Callout } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -97,16 +97,14 @@ export default function MigrateSelfHostedWhisperPage() {
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/transcribe" />
-
+      
       <h2>Input / upload differences</h2>
       <p>
         <code>faster-whisper</code> reads a local file path directly.{" "}
         <code>whisper.cpp</code> is stricter still — it wants 16 kHz mono WAV, so
         most pipelines shell out to <code>ffmpeg</code> to convert first. Speech Revolutions
         accepts common audio/video formats and transcodes them for you, so you pass a path,
-        URL, or bytes (or send the file to <code>/api/v1/transcribe</code>) and skip the
-        transcode step.
+        URL, or bytes to the SDK and skip the transcode step.
       </p>
 
       <h2>Response shape</h2>

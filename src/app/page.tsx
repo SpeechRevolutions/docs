@@ -80,9 +80,8 @@ export default function DocsHomePage() {
 
       <h2>Choose your path</h2>
       <p>
-        Use the <strong>SDK</strong> for apps and pipelines. Use{" "}
-        <strong>cURL / terminal</strong> when you want a single streaming upload
-        without managing upload sessions.
+        Use an <strong>SDK</strong> for anything you build: apps, pipelines, batch jobs. The{" "}
+        <strong>terminal</strong> path is for trying the API without installing anything.
       </p>
 
       <div className="table-scroll">
@@ -96,18 +95,18 @@ export default function DocsHomePage() {
           </thead>
           <tbody>
             <tr>
-              <td>SDK / apps</td>
+              <td>Apps, pipelines, batch</td>
               <td>
                 <Link href="/sdks/python">SDK</Link> <code>transcribe()</code>
               </td>
               <td>Files up to {LIMITS.sdkUploadMax}, upload progress, retries, resumable wait</td>
             </tr>
             <tr>
-              <td>Terminal / scripts</td>
+              <td>Quick tests</td>
               <td>
-                <code>POST /api/v1/transcribe</code>
+                <code>curl</code> to <code>POST /api/v1/transcribe</code>
               </td>
-              <td>One-shot stream upload + percentage progress on the wire</td>
+              <td>Trying the API from a shell; up to {LIMITS.apiUploadMax} per file</td>
             </tr>
           </tbody>
         </table>

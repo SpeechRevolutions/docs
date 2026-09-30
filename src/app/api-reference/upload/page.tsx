@@ -6,49 +6,30 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Uploading files",
-  description: `Send audio up to ${LIMITS.apiUploadMax} in one request with cURL, anything up to ${LIMITS.sdkUploadMax} through an SDK, or a URL for audio that is already online.`,
+  description: `Pass a file path or a URL to an SDK and it uploads the audio for you, up to ${LIMITS.sdkUploadMax} per file.`,
 };
 
 /*
  * How audio gets in, by size and source. This page used to document the upload endpoints the
  * SDKs call internally (create, presigned PUT, progress, complete, multipart). Those are the
  * SDKs' transport, not a public API: they are not in the API reference, and nothing here tells a
- * reader to call them. A reader without an SDK uses /api/v1/transcribe.
+ * reader to call them. The page leads with the SDKs; /api/v1/transcribe appears only as the
+ * terminal path for quick tests.
  */
 export default function UploadingFilesPage() {
   return (
     <>
       <h1>Uploading files</h1>
       <p>
-        Send audio up to {LIMITS.apiUploadMax} in a single request with cURL, anything up to{" "}
-        {LIMITS.sdkUploadMax} through an SDK, or pass a URL for audio that is already online.
-      </p>
-
-      <h2>Up to {LIMITS.apiUploadMax}: one request</h2>
-      <p>
-        <Link href="/api-reference/endpoints/transcribe">
-          <code>POST /api/v1/transcribe</code>
-        </Link>{" "}
-        takes the audio as the request body and streams the transcript back on the same
-        connection. Nothing to install, and no job to poll.
-      </p>
-      <CodeBlock
-        language="bash"
-        code={`curl -N -X POST "${SITE.apiBase}/api/v1/transcribe?output_type=json&speaker_labels=true" \\
-  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  --data-binary @meeting.mp3`}
-      />
-      <p>
-        The <Link href="/api-reference/transcribe">one-request transcription</Link> guide covers
-        the stream, its events, and how to resume if the connection drops.
-      </p>
-
-      <h2>Larger files: use an SDK</h2>
-      <p>
-        Above {LIMITS.apiUploadMax}, and for anything running in production, let an SDK do the
-        upload. It sends the file in parts straight to storage, retries a part that fails rather
-        than the whole file, reports upload progress, and then waits for the result. Up to{" "}
+        Pass a file path or a URL to an SDK and it uploads the audio for you, up to{" "}
         {LIMITS.sdkUploadMax} per file.
+      </p>
+
+      <h2>Upload a file</h2>
+      <p>
+        Pass a path and the SDK does the upload: it sends the file in parts straight to storage,
+        retries a part that fails rather than the whole file, reports upload progress, then
+        waits for the result. Up to {LIMITS.sdkUploadMax} per file.
       </p>
       <CodeTabs
         tabs={[
@@ -134,10 +115,29 @@ Console.WriteLine(result.Text);`,
       <h2>Don&apos;t wait on the result</h2>
       <p>
         For batches and background work, submit and move on: pass a <code>callback_url</code>{" "}
-        and we POST a signed notification when each job finishes. It works with every SDK and
-        with <code>/api/v1/transcribe</code> as a query parameter. The{" "}
+        and we POST a signed notification when each job finishes. The{" "}
         <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, verifying the
         signature, and retries.
+      </p>
+
+      <h2>A quick test from a terminal</h2>
+      <p>
+        <Link href="/api-reference/endpoints/transcribe">
+          <code>POST /api/v1/transcribe</code>
+        </Link>{" "}
+        takes up to {LIMITS.apiUploadMax} as the request body and streams the transcript back
+        on the same connection. It is meant for trying the API from a shell; applications should
+        use an SDK.
+      </p>
+      <CodeBlock
+        language="bash"
+        code={`curl -N -X POST "${SITE.apiBase}/api/v1/transcribe?output_type=json&speaker_labels=true" \\
+  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
+  --data-binary @meeting.mp3`}
+      />
+      <p>
+        The <Link href="/api-reference/transcribe">one-request transcription</Link> guide covers
+        the stream, its events, and how to resume if the connection drops.
       </p>
 
       <h2>Formats and limits</h2>

@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
-import { Callout, EndpointBadge } from "@/components/DocsUI";
+import { Callout } from "@/components/DocsUI";
 import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -130,15 +130,13 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/transcribe" />
-
+      
       <h2>Upload differences</h2>
       <p>
         Deepgram takes raw audio bytes directly in the request body with a{" "}
-        <code>Content-Type</code> matching the file, and so does Speech Revolutions&apos;{" "}
-        <code>/api/v1/transcribe</code>, up to {LIMITS.apiUploadMax}. Above that, the SDKs
-        stream large files straight to object storage in parts, so you still pass a path, URL,
-        bytes, or file object to <code>transcribe()</code>. Speech Revolutions also reports real{" "}
+        <code>Content-Type</code> matching the file. With Speech Revolutions you pass a path, URL,
+        bytes, or file object to the SDK&apos;s <code>transcribe()</code>, which streams large
+        files straight to object storage in parts. Speech Revolutions also reports real{" "}
         <code>upload</code> and <code>transcribe</code> progress; Deepgram
         exposes no percentage for pre-recorded audio.
       </p>

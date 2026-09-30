@@ -41,7 +41,7 @@ export default function QuickstartPage() {
         ]}
       />
 
-      <h2>2a. SDK (recommended for apps)</h2>
+      <h2>2a. SDK (recommended)</h2>
       <p>
         The SDK uploads the file for you (in parts, for large files), then waits for the
         transcript.
@@ -173,7 +173,7 @@ SPEAKER_1: Why the gown you go to the theater in? It looks very well to me.
 SPEAKER_2: He stopped distracted, seeing that his wife was weeping, Two great tears ran slowly from the corners of her eyes toward the corners of her mouth.`}
       />
 
-      <h2>2b. Terminal (one request)</h2>
+      <h2>2b. Quick test from a terminal</h2>
       <p>
         For scripts and one-off jobs, stream the file to{" "}
         <code>POST /api/v1/transcribe</code>. The connection stays open and

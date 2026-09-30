@@ -1,5 +1,5 @@
 import { CodeTabs } from "@/components/CodeTabs";
-import { Callout, EndpointBadge } from "@/components/DocsUI";
+import { Callout } from "@/components/DocsUI";
 import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -105,14 +105,12 @@ export default function MigrateElevenLabsPage() {
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/transcribe" />
-
+      
       <h2>Upload differences</h2>
       <p>
         ElevenLabs takes the audio as a multipart <code>file</code> field with{" "}
-        <code>model_id</code> in the form body. Speech Revolutions takes raw bytes in the body of{" "}
-        <code>/api/v1/transcribe</code> (up to {LIMITS.apiUploadMax}); above that, the SDKs
-        upload straight to storage in parts when you pass a path, URL, or bytes. Speech Revolutions
+        <code>model_id</code> in the form body. With Speech Revolutions you pass a path, URL, or
+        bytes to the SDK, which uploads straight to storage in parts. Speech Revolutions
         also reports live <code>upload</code> and <code>transcribe</code> progress
         (see <Link href="/guides/live-progress">live progress</Link>).
       </p>
