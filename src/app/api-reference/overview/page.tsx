@@ -42,10 +42,7 @@ export default function ApiOverviewPage() {
               <td>
                 <code>{LIMITS.sdkUploadMax}</code>
               </td>
-              <td>
-                SDK upload flow (<code>/api/v1/upload</code> + presigned PUT or
-                multipart)
-              </td>
+              <td>Through an SDK, which uploads in parts</td>
             </tr>
             <tr>
               <td>Maximum file size</td>
@@ -222,14 +219,14 @@ export default function ApiOverviewPage() {
       </p>
       <Callout title="Retrying safely" tone="warn">
         <p>
-          <code>POST /api/v1/upload</code> and{" "}
-          <code>POST /api/v1/upload/multipart/create</code> create a job the moment the
-          server handles them, and the API has no idempotency key. If the response is lost
-          — a 502, a reset, a read timeout — you cannot tell whether the job exists, and
-          retrying creates a <em>second</em> job for the same audio, which is transcribed and
-          billed twice. Retry these two only when the request provably never landed: a
-          connect timeout, or a <code>429</code>. Everything else is safe to retry. The
-          official SDKs already follow this rule.
+          <code>POST /api/v1/transcribe</code> creates a job as soon as the server has the
+          audio, and the API has no idempotency key. If the connection drops after the{" "}
+          <code>accepted</code> event, you already have the job id: follow the job instead of
+          resending. If it drops before, you cannot tell whether the job exists, and resending
+          creates a <em>second</em> job for the same audio, transcribed and billed twice.
+          Resend only when the request provably never landed: a connect timeout, or a{" "}
+          <code>429</code>. Everything else is safe to retry. The official SDKs already follow
+          this rule.
         </p>
       </Callout>
 
@@ -264,8 +261,8 @@ export default function ApiOverviewPage() {
 
       <Callout title="Upload styles" tone="info">
         <p>
-          <strong>SDK path:</strong> upload → progress → complete → SSE
-          (multipart when available, else a single presigned PUT).
+          <strong>SDK path:</strong> the SDK uploads the file in parts, then follows the job
+          until the transcript is ready.
           <br />
           <strong>Terminal path:</strong> one raw-body stream to{" "}
           <code>/transcribe</code> with SSE progress on the same connection.

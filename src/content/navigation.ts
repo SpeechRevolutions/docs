@@ -26,12 +26,6 @@ export type NavSection = {
  * fails the build if this list and the spec ever disagree.
  */
 export const ENDPOINT_NAV: NavItem[] = [
-  { title: "Create upload", href: "/api-reference/endpoints/create-upload-job", method: "POST" },
-  { title: "Upload heartbeat", href: "/api-reference/endpoints/report-upload-progress", method: "POST" },
-  { title: "Complete upload", href: "/api-reference/endpoints/complete-upload", method: "POST" },
-  { title: "Start multipart", href: "/api-reference/endpoints/create-multipart-upload", method: "POST" },
-  { title: "Complete multipart", href: "/api-reference/endpoints/complete-multipart-upload", method: "POST" },
-  { title: "Abort multipart", href: "/api-reference/endpoints/abort-multipart-upload", method: "POST" },
   { title: "List jobs", href: "/api-reference/endpoints/list-jobs", method: "GET" },
   { title: "Get job", href: "/api-reference/endpoints/get-job", method: "GET" },
   { title: "Stream progress", href: "/api-reference/endpoints/stream-job-progress", method: "GET" },

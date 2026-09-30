@@ -19,10 +19,8 @@ export default function AuthPage() {
 
       <CodeBlock
         language="bash"
-        code={`curl ${SITE.apiBase}/api/v1/upload \\
-  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{ ... }'`}
+        code={`curl ${SITE.apiBase}/api/v1/jobs \\
+  -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY"`}
       />
 
       <h2>Environment variables</h2>

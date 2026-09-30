@@ -1,7 +1,7 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout, EndpointBadge } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
+import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -86,8 +86,9 @@ export default function MigrateAssemblyAIPage() {
               <td>
                 <code>POST /v2/upload</code> (raw bytes → <code>upload_url</code>)
               </td>
-              <td>
-                <code>POST /api/v1/upload</code> → PUT to presigned URL
+              <td rowSpan={2}>
+                <code>POST /api/v1/transcribe</code> (raw bytes in, transcript streamed back;
+                up to {LIMITS.apiUploadMax})
               </td>
               <td rowSpan={2}>
                 <code>submit()</code> (or <code>transcribe()</code> to also wait)
@@ -96,9 +97,6 @@ export default function MigrateAssemblyAIPage() {
             <tr>
               <td>
                 <code>POST /v2/transcript</code> (<code>audio_url</code> → job id)
-              </td>
-              <td>
-                <code>POST /api/v1/upload/complete</code>
               </td>
             </tr>
             <tr>
@@ -117,13 +115,13 @@ export default function MigrateAssemblyAIPage() {
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/upload" />
+      <EndpointBadge method="POST" path="/api/v1/transcribe" />
       <p>
-        Note the ordering difference: AssemblyAI uploads first and gets an{" "}
-        <code>upload_url</code> it then references in the transcript request.
-        Speech Revolutions issues the presigned URL <em>first</em> (from{" "}
-        <code>/api/v1/upload</code>), you PUT the bytes to it, then confirm with{" "}
-        <code>/api/v1/upload/complete</code>. The SDK handles the ordering.
+        Note the shape difference: AssemblyAI uploads first, gets an <code>upload_url</code>,
+        then creates a transcript from it. Without an SDK, Speech Revolutions does both in one
+        call: send the bytes to <code>/api/v1/transcribe</code> and the transcript comes back on
+        the same connection. Above {LIMITS.apiUploadMax}, use an SDK, which uploads in parts
+        and waits for you.
       </p>
 
       <h2>Upload differences</h2>
@@ -314,8 +312,9 @@ if status.is_completed:
           <code>X-API-Key</code>.
         </li>
         <li>
-          <strong>Upload ordering.</strong> Speech Revolutions presigns before you PUT bytes;
-          AssemblyAI uploads then references a URL. Irrelevant if you use the SDK.
+          <strong>Upload shape.</strong> AssemblyAI uploads, then references the upload URL in a
+          second request. Speech Revolutions takes the bytes and returns the transcript in one
+          call to <code>/api/v1/transcribe</code>, and the SDKs handle larger files for you.
         </li>
         <li>
           <strong>Keyword biasing.</strong> AssemblyAI&apos;s{" "}

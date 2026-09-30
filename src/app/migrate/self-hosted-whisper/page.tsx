@@ -97,16 +97,16 @@ export default function MigrateSelfHostedWhisperPage() {
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/upload" />
+      <EndpointBadge method="POST" path="/api/v1/transcribe" />
 
       <h2>Input / upload differences</h2>
       <p>
         <code>faster-whisper</code> reads a local file path directly.{" "}
         <code>whisper.cpp</code> is stricter still — it wants 16 kHz mono WAV, so
         most pipelines shell out to <code>ffmpeg</code> to convert first. Speech Revolutions
-        accepts common audio/video formats and uploads through a presigned URL
-        (the SDK handles the presign → PUT → complete flow), so you pass a path,
-        URL, or bytes and skip the transcode step.
+        accepts common audio/video formats and transcodes them for you, so you pass a path,
+        URL, or bytes (or send the file to <code>/api/v1/transcribe</code>) and skip the
+        transcode step.
       </p>
 
       <h2>Response shape</h2>

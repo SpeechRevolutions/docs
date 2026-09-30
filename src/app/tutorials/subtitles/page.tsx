@@ -93,12 +93,11 @@ console.log(\`Wrote \${path}\`);`,
             label: "cURL",
             language: "bash",
             filename: "output_type",
-            code: `# The REST upload accepts output_type directly; the finished job's
-# download_url then serves the .srt/.vtt file.
-curl -X POST https://api.speechrevolutions.com/api/v1/upload \\
+            code: `# output_type=srt (or vtt): the transcript event carries the finished
+# subtitle file, and the job's download_url serves the same file.
+curl -N -X POST "https://api.speechrevolutions.com/api/v1/transcribe?output_type=srt" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"file_size": 5242880, "output_type": "srt"}'`,
+  --data-binary @talk.mp3`,
           },
           {
             label: "Go",

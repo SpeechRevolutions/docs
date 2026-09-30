@@ -1,6 +1,6 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
+import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -90,7 +90,7 @@ export default function DocsHomePage() {
           <thead>
             <tr>
               <th>Use case</th>
-              <th>Endpoint</th>
+              <th>How</th>
               <th>Best for</th>
             </tr>
           </thead>
@@ -98,9 +98,9 @@ export default function DocsHomePage() {
             <tr>
               <td>SDK / apps</td>
               <td>
-                <code>POST /api/v1/upload</code>
+                <Link href="/sdks/python">SDK</Link> <code>transcribe()</code>
               </td>
-              <td>Large files, progress heartbeats, resumable wait via SSE</td>
+              <td>Files up to {LIMITS.sdkUploadMax}, upload progress, retries, resumable wait</td>
             </tr>
             <tr>
               <td>Terminal / scripts</td>

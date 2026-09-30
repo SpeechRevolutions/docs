@@ -1,6 +1,6 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout, EndpointBadge } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
+import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -86,8 +86,8 @@ export default function MigrateElevenLabsPage() {
                 <code>model_id</code>)
               </td>
               <td>
-                <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
-                <code>POST /api/v1/upload/complete</code>
+                <code>POST /api/v1/transcribe</code> (raw bytes in, transcript streamed back;
+                up to {LIMITS.apiUploadMax})
               </td>
               <td>
                 <code>transcribe()</code> (blocks until done)
@@ -105,14 +105,14 @@ export default function MigrateElevenLabsPage() {
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/upload" />
+      <EndpointBadge method="POST" path="/api/v1/transcribe" />
 
       <h2>Upload differences</h2>
       <p>
         ElevenLabs takes the audio as a multipart <code>file</code> field with{" "}
-        <code>model_id</code> in the form body. Speech Revolutions uploads through a presigned
-        object-storage URL, so bytes stream to storage rather than through the API
-        request — handled by the SDK when you pass a path, URL, or bytes. Speech Revolutions
+        <code>model_id</code> in the form body. Speech Revolutions takes raw bytes in the body of{" "}
+        <code>/api/v1/transcribe</code> (up to {LIMITS.apiUploadMax}); above that, the SDKs
+        upload straight to storage in parts when you pass a path, URL, or bytes. Speech Revolutions
         also reports live <code>upload</code> and <code>transcribe</code> progress
         (see <Link href="/guides/live-progress">live progress</Link>).
       </p>

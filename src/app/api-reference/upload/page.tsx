@@ -1,287 +1,166 @@
 import { CodeBlock } from "@/components/CodeBlock";
-import { EndpointBadge } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
+import { CodeTabs } from "@/components/CodeTabs";
+import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Upload API",
-  description:
-    "Create a job, upload bytes to a presigned URL, then complete. This is what the official SDKs call.",
+  title: "Uploading files",
+  description: `Send audio up to ${LIMITS.apiUploadMax} in one request with cURL, anything up to ${LIMITS.sdkUploadMax} through an SDK, or a URL for audio that is already online.`,
 };
 
-export default function UploadApiPage() {
+/*
+ * How audio gets in, by size and source. This page used to document the upload endpoints the
+ * SDKs call internally (create, presigned PUT, progress, complete, multipart). Those are the
+ * SDKs' transport, not a public API: they are not in the API reference, and nothing here tells a
+ * reader to call them. A reader without an SDK uses /api/v1/transcribe.
+ */
+export default function UploadingFilesPage() {
   return (
     <>
-      <h1>Upload API (SDK)</h1>
+      <h1>Uploading files</h1>
       <p>
-        Create a job, upload bytes to a presigned URL, then complete. This is
-        what the official SDKs call.
+        Send audio up to {LIMITS.apiUploadMax} in a single request with cURL, anything up to{" "}
+        {LIMITS.sdkUploadMax} through an SDK, or pass a URL for audio that is already online.
       </p>
 
-      <h2>Create job</h2>
-      <EndpointBadge method="POST" path="/api/v1/upload" />
+      <h2>Up to {LIMITS.apiUploadMax}: one request</h2>
+      <p>
+        <Link href="/api-reference/endpoints/transcribe">
+          <code>POST /api/v1/transcribe</code>
+        </Link>{" "}
+        takes the audio as the request body and streams the transcript back on the same
+        connection. Nothing to install, and no job to poll.
+      </p>
       <CodeBlock
         language="bash"
-        code={`curl -X POST "${SITE.apiBase}/api/v1/upload" \\
+        code={`curl -N -X POST "${SITE.apiBase}/api/v1/transcribe?output_type=json&speaker_labels=true" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "file_size": 1048576,
-    "output_type": "json",
-    "word_timestamps": true,
-    "speaker_labels": true,
-    "nltk": true,
-    "tier": "standard",
-    "custom_vocabulary": ["AcmeCorp"]
-  }'`}
-      />
-
-      <h3>Request body</h3>
-      <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Field</th>
-              <th>Type</th>
-              <th>Default</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <code>file_size</code>
-              </td>
-              <td>int</td>
-              <td>required (unless audio_url)</td>
-            </tr>
-            <tr>
-              <td>
-                <code>audio_url</code>
-              </td>
-              <td>string (uri)</td>
-              <td>alternative to file_size</td>
-            </tr>
-            <tr>
-              <td>
-                <code>output_type</code>
-              </td>
-              <td>string</td>
-              <td>
-                <code>json</code>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>word_timestamps</code>
-              </td>
-              <td>bool</td>
-              <td>
-                <code>true</code>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>speaker_labels</code>
-              </td>
-              <td>bool</td>
-              <td>
-                <code>true</code>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>nltk</code>
-              </td>
-              <td>bool</td>
-              <td>
-                <code>true</code>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>tier</code>
-              </td>
-              <td>string</td>
-              <td>
-                <code>standard</code> — the only tier currently available
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>custom_vocabulary</code>
-              </td>
-              <td>string[]</td>
-              <td>optional</td>
-            </tr>
-            <tr>
-              <td>
-                <code>callback_url</code>
-              </td>
-              <td>string (uri)</td>
-              <td>optional</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Provide exactly one of <code>file_size</code> or <code>audio_url</code>.
-        With <code>audio_url</code> (an http(s) URL) the platform fetches the
-        audio itself: the response has no <code>upload_url</code>, the job is
-        enqueued immediately, and you skip the upload and{" "}
-        <code>/upload/complete</code> steps entirely — go straight to waiting on
-        the job stream. The URL must resolve to a public host.
-      </p>
-      <p>
-        <code>callback_url</code> is an optional http(s) webhook. On completion
-        or permanent failure the platform POSTs a JSON notification there, shaped like{" "}
-        <code>
-          {`{job_id, status: "completed"|"failed", download_url?, step?, reason?}`}
-        </code>
-        , with these headers:
-      </p>
-      <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>Header</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <code>X-SR-Signature</code>
-              </td>
-              <td>
-                <code>sha256=&lt;hex&gt;</code>, an HMAC-SHA256 of the raw request
-                body keyed with your organization&apos;s signing secret (console →
-                API Keys → Webhook signing secret). Verify it against the exact bytes
-                you received, with a constant-time comparison.
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>X-SR-Event</code>
-              </td>
-              <td>
-                <code>completed</code> or <code>failed</code>, the same value as{" "}
-                <code>status</code> in the body, so you can route a delivery
-                before parsing it.
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>X-SR-Delivery</code>
-              </td>
-              <td>
-                A unique id for this delivery. Retries of the same delivery reuse
-                it, so use it to ignore duplicates.
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <code>User-Agent</code>
-              </td>
-              <td>
-                <code>SpeechRevolutions-Webhook/1</code>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>
-        Respond with any <code>2xx</code> to acknowledge. A <code>5xx</code>,
-        a timeout (10 seconds per attempt) or a connection error is retried with
-        backoff, up to 4 attempts in all; a <code>4xx</code> is treated as
-        final and not retried. The{" "}
-        <Link href="/guides/webhooks">webhooks guide</Link> has verification code
-        in every language.
-      </p>
-
-      <h3>Response</h3>
-      <CodeBlock
-        language="json"
-        code={`{
-  "job_id": "…",
-  "upload_url": "https://…",   // null for audio_url jobs (nothing to upload)
-  "download_url": "https://…",
-  "content_type": "application/octet-stream",
-  "expires_in": 3600
-}`}
-      />
-
-      <h2>Progress heartbeat</h2>
-      <EndpointBadge method="POST" path="/api/v1/upload/progress" />
-      <p>
-        Ping while the PUT is in flight (TTL ~15s). Body:{" "}
-        <code>{`{"job_id":"…"}`}</code>
-      </p>
-
-      <h2>Complete</h2>
-      <EndpointBadge method="POST" path="/api/v1/upload/complete" />
-      <p>
-        Enqueues the job. Body: <code>{`{"job_id":"…"}`}</code>
-      </p>
-
-      <p>
-        Then wait on{" "}
-        <Link href="/api-reference/jobs">
-          GET /api/v1/jobs/{"{job_id}"}/stream
-        </Link>
-        .
-      </p>
-
-      <h2>Multipart upload (large files)</h2>
-      <p>
-        An alternative to the single presigned PUT: upload the file in parts,
-        which is more resilient for large files. The official SDKs use this by
-        default and fall back to the single-shot PUT above if it&apos;s
-        unavailable. The single-shot flow is always supported.
-      </p>
-
-      <h3>Create</h3>
-      <EndpointBadge method="POST" path="/api/v1/upload/multipart/create" />
-      <p>
-        Same body as <code>/upload</code> (needs <code>file_size</code>), plus an
-        optional <code>part_size</code>. Returns presigned URLs for each part:
-      </p>
-      <CodeBlock
-        language="json"
-        code={`{
-  "job_id": "…",
-  "upload_id": "…",
-  "download_url": "https://…",
-  "part_size": 16777216,
-  "num_parts": 3,
-  "parts": [
-    { "part_number": 1, "url": "https://…" },
-    { "part_number": 2, "url": "https://…" },
-    { "part_number": 3, "url": "https://…" }
-  ],
-  "expires_in": 3600
-}`}
+  --data-binary @meeting.mp3`}
       />
       <p>
-        PUT each part&apos;s bytes to its <code>url</code> and keep the{" "}
-        <code>ETag</code> from each response header.
+        The <Link href="/api-reference/transcribe">one-request transcription</Link> guide covers
+        the stream, its events, and how to resume if the connection drops.
       </p>
 
-      <h3>Complete</h3>
-      <EndpointBadge method="POST" path="/api/v1/upload/multipart/complete" />
+      <h2>Larger files: use an SDK</h2>
       <p>
-        Finalizes the upload and enqueues the job. Body:{" "}
-        <code>
-          {`{"job_id": "…", "parts": [{"part_number": 1, "etag": "…"}, …]}`}
-        </code>
+        Above {LIMITS.apiUploadMax}, and for anything running in production, let an SDK do the
+        upload. It sends the file in parts straight to storage, retries a part that fails rather
+        than the whole file, reports upload progress, and then waits for the result. Up to{" "}
+        {LIMITS.sdkUploadMax} per file.
+      </p>
+      <CodeTabs
+        tabs={[
+          {
+            label: "Python",
+            language: "python",
+            code: `from speechrevolutions import SpeechRevolutions
+
+client = SpeechRevolutions()  # reads SPEECHREVOLUTIONS_API_KEY
+result = client.transcribe("board-meeting.mp4", speaker_labels=True)
+print(result.text)`,
+          },
+          {
+            label: "JavaScript",
+            language: "ts",
+            code: `import { SpeechRevolutions } from "speechrevolutions";
+
+const client = new SpeechRevolutions(); // reads SPEECHREVOLUTIONS_API_KEY
+const result = await client.transcribe("board-meeting.mp4", { speakerLabels: true });
+console.log(result.text);`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `client, err := stt.NewClient("") // reads SPEECHREVOLUTIONS_API_KEY
+if err != nil {
+	log.Fatal(err)
+}
+sl := true
+result, err := client.Transcribe(context.Background(), "board-meeting.mp4",
+	stt.TranscribeOptions{SpeakerLabels: &sl}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(result.Text())`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `using SpeechRevolutions;
+
+using var client = new SpeechRevolutionsClient(); // reads SPEECHREVOLUTIONS_API_KEY
+var result = await client.TranscribeAsync("board-meeting.mp4",
+    new TranscribeOptions { SpeakerLabels = true });
+Console.WriteLine(result.Text);`,
+          },
+        ]}
+      />
+
+      <h2>Audio that is already online</h2>
+      <p>
+        Pass an <code>https</code> URL instead of a path and the platform fetches the audio
+        itself, so the bytes never pass through your machine. The URL has to be reachable from
+        the public internet; for a private bucket, pass a signed URL that outlives the job (see{" "}
+        <Link href="/integrations/s3">Amazon S3</Link> and{" "}
+        <Link href="/integrations/supabase">Supabase</Link>).
+      </p>
+      <CodeTabs
+        tabs={[
+          {
+            label: "Python",
+            language: "python",
+            code: `result = client.transcribe("https://example.com/audio.mp3")`,
+          },
+          {
+            label: "JavaScript",
+            language: "ts",
+            code: `const result = await client.transcribe("https://example.com/audio.mp3");`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `result, err := client.TranscribeURL(ctx, "https://example.com/audio.mp3", stt.TranscribeOptions{}, nil)`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var result = await client.TranscribeAsync("https://example.com/audio.mp3");`,
+          },
+        ]}
+      />
+
+      <h2>Don&apos;t wait on the result</h2>
+      <p>
+        For batches and background work, submit and move on: pass a <code>callback_url</code>{" "}
+        and we POST a signed notification when each job finishes. It works with every SDK and
+        with <code>/api/v1/transcribe</code> as a query parameter. The{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, verifying the
+        signature, and retries.
       </p>
 
-      <h3>Abort</h3>
-      <EndpointBadge method="POST" path="/api/v1/upload/multipart/abort" />
+      <h2>Formats and limits</h2>
       <p>
-        Discards an in-progress multipart upload. Body:{" "}
-        <code>{`{"job_id": "…"}`}</code>
+        Common audio and video formats are accepted, and anything we can decode is transcoded for
+        you. The{" "}
+        <Link href="/api-reference/overview">API overview</Link> lists the formats, size limits,
+        rate limits and every error code.
       </p>
+
+      <h2>Next steps</h2>
+      <ul>
+        <li>
+          <Link href="/api-reference/transcribe">One-request transcription</Link>: the stream,
+          events and resuming.
+        </li>
+        <li>
+          <Link href="/sdks/python">SDKs</Link>: upload progress, retries and every option.
+        </li>
+        <li>
+          <Link href="/api-reference/jobs">Job lifecycle</Link>: list, fetch and cancel jobs.
+        </li>
+      </ul>
     </>
   );
 }

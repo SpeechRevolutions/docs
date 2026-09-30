@@ -37,8 +37,6 @@ export const LIMITS = {
  * a response field it does not send, so these are the real numbers.
  */
 export const RATE_LIMITS = [
-  { endpoint: "POST /api/v1/upload", perMinute: 120 },
-  { endpoint: "POST /api/v1/upload/progress", perMinute: 600 },
   { endpoint: "POST /api/v1/transcribe", perMinute: 120 },
   { endpoint: "GET /api/v1/jobs, /api/v1/jobs/{id}", perMinute: 120 },
   { endpoint: "GET /api/v1/jobs/{id}/stream", perMinute: 120 },

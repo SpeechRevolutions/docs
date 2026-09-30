@@ -27,9 +27,8 @@ export default function TerminalGuidePage() {
       <Callout title="When to use this" tone="tip">
         <p>
           Use <code>/transcribe</code> from terminals and simple scripts. Use
-          the <Link href="/sdks/python">SDK</Link> (
-          <code>/api/v1/upload</code> flow) inside applications — it handles
-          large uploads, heartbeats, and SSE reconnects for you.
+          the <Link href="/sdks/python">SDK</Link> inside applications — it handles
+          large uploads, retries, and reconnects for you.
         </p>
       </Callout>
 
@@ -174,9 +173,8 @@ data: <the transcript, one data: line per line of output>`}
         off the <code>completed</code> event.
       </p>
       <p>
-        Unlike the SDK upload flow, there is no separate{" "}
-        <code>/upload/progress</code> or <code>/upload/complete</code> step —
-        the file upload and job wait happen on one connection.
+        There is no separate upload step: the file upload and the wait for the transcript
+        happen on one connection.
       </p>
 
       <p>

@@ -87,14 +87,9 @@ await client.SubmitAsync("meeting.mp3",
           {
             label: "cURL",
             language: "bash",
-            code: `curl -X POST "${SITE.apiBase}/api/v1/upload" \\
+            code: `curl -N -X POST "${SITE.apiBase}/api/v1/transcribe?output_type=json&callback_url=https%3A%2F%2Fyou.example.com%2Fwebhooks%2Fstt" \\
   -H "X-API-Key: $SPEECHREVOLUTIONS_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "audio_url": "https://example.com/meeting.mp3",
-    "output_type": "json",
-    "callback_url": "https://you.example.com/webhooks/stt"
-  }'`,
+  --data-binary @meeting.mp3`,
           },
         ]}
       />

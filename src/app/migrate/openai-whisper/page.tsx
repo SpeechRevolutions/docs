@@ -1,7 +1,7 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout, EndpointBadge } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
+import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -88,8 +88,8 @@ export default function MigrateOpenAIWhisperPage() {
                 <code>POST /v1/audio/transcriptions</code> (sync multipart)
               </td>
               <td>
-                <code>POST /api/v1/upload</code> → PUT to presigned URL →{" "}
-                <code>POST /api/v1/upload/complete</code>
+                <code>POST /api/v1/transcribe</code> (raw bytes in, transcript streamed back;
+                up to {LIMITS.apiUploadMax})
               </td>
               <td>
                 <code>transcribe()</code> (blocks until done)
@@ -107,17 +107,16 @@ export default function MigrateOpenAIWhisperPage() {
           </tbody>
         </table>
       </div>
-      <EndpointBadge method="POST" path="/api/v1/upload" />
+      <EndpointBadge method="POST" path="/api/v1/transcribe" />
 
       <h2>Upload differences &amp; the 25 MB limit</h2>
       <p>
         OpenAI expects the audio as a multipart <code>file</code> field in the
         request body, which is why the API rejects anything over{" "}
         <strong>25 MB</strong> — you have to pre-split or compress long recordings
-        yourself. Speech Revolutions uploads through a presigned object-storage URL, so the
-        bytes never pass through the API request body and there is no 25 MB
-        request ceiling to work around. The SDK does the presign → PUT → complete
-        handshake; you just pass a path, URL, or bytes.
+        yourself. Speech Revolutions has no 25 MB ceiling: <code>/api/v1/transcribe</code> takes up
+        to {LIMITS.apiUploadMax} in one request, and the SDKs upload files up to{" "}
+        {LIMITS.sdkUploadMax} straight to storage in parts. You just pass a path, URL, or bytes.
       </p>
       <Callout title="No more chunking long files" tone="tip">
         <p>

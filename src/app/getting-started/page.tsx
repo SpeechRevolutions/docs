@@ -43,8 +43,8 @@ export default function QuickstartPage() {
 
       <h2>2a. SDK (recommended for apps)</h2>
       <p>
-        The SDK uses the upload flow under the hood (
-        <code>POST /api/v1/upload</code> → storage → complete → SSE wait).
+        The SDK uploads the file for you (in parts, for large files), then waits for the
+        transcript.
       </p>
       <CodeTabs
         tabs={[

@@ -481,9 +481,8 @@ except AuthenticationError as e:
 
       <Callout title="Under the hood" tone="info">
         <p>
-          The SDK drives the{" "}
-          <Link href="/api-reference/upload">/api/v1/upload</Link> flow (create
-          job → presigned PUT → complete) and waits on the{" "}
+          The SDK uploads the file (in parts, retrying any part that fails) and
+          waits on the{" "}
           <Link href="/api-reference/jobs">SSE job stream</Link>, converting the
           server&apos;s <code>completed</code>/<code>total</code> counts into{" "}
           <code>percent</code> for you.
