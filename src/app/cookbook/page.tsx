@@ -964,11 +964,11 @@ foreach (var u in result.Utterances)
 
       <h2 id="multilingual">Multilingual audio</h2>
       <p>
-        There is no language flag to set. Speech Revolutions detects the spoken language and
-        transcribes it, including audio that switches languages mid-file. Just
-        call <code>transcribe()</code> as usual. For domain-specific names and
-        jargon, pass <code>custom_vocabulary</code> to bias the model toward those
-        terms.
+        By default there is no language flag to set. Speech Revolutions detects the spoken
+        language and transcribes it, including audio that switches languages mid-file —
+        each word carries its own <code>language</code>. Just call <code>transcribe()</code>{" "}
+        as usual. For domain-specific names and jargon, pass <code>custom_vocabulary</code>{" "}
+        to bias the model toward those terms.
       </p>
       <CodeTabs
         tabs={[
@@ -1016,6 +1016,175 @@ Console.WriteLine(result.Text);`,
       <p>
         For per-language accuracy across our benchmark suite, see the{" "}
         <Link href="/benchmarks">benchmarks page</Link>.
+      </p>
+
+      <h3 id="pin-language">Pin the language</h3>
+      <p>
+        When you already know what language the recording is in, pass it as{" "}
+        <code>language</code>: an ISO 639-1 code such as <code>&quot;en&quot;</code>,{" "}
+        <code>&quot;ru&quot;</code> or <code>&quot;de&quot;</code>. Detection is skipped
+        and the whole file is transcribed in that language. Leave it out (or pass{" "}
+        <code>&quot;auto&quot;</code>) to keep automatic detection, the default.
+      </p>
+      <CodeTabs
+        tabs={[
+          {
+            label: "Python",
+            language: "python",
+            code: `result = client.transcribe("interview.mp3", language="ru")
+print(result.text)`,
+          },
+          {
+            label: "JavaScript",
+            language: "ts",
+            code: `const result = await client.transcribe("interview.mp3", { language: "ru" });
+console.log(result.text);`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            code: `result, err := client.Transcribe(ctx, "interview.mp3", stt.TranscribeOptions{
+	Language: "ru",
+}, nil)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(result.Text())`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            code: `var result = await client.TranscribeAsync("interview.mp3",
+    new TranscribeOptions { Language = "ru" });
+
+Console.WriteLine(result.Text);`,
+          },
+        ]}
+      />
+      <p>When to pin, and when to rely on detection:</p>
+      <ul>
+        <li>
+          <strong>Pin</strong> when every file in the workload is in one language you know
+          in advance — for example, strongly accented speech that automatic detection could
+          mistake for another language.
+        </li>
+        <li>
+          <strong>Rely on detection</strong> when the language is unknown, varies from file
+          to file, or changes within a file. Pinning turns off mid-file language switching:
+          every word is transcribed in the pinned language.
+        </li>
+      </ul>
+      <Callout title="A wrong code translates rather than fails" tone="warn">
+        <p>
+          Pinning the wrong language does not produce an error. The model translates the
+          speech into the pinned language: Russian audio pinned to <code>&quot;en&quot;</code>{" "}
+          comes back as an English translation. Only pin a language you are sure of.
+        </p>
+      </Callout>
+      <p>
+        An unsupported code is rejected with HTTP <code>422</code> and a message naming
+        the bad value. The supported codes are Whisper&apos;s 99-language set:
+      </p>
+      <p>
+        <code>af</code>{" "}
+        <code>am</code>{" "}
+        <code>ar</code>{" "}
+        <code>as</code>{" "}
+        <code>az</code>{" "}
+        <code>ba</code>{" "}
+        <code>be</code>{" "}
+        <code>bg</code>{" "}
+        <code>bn</code>{" "}
+        <code>bo</code>{" "}
+        <code>br</code>{" "}
+        <code>bs</code>{" "}
+        <code>ca</code>{" "}
+        <code>cs</code>{" "}
+        <code>cy</code>{" "}
+        <code>da</code>{" "}
+        <code>de</code>{" "}
+        <code>el</code>{" "}
+        <code>en</code>{" "}
+        <code>es</code>{" "}
+        <code>et</code>{" "}
+        <code>eu</code>{" "}
+        <code>fa</code>{" "}
+        <code>fi</code>{" "}
+        <code>fo</code>{" "}
+        <code>fr</code>{" "}
+        <code>gl</code>{" "}
+        <code>gu</code>{" "}
+        <code>ha</code>{" "}
+        <code>haw</code>{" "}
+        <code>he</code>{" "}
+        <code>hi</code>{" "}
+        <code>hr</code>{" "}
+        <code>ht</code>{" "}
+        <code>hu</code>{" "}
+        <code>hy</code>{" "}
+        <code>id</code>{" "}
+        <code>is</code>{" "}
+        <code>it</code>{" "}
+        <code>ja</code>{" "}
+        <code>jw</code>{" "}
+        <code>ka</code>{" "}
+        <code>kk</code>{" "}
+        <code>km</code>{" "}
+        <code>kn</code>{" "}
+        <code>ko</code>{" "}
+        <code>la</code>{" "}
+        <code>lb</code>{" "}
+        <code>ln</code>{" "}
+        <code>lo</code>{" "}
+        <code>lt</code>{" "}
+        <code>lv</code>{" "}
+        <code>mg</code>{" "}
+        <code>mi</code>{" "}
+        <code>mk</code>{" "}
+        <code>ml</code>{" "}
+        <code>mn</code>{" "}
+        <code>mr</code>{" "}
+        <code>ms</code>{" "}
+        <code>mt</code>{" "}
+        <code>my</code>{" "}
+        <code>ne</code>{" "}
+        <code>nl</code>{" "}
+        <code>nn</code>{" "}
+        <code>no</code>{" "}
+        <code>oc</code>{" "}
+        <code>pa</code>{" "}
+        <code>pl</code>{" "}
+        <code>ps</code>{" "}
+        <code>pt</code>{" "}
+        <code>ro</code>{" "}
+        <code>ru</code>{" "}
+        <code>sa</code>{" "}
+        <code>sd</code>{" "}
+        <code>si</code>{" "}
+        <code>sk</code>{" "}
+        <code>sl</code>{" "}
+        <code>sn</code>{" "}
+        <code>so</code>{" "}
+        <code>sq</code>{" "}
+        <code>sr</code>{" "}
+        <code>su</code>{" "}
+        <code>sv</code>{" "}
+        <code>sw</code>{" "}
+        <code>ta</code>{" "}
+        <code>te</code>{" "}
+        <code>tg</code>{" "}
+        <code>th</code>{" "}
+        <code>tk</code>{" "}
+        <code>tl</code>{" "}
+        <code>tr</code>{" "}
+        <code>tt</code>{" "}
+        <code>uk</code>{" "}
+        <code>ur</code>{" "}
+        <code>uz</code>{" "}
+        <code>vi</code>{" "}
+        <code>yi</code>{" "}
+        <code>yo</code>{" "}
+        <code>zh</code>
       </p>
 
       <h2 id="subtitles">Subtitles (SRT / VTT)</h2>

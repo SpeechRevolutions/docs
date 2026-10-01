@@ -189,6 +189,22 @@ result = client.transcribe(
             </tr>
             <tr>
               <td>
+                <code>language</code>
+              </td>
+              <td>
+                <code>str | None</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>
+                ISO 639-1 code (e.g. <code>&quot;en&quot;</code>) to skip detection;{" "}
+                <code>None</code> auto-detects.{" "}
+                <Link href="/cookbook#pin-language">When to pin</Link>
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <code>on_progress</code>
               </td>
               <td>

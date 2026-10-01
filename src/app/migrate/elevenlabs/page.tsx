@@ -206,11 +206,14 @@ export default function MigrateElevenLabsPage() {
 
       <h2>Language selection</h2>
       <p>
-        ElevenLabs takes <code>language_code</code>. Speech Revolutions always
-        auto-detects, and detects changes <em>within</em> a file, so a
+        ElevenLabs takes <code>language_code</code>. Speech Revolutions auto-detects by
+        default, and detects changes <em>within</em> a file, so a
         recording that switches languages mid-sentence comes back correctly rather than
         forced into one. Each word carries its own <code>language</code>, which is what you
-        want if you are cutting subtitles per language rather than per file.
+        want if you are cutting subtitles per language rather than per file. To fix the
+        language instead, pass <code>language</code> with an ISO 639-1 code (e.g.{" "}
+        <code>en</code>); that skips detection, including mid-file switching. See{" "}
+        <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Side by side</h2>

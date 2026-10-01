@@ -73,6 +73,17 @@ export default function FeaturesPage() {
             </tr>
             <tr>
               <td>
+                <code>language</code>
+              </td>
+              <td>auto</td>
+              <td>
+                ISO 639-1 code (e.g. <code>en</code>) to skip detection and transcribe the
+                whole file in that language — see{" "}
+                <Link href="/cookbook#pin-language">pinning the language</Link>
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <code>tier</code>
               </td>
               <td>

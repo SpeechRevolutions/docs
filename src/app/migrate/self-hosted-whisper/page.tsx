@@ -191,11 +191,13 @@ export default function MigrateSelfHostedWhisperPage() {
       <h2>Language selection</h2>
       <p>
         <code>faster-whisper</code> auto-detects, or you pass{" "}
-        <code>language=</code> to <code>transcribe()</code>. Speech Revolutions always
-        auto-detects. This is one of the parameters you stop
-        tuning: no language flag, no per-language model choice, and code-switching handled
+        <code>language=</code> to <code>transcribe()</code>. Speech Revolutions auto-detects by
+        default. This is one of the parameters you can stop
+        tuning: no per-language model choice, and code-switching handled
         without you splitting the file first. The detected spans come back in{" "}
-        <code>result.languages</code>.
+        <code>result.languages</code>. If you do pin today, the same{" "}
+        <code>language=</code> option exists with the same ISO 639-1 codes; see{" "}
+        <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Side by side</h2>

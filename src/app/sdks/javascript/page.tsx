@@ -166,6 +166,17 @@ const result2 = await client.transcribeUrl("https://example.com/audio.mp3");`}
             </tr>
             <tr>
               <td>
+                <code>language</code>
+              </td>
+              <td>
+                <code>string</code>
+              </td>
+              <td>
+                <code>undefined</code>
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <code>onProgress</code>
               </td>
               <td>
@@ -203,6 +214,11 @@ const result2 = await client.transcribeUrl("https://example.com/audio.mp3");`}
       <p>
         <code>tier</code>: <code>standard</code> is the only tier currently
         available.
+      </p>
+      <p>
+        <code>language</code>: an ISO 639-1 code (e.g. <code>&quot;en&quot;</code>) skips
+        language detection and transcribes the whole file in that language; leave it unset
+        to auto-detect. See <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Live progress</h2>

@@ -101,6 +101,14 @@ data: {"job_id":"…","download_url":"https://…","output_type":"json"}`}
             </tr>
             <tr>
               <td>
+                <code>422</code>
+              </td>
+              <td>
+                Invalid query parameter, e.g. an unsupported <code>language</code> code
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <code>429</code>
               </td>
               <td>Rate limited</td>

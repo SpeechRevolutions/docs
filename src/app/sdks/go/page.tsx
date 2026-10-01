@@ -191,6 +191,21 @@ result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.Transc
             </tr>
             <tr>
               <td>
+                <code>Language</code>
+              </td>
+              <td>
+                <code>string</code>
+              </td>
+              <td>
+                <code>&quot;&quot;</code>
+              </td>
+              <td>
+                ISO 639-1 code (e.g. <code>&quot;en&quot;</code>) to skip detection; empty
+                auto-detects. <Link href="/cookbook#pin-language">When to pin</Link>
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <code>OnUploadProgress</code>
               </td>
               <td>

@@ -238,11 +238,15 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
       <h2>Language selection</h2>
       <p>
         Deepgram takes a BCP-47 <code>language</code> query param, or{" "}
-        <code>detect_language=true</code> to auto-detect. Speech Revolutions always
-        auto-detects and cannot be pinned, so there is nothing to
-        migrate: drop the parameter. The difference worth knowing is that detection is
-        per-segment rather than per-request — <code>result.languages</code> gives you the
-        spans, so a bilingual call is labelled as two, not averaged into one.
+        <code>detect_language=true</code> to auto-detect. Speech Revolutions auto-detects by
+        default, so <code>detect_language</code> simply comes out of your request. The
+        difference worth knowing is that detection is per-segment rather than
+        per-request — <code>result.languages</code> gives you the spans, so a bilingual call
+        is labelled as two, not averaged into one. If you pinned a language on Deepgram, you
+        can pin it here too: <code>language</code> takes the ISO 639-1 code, so{" "}
+        <code>en-US</code> becomes <code>en</code>. Pinning skips detection for the whole
+        file; see <Link href="/cookbook#pin-language">pinning the language</Link> for when
+        that is the right call.
       </p>
 
       <h2>Side by side</h2>

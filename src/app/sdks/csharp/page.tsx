@@ -172,6 +172,22 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
             </tr>
             <tr>
               <td>
+                <code>Language</code>
+              </td>
+              <td>
+                <code>string?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>
+                ISO 639-1 code (e.g. <code>&quot;en&quot;</code>) to skip detection;{" "}
+                <code>null</code> auto-detects.{" "}
+                <Link href="/cookbook#pin-language">When to pin</Link>
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <code>Progress</code>
               </td>
               <td>

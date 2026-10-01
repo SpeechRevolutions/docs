@@ -128,6 +128,17 @@ curl -N -X POST \\
               <td>—</td>
               <td>Comma-separated terms (optional)</td>
             </tr>
+            <tr>
+              <td>
+                <code>language</code>
+              </td>
+              <td>string</td>
+              <td>auto</td>
+              <td>
+                ISO 639-1 code (e.g. <code>en</code>) to skip language detection; see{" "}
+                <Link href="/cookbook#pin-language">pinning the language</Link>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

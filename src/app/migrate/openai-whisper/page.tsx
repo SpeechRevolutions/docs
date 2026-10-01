@@ -194,10 +194,12 @@ export default function MigrateOpenAIWhisperPage() {
 
       <h2>Language selection</h2>
       <p>
-        OpenAI takes an ISO-639-1 <code>language</code> hint. Speech Revolutions always
-        auto-detects, and unlike a hint you cannot get it wrong: a
-        mislabelled <code>language</code> on Whisper quietly degrades the transcript, where
-        here the detected spans come back in <code>result.languages</code> for you to check.
+        OpenAI takes an ISO-639-1 <code>language</code> hint. Speech Revolutions auto-detects
+        by default, and the detected spans come back in <code>result.languages</code> for you
+        to check. The same <code>language</code> parameter, with the same ISO-639-1 codes, is
+        available when you know the language and want to skip detection. The same caution
+        applies as on Whisper: a wrong code does not fail, it makes the model translate into
+        that language. See <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Custom vocabulary</h2>

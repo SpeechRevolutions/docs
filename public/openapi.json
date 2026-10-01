@@ -303,6 +303,15 @@
             "example": "Kubernetes,Grafana,Zephyr"
           },
           {
+            "name": "language",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "ISO 639-1 code of the spoken language, from Whisper's 99-language set (e.g. `en`, `ru`, `de`). Omit it, or pass `auto`, for automatic language detection — the default, which also handles audio that switches language mid-file. When set, detection is skipped and the whole file is transcribed in that language. Pinning the wrong language makes the model translate into it (Russian audio pinned to `en` comes back as an English translation), and disables mid-file language switching. An unsupported code returns 422 with a message naming the bad value.",
+            "example": "en"
+          },
+          {
             "name": "callback_url",
             "in": "query",
             "schema": {

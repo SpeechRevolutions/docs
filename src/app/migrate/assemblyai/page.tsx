@@ -215,11 +215,14 @@ export default function MigrateAssemblyAIPage() {
       <h2>Language selection</h2>
       <p>
         AssemblyAI takes <code>language_code</code>, or{" "}
-        <code>language_detection: true</code> to auto-detect. Speech Revolutions always
-        auto-detects, so both of those parameters come out of your
-        request with nothing to replace them. Detection is per-segment, so{" "}
-        <code>result.languages</code> reports spans rather than one verdict for the file —
-        closer to what <code>language_detection</code> gave you, but without a second pass.
+        <code>language_detection: true</code> to auto-detect. Speech Revolutions auto-detects
+        by default, so <code>language_detection</code> comes out of your request with nothing
+        to replace it. Detection is per-segment, so <code>result.languages</code> reports
+        spans rather than one verdict for the file — closer to what{" "}
+        <code>language_detection</code> gave you, but without a second pass. A fixed{" "}
+        <code>language_code</code> maps to <code>language</code> with the ISO 639-1 code
+        (e.g. <code>en</code>), which skips detection for the whole file; see{" "}
+        <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Side by side</h2>
