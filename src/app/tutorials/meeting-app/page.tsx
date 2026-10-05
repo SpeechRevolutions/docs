@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Build a meeting-transcription app",
   description:
-    "This tutorial wires the whole thing together: a user uploads a meeting recording, watches a live progress bar, and ends up with a clean, speaker-labeled…",
+    "Build an app where a user uploads a meeting recording, watches a live progress bar, and gets a speaker-labeled transcript.",
 };
 
 export default function MeetingAppTutorialPage() {
@@ -14,63 +14,60 @@ export default function MeetingAppTutorialPage() {
     <>
       <h1>Build a meeting-transcription app</h1>
       <p>
-        This tutorial wires the whole thing together: a user uploads a meeting
-        recording, watches a live progress bar, and ends up with a clean,
-        speaker-labeled transcript — &quot;Speaker A said this, then Speaker B
-        replied.&quot; It builds directly on two guides you should skim first:{" "}
+        In this tutorial you build an app where a user uploads a meeting
+        recording, watches a live progress bar, and gets a speaker-labeled
+        transcript. It combines two guides:{" "}
         <Link href="/guides/live-progress">Live progress</Link> (turning the
         SDK&apos;s callbacks into a 0–100 bar) and{" "}
         <Link href="/guides/diarization">Speaker diarization</Link> (what{" "}
-        <code>speaker_labels</code> gives you). Here we combine them into one
-        end-to-end app.
+        <code>speaker_labels</code> returns).
       </p>
 
       <Callout title="What you'll build" tone="tip">
         <p>
           A backend endpoint that accepts a recording and transcribes it with{" "}
-          <code>speaker_labels</code> on; a progress endpoint your frontend
-          polls while the job runs; and a transcript view that renders the Speech Revolutions{" "}
-          <code>.utterances</code> as timestamped speaker turns. No spinner —
-          a real bar, because Speech Revolutions reports progress for pre-recorded audio.
+          <code>speaker_labels</code> on, a progress endpoint your frontend
+          polls while the job runs, and a transcript view that renders{" "}
+          <code>.utterances</code> as timestamped speaker turns. Speech
+          Revolutions reports progress for pre-recorded audio, so you show a
+          real progress bar instead of a spinner.
         </p>
       </Callout>
 
-      <h2>The shape of the result</h2>
+      <h2>The result shape</h2>
       <p>
-        When you pass <code>speaker_labels=True</code>, Speech Revolutions labels who spoke
-        each segment, and the SDK parses the response into a transcript object
-        with an <code>.utterances</code> list. Each utterance is one contiguous
-        speaker turn:
+        With <code>speaker_labels=True</code>, each segment is labeled with its
+        speaker, and the transcript object has an <code>.utterances</code> list.
+        Each utterance is one contiguous speaker turn:
       </p>
       <ul>
         <li>
-          <code>utterance.speaker</code> — the speaker label, a stable string id
-          within the job (e.g. <code>&quot;SPEAKER_1&quot;</code>,{" "}
-          <code>&quot;SPEAKER_2&quot;</code>). Map them to display names yourself;
-          the API does not know who is who.
+          <code>utterance.speaker</code>: the speaker label, a string ID that is
+          stable within the job (for example <code>&quot;SPEAKER_1&quot;</code>,{" "}
+          <code>&quot;SPEAKER_2&quot;</code>). The API does not identify people;
+          map labels to display names yourself.
         </li>
         <li>
-          <code>utterance.text</code> — what that speaker said in this turn
+          <code>utterance.text</code>: what the speaker said in this turn
         </li>
         <li>
-          <code>utterance.start</code> / <code>utterance.end</code> — turn
+          <code>utterance.start</code> / <code>utterance.end</code>: turn
           boundaries in seconds
         </li>
       </ul>
       <p>
-        That maps one-to-one onto the UI you want: a list of turns, each with a
-        speaker chip, a timestamp, and the spoken text. <code>result.text</code>{" "}
-        still holds the full flat transcript if you need it.
+        Each utterance maps to one row in the UI: a speaker chip, a timestamp,
+        and the text. <code>result.text</code> holds the full flat transcript.
       </p>
 
-      <h2>Step 1 — transcribe with speakers and progress</h2>
+      <h2>Step 1: Transcribe with speakers and progress</h2>
       <p>
-        Run the transcription in the background and stream its progress into a
-        per-job store, exactly as in the{" "}
-        <Link href="/guides/live-progress">Live progress</Link> guide. The only
-        additions here are <code>speaker_labels=True</code> and keeping the
-        finished <code>result</code> around so the transcript endpoint can serve
-        its <code>.utterances</code>.
+        Run the transcription in the background and write its progress to a
+        per-job store, as in the{" "}
+        <Link href="/guides/live-progress">Live progress</Link> guide. Add{" "}
+        <code>speaker_labels=True</code>, and keep the finished{" "}
+        <code>result</code>&apos;s <code>.utterances</code> so the transcript
+        endpoint can serve them.
       </p>
       <CodeTabs
         tabs={[
@@ -343,11 +340,11 @@ public static class Meetings
         ]}
       />
 
-      <h2>Step 2 — expose start, progress, and transcript endpoints</h2>
+      <h2>Step 2: Expose start, progress, and transcript endpoints</h2>
       <p>
-        Kick the job off in the background and return a <code>job_id</code>{" "}
-        immediately. The frontend polls <code>/progress</code> for the bar, and
-        once <code>phase</code> is <code>&quot;done&quot;</code> it reads the
+        Start the job in the background and return a <code>job_id</code>{" "}
+        immediately. The frontend polls the meeting endpoint for the bar. Once{" "}
+        <code>phase</code> is <code>&quot;done&quot;</code>, it reads the
         speaker turns from the same snapshot.
       </p>
       <CodeTabs
@@ -477,21 +474,19 @@ public record StartMeeting(string Url);`,
 
       <Callout title="For real servers, prefer a webhook" tone="info">
         <p>
-          Holding the transcription in a background task is fine for a single
-          box and a demo. For anything that restarts or scales out, use{" "}
-          <code>submit()</code> plus a <code>callback_url</code> so a job
-          survives a redeploy — the pattern in the{" "}
-          <Link href="/tutorials/batch">batch tutorial</Link>. Persist{" "}
-          <code>turns</code> to your database instead of an in-memory map.
+          A background task works for a demo on a single server. If your
+          server restarts or scales out, use <code>submit()</code> with a{" "}
+          <code>callback_url</code> so jobs survive a redeploy, as shown in the{" "}
+          <Link href="/tutorials/batch">batch tutorial</Link>. Store{" "}
+          <code>turns</code> in your database instead of an in-memory map.
         </p>
       </Callout>
 
-      <h2>Step 3 — render the transcript as speaker turns</h2>
+      <h2>Step 3: Render the transcript as speaker turns</h2>
       <p>
-        With the turns in hand the frontend is straightforward: one row per
-        utterance, a speaker chip, a <code>mm:ss</code> timestamp from{" "}
-        <code>start</code>, and the text. This is a minimal React view; style it
-        however you like.
+        Render one row per utterance: a speaker chip, a <code>mm:ss</code>{" "}
+        timestamp from <code>start</code>, and the text. This is a minimal
+        React view.
       </p>
       <CodeTabs
         tabs={[
@@ -547,10 +542,8 @@ export function MeetingView({ jobId }: { jobId: string }) {
       />
 
       <p>
-        That&apos;s the whole loop: upload, a real progress bar while Speech Revolutions
-        works, and a speaker-labeled transcript rendered from{" "}
-        <code>.utterances</code>. From here you might persist meetings, add
-        search across turns, or export the transcript — see the{" "}
+        Next steps: persist meetings, add search across turns, or export the
+        transcript. See the{" "}
         <Link href="/tutorials/subtitles">subtitles tutorial</Link> to turn the
         same job into an <code>.srt</code>/<code>.vtt</code> file, or the{" "}
         <Link href="/cookbook">cookbook</Link> for more recipes.
