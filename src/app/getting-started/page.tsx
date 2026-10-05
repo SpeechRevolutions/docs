@@ -41,7 +41,7 @@ export default function QuickstartPage() {
         ]}
       />
 
-      <h2>2a. SDK (recommended)</h2>
+      <h2>2a. Use an SDK (recommended)</h2>
       <p>
         The SDK uploads the file for you (in parts, for large files), then waits for the
         transcript.
@@ -71,10 +71,9 @@ export default function QuickstartPage() {
         ]}
       />
       <p>
-        Then transcribe something. The code below uses a 47-second sample we host — a
-        two-voice passage from Maupassant&apos;s <em>The Diamond Necklace</em> — so you can
-        try it before you have audio of your own. Swap in a local path or your own URL when
-        you&apos;re ready.
+        Transcribe a file. The code below uses a 47-second hosted sample, a two-voice
+        passage from Maupassant&apos;s <em>The Diamond Necklace</em>. Replace it with a local
+        path or your own URL.
       </p>
       <audio controls preload="none" src="/samples/diamond-necklace.mp3" className="w-full">
         <a href="/samples/diamond-necklace.mp3">Download the sample</a>
@@ -173,11 +172,11 @@ SPEAKER_1: Why the gown you go to the theater in? It looks very well to me.
 SPEAKER_2: He stopped distracted, seeing that his wife was weeping, Two great tears ran slowly from the corners of her eyes toward the corners of her mouth.`}
       />
 
-      <h2>2b. Quick test from a terminal</h2>
+      <h2>2b. Use cURL from a terminal</h2>
       <p>
         For scripts and one-off jobs, stream the file to{" "}
         <code>POST /api/v1/transcribe</code>. The connection stays open and
-        emits percentage-style progress until the transcript is ready.
+        emits progress events until the transcript is ready.
       </p>
       <CodeTabs
         tabs={[
@@ -203,14 +202,14 @@ curl -N -X POST \\
 
       <h2>3. Watch live progress (optional)</h2>
       <p>
-        The SDKs surface real-time upload <em>and</em> transcription progress —
-        as console bars (<code>progress=True</code>) or callbacks with a{" "}
-        <code>percent</code> field, so a long file is never a silent wait.
+        The SDKs report real-time upload <em>and</em> transcription progress,
+        as console bars (<code>progress=True</code>) or as callbacks with a{" "}
+        <code>percent</code> field.
       </p>
       <p>
-        Files under about 3 MiB go straight to the GPU and may report no transcription
-        progress before they complete, so expect the bar to jump from the end of the upload
-        to done.
+        Files under about 3 MiB are processed in a single pass and may report no
+        transcription progress before they complete. For these files the bar jumps from the
+        end of the upload to done.
       </p>
       <CodeTabs
         tabs={[

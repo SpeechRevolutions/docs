@@ -33,8 +33,8 @@ export default function DocsHomePage() {
 
       <p>
         New here? Start with the{" "}
-        <Link href="/getting-started">Quickstart</Link> — first transcript in
-        under a minute. Or pick your language:
+        <Link href="/getting-started">Quickstart</Link> to get your first
+        transcript in under a minute, or pick your language:
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -119,7 +119,7 @@ export default function DocsHomePage() {
         </p>
       </Callout>
 
-      <h2>30-second taste</h2>
+      <h2>Quick example</h2>
       <CodeTabs
         tabs={[
           {
@@ -193,8 +193,7 @@ Console.WriteLine(result.Text);`,
         <li>Custom vocabulary / keyterm prompting</li>
         <li>
           <strong>Live progress</strong> — real-time upload and transcription
-          percentage via SDK console bars or callbacks (something neither
-          AssemblyAI nor Deepgram expose for pre-recorded audio)
+          percentage via SDK console bars or callbacks
         </li>
       </ul>
 
