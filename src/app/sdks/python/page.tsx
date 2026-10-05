@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Python SDK",
   description:
-    "Official Python client for the Speech Revolutions STT API. Ships a synchronous SpeechRevolutions client and an asyncio AsyncSpeechRevolutions client with the…",
+    "The official Python client for the Speech Revolutions STT API, with a synchronous SpeechRevolutions client and an asyncio AsyncSpeechRevolutions client.",
 };
 
 export default function PythonSdkPage() {
@@ -14,10 +14,10 @@ export default function PythonSdkPage() {
     <>
       <h1>Python SDK</h1>
       <p>
-        Official Python client for the Speech Revolutions STT API. Ships a
-        synchronous <code>SpeechRevolutions</code> client and an asyncio{" "}
-        <code>AsyncSpeechRevolutions</code> client with the same one-line{" "}
-        <code>transcribe()</code> API.
+        The official Python client for the Speech Revolutions STT API. It
+        includes a synchronous <code>SpeechRevolutions</code> client and an
+        asyncio <code>AsyncSpeechRevolutions</code> client. Both expose the
+        same <code>transcribe()</code> method.
       </p>
 
       <p>
@@ -37,9 +37,9 @@ pip install "speechrevolutions[progress]"`} />
 
       <h2>Quickstart</h2>
       <p>
-        Point <code>transcribe()</code> at a local path, a URL, raw bytes, or a
-        file object. With the default <code>output_type="json"</code> the SDK
-        parses the response into a transcript-first result object.
+        Pass <code>transcribe()</code> a local path, a URL, raw bytes, or a
+        file object. With the default <code>output_type="json"</code>, the SDK
+        parses the response into a result object.
       </p>
       <CodeBlock
         language="python"
@@ -56,9 +56,9 @@ for u in result.utterances:
 
       <h2>From a URL or file</h2>
       <p>
-        <code>transcribe()</code> auto-detects <code>http(s)</code> URLs; the{" "}
-        <code>transcribe_url()</code> / <code>transcribe_file()</code> aliases
-        make intent explicit.
+        <code>transcribe()</code> detects <code>http(s)</code> URLs
+        automatically. Use the <code>transcribe_url()</code> and{" "}
+        <code>transcribe_file()</code> aliases to make the source explicit.
       </p>
       <CodeBlock
         language="python"
@@ -72,8 +72,8 @@ result = client.transcribe_file("./local.wav")`}
 
       <h2>Options</h2>
       <p>
-        Pass options as keyword arguments (ElevenLabs / Deepgram style) or as a{" "}
-        <code>TranscribeOptions</code> config object (AssemblyAI style):
+        Pass options as keyword arguments or as a{" "}
+        <code>TranscribeOptions</code> object:
       </p>
       <CodeBlock
         language="python"
@@ -245,16 +245,15 @@ result = client.transcribe(
 
       <h2>Live progress</h2>
       <p>
-        Unlike AssemblyAI and Deepgram — which expose no percentage for
-        pre-recorded audio — you get real-time progress for <strong>both</strong>{" "}
-        the file upload and the transcription, as a console bar, a callback, or
-        both. They compose: the bars render <em>and</em> your callbacks still
-        fire for every event.
+        The SDK reports progress for <strong>both</strong> the file upload and
+        the transcription, as a console bar, a callback, or both. When you
+        enable both, the bars render <em>and</em> your callbacks fire for every
+        event.
       </p>
       <p>
-        Files under about 3 MiB go straight to the GPU and may report no transcription
-        progress before they complete, so expect the bar to jump from the end of the upload
-        to done.
+        Files under about 3 MiB may report no transcription progress before
+        they complete. Expect the bar to jump from the end of the upload to
+        done.
       </p>
       <CodeBlock
         language="python"
@@ -283,17 +282,15 @@ result = client.transcribe(
         the total is not yet known).
       </p>
       <p>
-        Building a UI?{" "}
-        <Link href="/guides/live-progress">Live progress for web apps</Link>{" "}
-        shows how to fold both callbacks into a single 0–100 bar you can serve
-        to your frontend.
+        For a web UI, see{" "}
+        <Link href="/guides/live-progress">Live progress for web apps</Link>.
+        It combines both callbacks into a single 0–100 bar for your frontend.
       </p>
 
       <h2>Async</h2>
       <p>
-        The asyncio client mirrors the sync API. Use{" "}
-        <code>async with</code> so the underlying httpx client is closed on
-        exit.
+        The asyncio client has the same API as the sync client. Use{" "}
+        <code>async with</code> so the underlying HTTP client closes on exit.
       </p>
       <CodeBlock
         language="python"
@@ -315,9 +312,9 @@ asyncio.run(main())`}
 
       <h2>Result shape</h2>
       <p>
-        With <code>output_type="json"</code> the SDK returns a transcript-first
-        object. The client never writes files unless you call{" "}
-        <code>save()</code>.
+        With <code>output_type="json"</code>, the SDK returns a{" "}
+        <code>Transcript</code> object. The client writes files only when you
+        call <code>save()</code>.
       </p>
       <div className="table-scroll">
         <table>
@@ -332,31 +329,31 @@ asyncio.run(main())`}
               <td>
                 <code>result.text</code>
               </td>
-              <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
+              <td>Full transcript text</td>
             </tr>
             <tr>
               <td>
                 <code>result.transcript</code>
               </td>
-              <td>Deepgram-style alias for the same text</td>
+              <td>Alias for <code>result.text</code></td>
             </tr>
             <tr>
               <td>
                 <code>result.words</code>
               </td>
-              <td>Word + start / end / speaker</td>
+              <td>Words with start, end, and speaker</td>
             </tr>
             <tr>
               <td>
                 <code>result.utterances</code>
               </td>
-              <td>AssemblyAI-style speaker turns</td>
+              <td>Speaker turns</td>
             </tr>
             <tr>
               <td>
                 <code>result.to_deepgram()</code>
               </td>
-              <td>Deepgram-shaped dict for migrations</td>
+              <td>Deepgram-shaped dict, for migrations</td>
             </tr>
             <tr>
               <td>
@@ -368,7 +365,7 @@ asyncio.run(main())`}
               <td>
                 <code>result.content</code> / <code>result.save(path)</code>
               </td>
-              <td>Raw bytes / write to disk</td>
+              <td>Raw bytes / write the output to disk</td>
             </tr>
           </tbody>
         </table>
@@ -385,10 +382,10 @@ print("saved to", out)`}
 
       <h2>Webhooks</h2>
       <p>
-        Pass <code>callback_url</code> to be notified when a job finishes
-        instead of holding the call open — the right pattern for server and
-        background workloads. On completion or permanent failure the platform
-        POSTs a signed JSON body to your URL:
+        Pass <code>callback_url</code> to get notified when a job finishes
+        instead of holding the call open. Use this for server and background
+        workloads. When the job completes or fails permanently, Speech
+        Revolutions sends a signed JSON <code>POST</code> to your URL:
       </p>
       <CodeBlock
         language="python"
@@ -399,12 +396,16 @@ print("saved to", out)`}
         <code>
           {`{job_id, status: "completed"|"failed", download_url?, step?, reason?}`}
         </code>
-        , signed with HMAC-SHA256 over the raw body in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
-        <code>X-SR-Delivery</code> id). Always verify the signature against the
-        raw bytes you received — not a re-serialized dict — using a
-        constant-time comparison. Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
-        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
+        . It is signed with HMAC-SHA256 over the raw body, in the{" "}
+        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. The request
+        also carries <code>X-SR-Event</code> (the status) and a unique{" "}
+        <code>X-SR-Delivery</code> ID. Verify the signature against the raw
+        bytes you received, not a re-serialized dict, and use a constant-time
+        comparison. Copy your signing secret from the console (
+        <strong>API Keys → Webhook signing secret</strong>) into{" "}
+        <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>. The{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload,
+        retries, and secret rotation.
       </p>
       <CodeBlock
         language="python"
@@ -437,9 +438,9 @@ def verify_signature(raw_body: bytes, signature_header: str, signing_secret: str
 
       <h2>Retrieve results later</h2>
       <p>
-        Fetch a job by id anytime — useful after a webhook, or when rebuilding
-        state after a restart. The download URL is regenerated on demand, so
-        results are fetchable long after the original upload.
+        Fetch a job by ID at any time, for example after a webhook arrives or
+        after your service restarts. The download URL is generated on each
+        request, so you can fetch results long after the original upload.
       </p>
       <CodeBlock
         language="python"
@@ -463,9 +464,9 @@ for job in page["jobs"]:
 
       <h2>Robustness</h2>
       <p>
-        Configure retries, backoff, and an outbound proxy on the client.
-        Transient <code>429</code>/<code>5xx</code>/network errors are retried
-        automatically (honoring the <code>Retry-After</code> header).
+        Configure retries, backoff, and an outbound proxy on the client. The
+        SDK retries <code>429</code>, <code>5xx</code>, and network errors
+        automatically and honors the <code>Retry-After</code> header.
       </p>
       <CodeBlock
         language="python"
@@ -476,8 +477,9 @@ for job in page["jobs"]:
 )`}
       />
       <p>
-        Errors are typed and carry a <code>.status_code</code> and the server{" "}
-        <code>.request_id</code> for correlating with support.
+        Errors are typed. Each carries a <code>.status_code</code> and the
+        server&apos;s <code>.request_id</code>. Include the request ID when you
+        contact support.
       </p>
       <CodeBlock
         language="python"
@@ -491,8 +493,8 @@ except AuthenticationError as e:
     print(e.status_code, e.request_id)`}
       />
 
-      <h2>Auth</h2>
-      <p>The SDK reads the key from the environment:</p>
+      <h2>Authentication</h2>
+      <p>The SDK reads your API key from the environment:</p>
       <CodeBlock
         language="bash"
         code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
@@ -502,11 +504,11 @@ except AuthenticationError as e:
 
       <Callout title="Under the hood" tone="info">
         <p>
-          The SDK uploads the file (in parts, retrying any part that fails) and
-          waits on the{" "}
-          <Link href="/api-reference/jobs">SSE job stream</Link>, converting the
-          server&apos;s <code>completed</code>/<code>total</code> counts into{" "}
-          <code>percent</code> for you.
+          The SDK uploads the file in parts, retrying any part that fails. It
+          then listens on the{" "}
+          <Link href="/api-reference/jobs">SSE job stream</Link> and converts
+          the <code>completed</code> and <code>total</code> counts into{" "}
+          <code>percent</code>.
         </p>
       </Callout>
     </>
