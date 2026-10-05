@@ -165,6 +165,37 @@ Console.WriteLine($"Wrote {path}");`,
         </p>
       </Callout>
 
+      <h2>What the file looks like</h2>
+      <p>
+        Cues follow the usual captioning rules: one speaker per cue, at most two lines of 42
+        characters, at most 7 seconds, and a break at pauses longer than a second and at
+        sentence ends. With speaker labels on (the default), the first line of each cue starts
+        with the speaker, like <code>SPEAKER_1: </code>; turn <code>speaker_labels</code> off
+        for captions without it. The full rules are in{" "}
+        <Link href="/guides/output-formats#cues">Output formats</Link>.
+      </p>
+      <CodeBlock
+        language="text"
+        filename="captions.srt (excerpt)"
+        code={`5
+00:00:11,599 --> 00:00:15,820
+SPEAKER_1: It is very select and they are not giving
+many invitations to clerks.
+
+6
+00:00:16,769 --> 00:00:18,769
+SPEAKER_1: The whole official world will be there.
+
+7
+00:00:19,629 --> 00:00:25,399
+SPEAKER_2: She looked at him with an irritated glance
+and said impatiently, And what do you wish
+
+8
+00:00:25,460 --> 00:00:26,600
+SPEAKER_2: me to put on my back?`}
+      />
+
       <h2>Sidecar vs burned-in</h2>
       <p>
         Once you have the file, there are two ways to get captions in front of a

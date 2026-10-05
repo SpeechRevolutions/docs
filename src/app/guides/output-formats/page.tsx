@@ -217,16 +217,63 @@ await vtt.SaveAsync("meeting");   // -> meeting.vtt`,
           },
         ]}
       />
+      <h3 id="cues">How cues are built</h3>
+      <p>
+        Each cue is a run of consecutive words from <strong>one speaker</strong>, shown as at
+        most two lines of up to 42 characters. A new cue starts when:
+      </p>
+      <ul>
+        <li>the speaker changes (a cue never spans two speakers);</li>
+        <li>the next word would need a third line, or would take the cue past 7 seconds;</li>
+        <li>there is a pause of more than 1 second before the next word;</li>
+        <li>a sentence ends (<code>.</code> <code>?</code> <code>!</code>) and the cue has already run for at least 1 second.</li>
+      </ul>
+      <p>
+        A cue runs from its first word&apos;s start to its last word&apos;s end. With speaker
+        labels on (the default), the cue&apos;s first line starts with the speaker, e.g.{" "}
+        <code>SPEAKER_1: </code>; turn <code>speaker_labels</code> off for captions without
+        it. SRT times are <code>HH:MM:SS,mmm</code>; VTT times are{" "}
+        <code>HH:MM:SS.mmm</code>, after a <code>WEBVTT</code> header.
+      </p>
       <CodeBlock
         language="text"
-        filename="meeting.srt (example)"
-        code={`1
-00:00:00,500 --> 00:00:02,100
-Hi there, thanks for joining.
+        filename="diamond-necklace.srt (excerpt)"
+        code={`5
+00:00:11,599 --> 00:00:15,820
+SPEAKER_1: It is very select and they are not giving
+many invitations to clerks.
 
-2
-00:00:03,200 --> 00:00:04,600
-Happy to be here.`}
+6
+00:00:16,769 --> 00:00:18,769
+SPEAKER_1: The whole official world will be there.
+
+7
+00:00:19,629 --> 00:00:25,399
+SPEAKER_2: She looked at him with an irritated glance
+and said impatiently, And what do you wish
+
+8
+00:00:25,460 --> 00:00:26,600
+SPEAKER_2: me to put on my back?`}
+      />
+      <CodeBlock
+        language="text"
+        filename="diamond-necklace.vtt (excerpt)"
+        code={`WEBVTT
+
+00:00:11.599 --> 00:00:15.820
+SPEAKER_1: It is very select and they are not giving
+many invitations to clerks.
+
+00:00:16.769 --> 00:00:18.769
+SPEAKER_1: The whole official world will be there.
+
+00:00:19.629 --> 00:00:25.399
+SPEAKER_2: She looked at him with an irritated glance
+and said impatiently, And what do you wish
+
+00:00:25.460 --> 00:00:26.600
+SPEAKER_2: me to put on my back?`}
       />
       <Callout title="SRT or VTT?" tone="tip">
         <p>
