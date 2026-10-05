@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Switching STT APIs in under 30 minutes",
   description:
-    "Changing speech-to-text providers sounds risky. It isn't — if you do it behind an interface, compare on your own audio, and roll out gradually with a…",
+    "A provider-agnostic playbook for switching speech-to-text APIs: put transcription behind an interface, compare on your own audio, and roll out gradually with a fallback.",
 };
 
 export default function MigrationPlaybookPage() {
@@ -14,31 +14,31 @@ export default function MigrationPlaybookPage() {
     <>
       <h1>Switching STT APIs in under 30 minutes</h1>
       <p>
-        Changing speech-to-text providers sounds risky. It isn&apos;t — if you
-        do it behind an interface, compare on your own audio, and roll out
-        gradually with a fallback. This is the provider-agnostic playbook; the{" "}
-        per-provider guides (
+        To switch speech-to-text providers safely, put transcription behind an
+        interface, compare outputs on your own audio, and roll out gradually with a
+        fallback. This page is the provider-agnostic playbook. The per-provider guides
+        (
         <Link href="/migrate/deepgram">Deepgram</Link>,{" "}
         <Link href="/migrate/assemblyai">AssemblyAI</Link>,{" "}
         <Link href="/migrate/openai-whisper">OpenAI Whisper</Link>,{" "}
         <Link href="/migrate/elevenlabs">ElevenLabs</Link>,{" "}
         <Link href="/migrate/self-hosted-whisper">self-hosted Whisper</Link>)
-        fill in the exact field mappings.
+        cover the exact field mappings.
       </p>
 
       <h2>1. Why teams switch</h2>
       <ul>
         <li>
-          <strong>Accuracy on their audio</strong> — general WER hides how a
-          model does on your domain, accents, and multi-speaker recordings.
+          <strong>Accuracy on your audio.</strong> General WER doesn&apos;t show how a
+          model performs on your domain, accents, and multi-speaker recordings.
         </li>
         <li>
-          <strong>Diarization &amp; timestamps</strong> — the difference between
-          &quot;a transcript&quot; and a usable, speaker-labeled, seekable one.
+          <strong>Diarization and timestamps.</strong> Speaker labels and word times make
+          a transcript searchable and seekable.
         </li>
         <li>
           <strong>Price at volume</strong>, output formats (SRT/VTT/DOCX), and
-          operational simplicity (no GPUs to babysit).
+          operational simplicity (no GPUs to manage).
         </li>
       </ul>
 
@@ -58,22 +58,22 @@ export default function MigrationPlaybookPage() {
             </tr>
             <tr>
               <td>Diarization</td>
-              <td>DER + does the speaker labeling actually hold up on your meetings</td>
+              <td>DER, and whether speaker labels hold up on your own recordings</td>
             </tr>
             <tr>
               <td>Timestamps</td>
-              <td>Word-level start/end accuracy (matters for subtitles &amp; search)</td>
+              <td>Word-level start/end accuracy (important for subtitles and search)</td>
             </tr>
             <tr>
               <td>Languages</td>
               <td>The specific languages and code-switching you serve</td>
             </tr>
             <tr>
-              <td>Formats &amp; features</td>
+              <td>Formats and features</td>
               <td>JSON shape, SRT/VTT/DOCX, custom vocabulary, webhooks</td>
             </tr>
             <tr>
-              <td>Throughput &amp; price</td>
+              <td>Throughput and price</td>
               <td>Batch latency and cost at your monthly volume</td>
             </tr>
           </tbody>
@@ -81,22 +81,20 @@ export default function MigrationPlaybookPage() {
       </div>
       <Callout title="Measure on your data" tone="tip">
         <p>
-          Our <Link href="/benchmarks">public benchmark suite</Link> is
-          reproducible and provider-agnostic — point it at your own audio and the
-          providers you&apos;re comparing. The most honest benchmark is always
-          yours.
+          The <Link href="/benchmarks">public benchmark suite</Link> is reproducible
+          and provider-agnostic. Run it on your own audio against the providers
+          you&apos;re comparing.
         </p>
       </Callout>
 
       <h2>3. Migrate behind an interface</h2>
       <p>
-        Don&apos;t sprinkle vendor SDK calls across your codebase. Put
-        transcription behind one function that returns your own normalized shape.
-        Swapping providers then touches exactly one file. The Speech Revolutions result
-        object is already transcript-first (<code>.text</code>,{" "}
-        <code>.words</code>, <code>.utterances</code>) and can emit a
-        Deepgram-shaped dict via <code>to_deepgram()</code> if you&apos;re
-        mid-migration.
+        Put transcription behind one function that returns your own normalized shape,
+        instead of calling a vendor SDK throughout your codebase. Switching providers then
+        changes one file. The Speech Revolutions result exposes <code>.text</code>,{" "}
+        <code>.words</code>, and <code>.utterances</code>, and{" "}
+        <code>to_deepgram()</code> returns a Deepgram-shaped dict if you are migrating
+        from Deepgram.
       </p>
       <CodeTabs
         tabs={[
@@ -222,38 +220,37 @@ public sealed class Transcription : IDisposable
 
       <h2>4. Compare outputs before you cut over</h2>
       <p>
-        Run both providers over the same sample set through your interface,
-        store both outputs, and diff them: WER against a reference if you have
-        one, otherwise spot-check the transcripts, speaker turns, and timestamps
-        that matter to your product. Keep the sample around as a regression set.
+        Run both providers on the same sample set through your interface, store both
+        outputs, and compare them. Measure WER against a reference transcript if you have
+        one; otherwise, spot-check the transcripts, speaker turns, and timestamps your
+        product depends on. Keep the sample as a regression set.
       </p>
 
       <h2>5. Roll out incrementally</h2>
       <ul>
         <li>
-          <strong>Shadow</strong> — send a copy of production traffic to Speech Revolutions,
-          compare, don&apos;t serve it yet.
+          <strong>Shadow.</strong> Send a copy of production traffic to Speech Revolutions
+          and compare results without serving them.
         </li>
         <li>
-          <strong>Ramp</strong> — route 5% → 25% → 100% behind a feature flag,
-          watching your quality and error metrics at each step.
+          <strong>Ramp.</strong> Route 5% → 25% → 100% of traffic behind a feature flag,
+          and check quality and error metrics at each step.
         </li>
         <li>
-          <strong>Fall back</strong> — on error or timeout, have the interface
-          fall back to the old provider until you&apos;re fully confident. One
-          interface makes this a few lines.
+          <strong>Fall back.</strong> On error or timeout, have the interface call the old
+          provider until the rollout is complete.
         </li>
       </ul>
       <Callout title="For large backfills" tone="info">
         <p>
-          Re-transcribing an existing library? Use{" "}
-          <code>submit()</code> + polling or webhooks instead of blocking calls —
-          see the <Link href="/tutorials/batch">batch tutorial</Link>.
+          To re-transcribe an existing library, use <code>submit()</code> with polling or
+          webhooks instead of blocking calls. See the{" "}
+          <Link href="/tutorials/batch">batch tutorial</Link>.
         </p>
       </Callout>
 
       <h2>6. The 30-minute quickstart</h2>
-      <p>Authenticate, transcribe, read the result — that&apos;s the whole loop.</p>
+      <p>Install the SDK, set your API key, transcribe, and read the result.</p>
       <CodeTabs
         tabs={[
           {
@@ -332,9 +329,8 @@ Console.WriteLine(result.Text);`,
         ]}
       />
       <p>
-        Next: pick your <Link href="/migrate/deepgram">provider-specific guide</Link>{" "}
-        for exact field mappings, or the{" "}
-        <Link href="/getting-started">Quickstart</Link> to go deeper.
+        Next, see the <Link href="/migrate/deepgram">provider-specific guide</Link> for
+        exact field mappings, or the <Link href="/getting-started">Quickstart</Link>.
       </p>
     </>
   );

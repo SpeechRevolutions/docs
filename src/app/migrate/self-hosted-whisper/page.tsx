@@ -16,32 +16,28 @@ export default function MigrateSelfHostedWhisperPage() {
     <>
       <h1>Migrating from self-hosted Whisper to Speech Revolutions</h1>
       <p>
-        Running Whisper yourself — <code>faster-whisper</code> (CTranslate2) on a
-        GPU box, or <code>whisper.cpp</code> on CPU/Metal — starts as a one-liner
-        and quietly turns into an infrastructure project: provisioning GPUs,
-        pinning CUDA/cuDNN, sizing VRAM for <code>large-v3</code>, warming models
-        to avoid cold starts, batching for throughput, autoscaling for load,
-        bolting on a separate diarization stack, and keeping all of it patched.
-        Speech Revolutions runs Zephyr, our speech-to-text engine, as a hosted API call — no GPUs to
-        run — with word timestamps and diarization in one response, and a diarization error
-        rate that leads every subset we publish.
+        This guide covers moving from self-hosted Whisper (<code>faster-whisper</code>{" "}
+        with CTranslate2 on a GPU, or <code>whisper.cpp</code> on CPU/Metal) to the Speech
+        Revolutions API. Self-hosting means provisioning GPUs, pinning CUDA/cuDNN, sizing
+        VRAM for <code>large-v3</code>, warming models, batching, autoscaling, and running
+        a separate diarization stack. Speech Revolutions runs Zephyr, its speech-to-text
+        engine, as a hosted API and returns word timestamps and diarization in one
+        response.
       </p>
 
-      <Callout title="The real cost of self-hosting" tone="tip">
+      <Callout title="What you no longer run" tone="tip">
         <p>
-          The transcription code is easy. What&apos;s hard is everything around
-          it: GPU availability and cost, driver/toolkit version drift, VRAM
-          pressure, cold-start latency, concurrency and queueing, and a
-          diarization pipeline neither <code>faster-whisper</code> nor{" "}
-          <code>whisper.cpp</code> includes out of the box. Migrating to Speech Revolutions
-          deletes that entire layer.
+          GPU capacity, driver and toolkit versions, VRAM limits, cold starts,
+          concurrency and queueing, and a diarization pipeline (neither{" "}
+          <code>faster-whisper</code> nor <code>whisper.cpp</code> includes one). With
+          Speech Revolutions, you call the API instead.
         </p>
       </Callout>
 
       <h2>Authentication</h2>
       <p>
-        A local model has no auth — it runs on your own machine. With Speech Revolutions you
-        add one API key, read from the environment by the SDK.
+        A local model needs no authentication. Speech Revolutions requires an API key,
+        which the SDK reads from the environment.
       </p>
       <CodeBlock
         language="bash"
@@ -50,10 +46,9 @@ export default function MigrateSelfHostedWhisperPage() {
 
       <h2>From a function call to an API call</h2>
       <p>
-        Self-hosted Whisper is an in-process function: you load a model into GPU
-        memory once, then call <code>.transcribe()</code> on it. Speech Revolutions moves the
-        compute off your box — the SDK uploads the file and waits for the result —
-        but the call site stays a single line.
+        Self-hosted Whisper runs in process: you load a model into GPU memory once, then
+        call <code>.transcribe()</code> on it. With Speech Revolutions, the SDK uploads the
+        file and waits for the result. The call site is still a single line.
       </p>
       <div className="table-scroll">
         <table>
@@ -70,7 +65,7 @@ export default function MigrateSelfHostedWhisperPage() {
                 (loads weights into VRAM)
               </td>
               <td>
-                <code>SpeechRevolutions()</code> (just reads the API key)
+                <code>SpeechRevolutions()</code> (reads the API key)
               </td>
             </tr>
             <tr>
@@ -97,14 +92,14 @@ export default function MigrateSelfHostedWhisperPage() {
           </tbody>
         </table>
       </div>
-      
-      <h2>Input / upload differences</h2>
+
+      <h2>Input and upload differences</h2>
       <p>
         <code>faster-whisper</code> reads a local file path directly.{" "}
-        <code>whisper.cpp</code> is stricter still — it wants 16 kHz mono WAV, so
-        most pipelines shell out to <code>ffmpeg</code> to convert first. Speech Revolutions
-        accepts common audio/video formats and transcodes them for you, so you pass a path,
-        URL, or bytes to the SDK and skip the transcode step.
+        <code>whisper.cpp</code> requires 16 kHz mono WAV, so most pipelines convert with{" "}
+        <code>ffmpeg</code> first. Speech Revolutions accepts common audio and video
+        formats and transcodes them for you. Pass a path, URL, or bytes to the SDK and skip
+        the conversion step.
       </p>
 
       <h2>Response shape</h2>
@@ -112,8 +107,8 @@ export default function MigrateSelfHostedWhisperPage() {
         <code>faster-whisper</code> yields <code>Segment</code> objects, each with
         a <code>words</code> list (<code>start</code>, <code>end</code>,{" "}
         <code>word</code>) when <code>word_timestamps=True</code>, plus an{" "}
-        <code>info</code> with the detected <code>language</code>. Speech Revolutions returns a
-        transcript-first object.
+        <code>info</code> with the detected <code>language</code>. Speech Revolutions returns
+        one complete result object.
       </p>
       <div className="table-scroll">
         <table>
@@ -162,41 +157,39 @@ export default function MigrateSelfHostedWhisperPage() {
       <Callout title="No more draining the generator" tone="info">
         <p>
           <code>faster-whisper</code>&apos;s <code>segments</code> is a lazy
-          generator — transcription only runs as you iterate it. Speech Revolutions hands you
-          a finished result, so there&apos;s no generator to exhaust before the
-          work actually happens.
+          generator: transcription runs only as you iterate it. Speech Revolutions returns
+          a finished result, so there is no generator to consume.
         </p>
       </Callout>
 
       <h2>Diarization</h2>
       <p>
         Neither <code>faster-whisper</code> nor <code>whisper.cpp</code> diarizes
-        on its own — you run a separate pipeline (typically{" "}
-        <code>pyannote.audio</code>) and align its speaker turns onto the Whisper
-        words yourself, which means a second model, more VRAM, and alignment code
-        to maintain. Speech Revolutions diarizes in the same call: set{" "}
+        on its own. You run a separate pipeline (typically{" "}
+        <code>pyannote.audio</code>) and align its speaker turns to the Whisper words
+        yourself. Speech Revolutions diarizes in the same call: set{" "}
         <code>speaker_labels</code> (on by default) and read{" "}
-        <code>result.utterances</code>. Diarization is one of Zephyr&apos;s strongest results; see the <Link href="/benchmarks">benchmarks</Link> and{" "}
+        <code>result.utterances</code>. For diarization accuracy, see the{" "}
+        <Link href="/benchmarks">benchmarks</Link> and the{" "}
         <a href={SITE.landingUrl}>comparison table</a>.
       </p>
 
       <h2>Timestamps</h2>
       <p>
-        With <code>faster-whisper</code> word timestamps require{" "}
-        <code>word_timestamps=True</code> (extra alignment cost). On Speech Revolutions{" "}
-        <code>word_timestamps</code> is on by default and the times are on{" "}
+        With <code>faster-whisper</code>, word timestamps require{" "}
+        <code>word_timestamps=True</code>, which adds alignment cost. On Speech
+        Revolutions, <code>word_timestamps</code> is on by default and the times are on{" "}
         <code>result.words</code> in seconds.
       </p>
 
       <h2>Language selection</h2>
       <p>
         <code>faster-whisper</code> auto-detects, or you pass{" "}
-        <code>language=</code> to <code>transcribe()</code>. Speech Revolutions auto-detects by
-        default. This is one of the parameters you can stop
-        tuning: no per-language model choice, and code-switching handled
-        without you splitting the file first. The detected spans come back in{" "}
-        <code>result.languages</code>. If you do pin today, the same{" "}
-        <code>language=</code> option exists with the same ISO 639-1 codes; see{" "}
+        <code>language=</code> to <code>transcribe()</code>. Speech Revolutions auto-detects
+        by default, with no per-language model choice, and handles code-switching without
+        splitting the file. The detected spans are returned in{" "}
+        <code>result.languages</code>. To set a fixed language, pass the same{" "}
+        <code>language=</code> option with an ISO 639-1 code; see{" "}
         <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
@@ -266,17 +259,16 @@ print("languages:", result.languages)  # [{start, end, language}, ...]`,
           rebuilds.
         </li>
         <li>
-          <strong>Cold starts &amp; batching.</strong> No model-warming or
-          throughput tuning to keep latency sane under load.
+          <strong>Cold starts and batching.</strong> No model warming or throughput
+          tuning.
         </li>
         <li>
           <strong>Diarization stack.</strong> No separate{" "}
           <code>pyannote</code> pipeline and word-alignment code.
         </li>
         <li>
-          <strong>Audio preprocessing.</strong> No mandatory{" "}
-          <code>ffmpeg</code> 16 kHz WAV conversion (as <code>whisper.cpp</code>{" "}
-          needs).
+          <strong>Audio preprocessing.</strong> No <code>ffmpeg</code> conversion to
+          16 kHz WAV (required by <code>whisper.cpp</code>).
         </li>
       </ul>
 
@@ -284,13 +276,13 @@ print("languages:", result.languages)  # [{start, end, language}, ...]`,
       <ul>
         <li>
           <strong>Handling the lazy generator.</strong> Code that assumed{" "}
-          <code>faster-whisper</code>&apos;s deferred <code>segments</code> should
-          switch to reading the finished <code>result</code> fields directly.
+          <code>faster-whisper</code>&apos;s lazy <code>segments</code> should read the
+          finished <code>result</code> fields directly.
         </li>
         <li>
-          <strong>Concurrency model.</strong> You no longer serialize work behind
-          a single GPU — issue calls concurrently (use <code>submit()</code> or
-          the async client) instead of queueing.
+          <strong>Concurrency model.</strong> You don&apos;t need to serialize work behind a
+          single GPU. Issue calls concurrently with <code>submit()</code> or the async
+          client.
         </li>
         <li>
           <strong>Preprocessing assumptions.</strong> Drop the forced 16 kHz mono
@@ -300,11 +292,10 @@ print("languages:", result.languages)  # [{start, end, language}, ...]`,
 
       <Callout title="Next steps" tone="info">
         <p>
-          See the <Link href="/migrate/playbook">migration playbook</Link> for
-          cutover strategy, the <Link href="/sdks/python">Python SDK</Link> for
-          concurrency and async, and the{" "}
-          <Link href="/benchmarks">benchmarks</Link> for how hosted Speech Revolutions
-          compares to a self-hosted Whisper on accuracy and diarization.
+          See the <Link href="/migrate/playbook">migration playbook</Link> for cutover,
+          the <Link href="/sdks/python">Python SDK</Link> for concurrency and async, and
+          the <Link href="/benchmarks">benchmarks</Link> for accuracy and diarization
+          compared with self-hosted Whisper.
         </p>
       </Callout>
     </>
