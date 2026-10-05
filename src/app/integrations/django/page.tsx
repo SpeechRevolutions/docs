@@ -92,6 +92,8 @@ def start_transcription(request):
     upload = request.FILES["file"]
 
     # submit() returns a job id without holding the request open.
+    # callback_url must be publicly reachable: a localhost / 127.0.0.1 URL is
+    # refused with HTTP 403. In local development, use a tunnel's public URL.
     job_id = client.submit(
         upload.read(),
         speaker_labels=True,

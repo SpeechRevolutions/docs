@@ -129,7 +129,7 @@ export async function transcribe(audio: string) {
   return {
     text: r.text,
     speakers: r.utterances.map((u) => ({ speaker: u.speaker, text: u.text })),
-    words: r.words.map((w) => w.toDict()),
+    words: r.words.map((w) => ({ ...w })), // words are plain objects in JS
   };
 }`,
           },
@@ -156,7 +156,16 @@ type Result struct {
 	Words    []stt.Word       \`json:"words"\`
 }
 
-var client *stt.Client // built once with SPEECHREVOLUTIONS_API_KEY
+// Built once; reads SPEECHREVOLUTIONS_API_KEY.
+var client = newClient()
+
+func newClient() *stt.Client {
+	c, err := stt.NewClient("")
+	if err != nil {
+		panic(err) // e.g. SPEECHREVOLUTIONS_API_KEY is not set
+	}
+	return c
+}
 
 func Transcribe(ctx context.Context, audio string) (*Result, error) {
 	r, err := client.Transcribe(ctx, audio, stt.TranscribeOptions{

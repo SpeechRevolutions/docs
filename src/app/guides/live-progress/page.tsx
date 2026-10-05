@@ -50,6 +50,11 @@ export default function LiveProgressGuidePage() {
         known. You decide what to do with it: write it to your DB, push it over
         a WebSocket, or store it in memory for an HTTP endpoint to read.
       </p>
+      <p>
+        Files under about 3 MiB go straight to the GPU and may report no transcription
+        progress before they complete, so expect the bar to jump from the end of the upload
+        to done.
+      </p>
 
       <h2>Weight the two phases into one bar</h2>
       <p>
@@ -80,7 +85,7 @@ TRANSCRIBE_WEIGHT = 0.85  # transcription spans 15–100%
 class JobProgress:
     """The latest progress for one job — the shape you'd serve to your frontend."""
 
-    phase: str = "starting"  # "upload" | "transcribe" | "done"
+    phase: str = "starting"  # "upload" | "transcribe" | "done" | "failed"
     percent: float = 0.0     # overall 0–100 across both phases
     lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
@@ -103,12 +108,16 @@ class JobProgress:
 
 
 async def transcribe_with_progress(audio: str, store: JobProgress):
-    async with AsyncSpeechRevolutions() as client:
-        result = await client.transcribe(
-            audio,
-            on_upload_progress=store.on_upload,   # <- do anything with event.percent
-            on_progress=store.on_transcribe,
-        )
+    try:
+        async with AsyncSpeechRevolutions() as client:
+            result = await client.transcribe(
+                audio,
+                on_upload_progress=store.on_upload,   # <- do anything with event.percent
+                on_progress=store.on_transcribe,
+            )
+    except Exception:
+        store._set("failed", store.percent)  # tell the frontend, instead of stalling
+        raise
     store._set("done", 100.0)
     return result`,
           },
@@ -124,7 +133,7 @@ const TRANSCRIBE_WEIGHT = 0.85; // transcription spans 15–100%
 
 /** The latest progress for one job — the shape you'd serve to your frontend. */
 class JobProgress {
-  phase = "starting"; // "upload" | "transcribe" | "done"
+  phase = "starting"; // "upload" | "transcribe" | "done" | "failed"
   percent = 0;        // overall 0–100 across both phases
 
   #set(phase, overall) {
@@ -137,6 +146,9 @@ class JobProgress {
     this.#set("transcribe", UPLOAD_WEIGHT * 100 + (event.percent ?? 0) * TRANSCRIBE_WEIGHT);
   done() {
     this.#set("done", 100);
+  }
+  fail() {
+    this.#set("failed", this.percent);
   }
   snapshot() {
     return { phase: this.phase, percent: this.percent };
@@ -180,7 +192,7 @@ const (
 // mutex is not optional.
 type JobProgress struct {
 	mu      sync.Mutex
-	phase   string  // "upload" | "transcribe" | "done"
+	phase   string  // "upload" | "transcribe" | "done" | "failed"
 	percent float64 // overall 0–100 across both phases
 }
 
@@ -215,6 +227,7 @@ func transcribeWithProgress(
 		OnUploadProgress: store.OnUpload, // <- do anything with e.Percent()
 	}, store.OnTranscribe)
 	if err != nil {
+		store.set("failed", 0) // tell the frontend, instead of stalling
 		return nil, err
 	}
 	store.set("done", 100)
@@ -252,7 +265,7 @@ public sealed class JobProgress
 
     private readonly object _lock = new();
 
-    public string Phase { get; private set; } = "starting"; // upload|transcribe|done
+    public string Phase { get; private set; } = "starting"; // upload|transcribe|done|failed
     public double Percent { get; private set; }             // overall 0–100
 
     public void Set(string phase, double overall)
@@ -283,11 +296,19 @@ public static class Transcriber
     public static async Task<TranscriptResult> RunAsync(
         SpeechRevolutionsClient client, string audio, JobProgress store)
     {
-        var result = await client.TranscribeAsync(audio,
-            new TranscribeOptions { OnUploadProgress = store.OnUpload },
-            store.OnTranscribe);
-        store.Set("done", 100);
-        return result;
+        try
+        {
+            var result = await client.TranscribeAsync(audio,
+                new TranscribeOptions { OnUploadProgress = store.OnUpload },
+                store.OnTranscribe);
+            store.Set("done", 100);
+            return result;
+        }
+        catch
+        {
+            store.Set("failed", 0); // tell the frontend, instead of stalling
+            throw;
+        }
     }
 }`,
           },
@@ -337,10 +358,15 @@ def progress(job_id: str):
 app.post("/transcribe", (req, res) => {
   const store = new JobProgress();
   jobs.set(req.body.jobId, store);
-  client.transcribe(req.body.url, {
-    onUploadProgress: store.onUpload,
-    onProgress: store.onTranscribe,
-  }); // runs in the background
+  // Runs in the background. Handle both outcomes: an unhandled rejection
+  // would crash the process, and the bar has to end somewhere.
+  client
+    .transcribe(req.body.url, {
+      onUploadProgress: store.onUpload,
+      onProgress: store.onTranscribe,
+    })
+    .then(() => store.done())
+    .catch(() => store.fail());
   res.json({ jobId: req.body.jobId }); // returns immediately
 });
 

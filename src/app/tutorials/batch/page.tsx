@@ -304,6 +304,7 @@ Console.WriteLine($"submitted {jobIds.Count}/{paths.Count} files; saved jobs.jso
             filename: "collect_poll.py",
             code: `import asyncio
 import json
+from pathlib import Path
 
 from speechrevolutions import AsyncSpeechRevolutions
 from speechrevolutions.exceptions import JobFailedError
@@ -318,7 +319,7 @@ async def collect_one(client: AsyncSpeechRevolutions, path: str, job_id: str, se
             status = await client.get_job_status(job_id)
             if status.is_completed:
                 result = await client.get_transcript(job_id)  # downloads + parses
-                result.save(f"transcripts/{path}")            # -> transcripts/<name>.json
+                result.save(f"transcripts/{Path(path).stem}.json")  # -> transcripts/<name>.json
                 print(f"done {path}")
                 return
             if status.is_failed:
@@ -328,12 +329,16 @@ async def collect_one(client: AsyncSpeechRevolutions, path: str, job_id: str, se
 
 
 async def collect_all(job_ids: dict[str, str]) -> None:
+    Path("transcripts").mkdir(exist_ok=True)
     sem = asyncio.Semaphore(CONCURRENCY)
     async with AsyncSpeechRevolutions() as client:
-        await asyncio.gather(
+        outcomes = await asyncio.gather(
             *(collect_one(client, path, jid, sem) for path, jid in job_ids.items()),
             return_exceptions=True,  # one failure doesn't sink the batch
         )
+    for path, outcome in zip(job_ids, outcomes):
+        if isinstance(outcome, Exception):  # ...but it is reported, so you can retry it
+            print(f"FAILED {path}: {outcome}")
 
 
 if __name__ == "__main__":
@@ -362,7 +367,7 @@ async function collectOne(client, filePath, jobId) {
       const result = await client.getTranscript(jobId); // downloads + parses
       await mkdir("transcripts", { recursive: true });
       await writeFile(
-        path.join("transcripts", path.basename(filePath) + ".json"),
+        path.join("transcripts", path.parse(filePath).name + ".json"), // -> transcripts/<name>.json
         JSON.stringify(result.toDict(), null, 2),
       );
       console.log("done " + filePath);
@@ -387,8 +392,10 @@ async function collectAll(jobIds) {
       const next = queue.shift();
       if (!next) return;
       const [filePath, jobId] = next;
-      // One failure must not sink the batch.
-      await collectOne(client, filePath, jobId).catch((e) => console.error(e.message));
+      // One failure must not sink the batch, but it is reported so you can retry it.
+      await collectOne(client, filePath, jobId).catch((e) =>
+        console.error(\`FAILED \${filePath}: \${e.message}\`),
+      );
     }
   };
 
@@ -410,6 +417,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -434,7 +442,8 @@ func collectOne(ctx context.Context, client *stt.Client, path, jobID string) err
 				return err
 			}
 			// -> transcripts/<name>.json
-			if _, err := result.Save(filepath.Join("transcripts", filepath.Base(path))); err != nil {
+			name := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+			if _, err := result.Save(filepath.Join("transcripts", name+".json")); err != nil {
 				return err
 			}
 			fmt.Println("done", path)
@@ -479,7 +488,8 @@ func main() {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 			if err := collectOne(ctx, client, path, jobID); err != nil {
-				log.Println(err) // one failure doesn't sink the batch
+				// one failure doesn't sink the batch, but it is reported so you can retry it
+				log.Printf("FAILED %s: %v", path, err)
 			}
 		}(p, id)
 	}
@@ -519,7 +529,8 @@ await Parallel.ForEachAsync(
                     // downloads + parses
                     var result = await client.GetTranscriptAsync(jobId, OutputType.Json, ct);
                     // -> transcripts/<name>.json
-                    await result.SaveAsync(Path.Combine("transcripts", Path.GetFileName(path)));
+                    await result.SaveAsync(Path.Combine("transcripts",
+                        Path.GetFileNameWithoutExtension(path) + ".json"));
                     Console.WriteLine($"done {path}");
                     return;
                 }
@@ -530,9 +541,9 @@ await Parallel.ForEachAsync(
                 await Task.Delay(pollInterval, ct);
             }
         }
-        catch (Exception e) // one failure doesn't sink the batch
+        catch (Exception e) // one failure doesn't sink the batch, but it is reported
         {
-            Console.Error.WriteLine(e.Message);
+            Console.Error.WriteLine($"FAILED {path}: {e.Message}");
         }
     });`,
           },
@@ -564,8 +575,8 @@ job_id = await client.submit(
           {
             label: "JavaScript",
             language: "ts",
-            code: `// In submitOne(), add a callbackUrl so Speech Revolutions notifies you on completion:
-const jobId = await client.submit(filePath, {
+            code: `// In the mapLimit callback, add a callbackUrl so Speech Revolutions notifies you on completion:
+const jobId = await client.submit(path, {
   speakerLabels: true,
   callbackUrl: "https://your-app.example.com/webhooks/speechrevolutions",
 });`,

@@ -46,6 +46,11 @@ export default function WebhooksGuidePage() {
         Add <code>callback_url</code> when you submit a job. <code>submit()</code> returns as
         soon as the job is queued; the webhook tells you when it is done.
       </p>
+      <p>
+        The URL must be publicly reachable over the internet. A <code>localhost</code> or{" "}
+        <code>127.0.0.1</code> URL (or any private address) is refused with HTTP 403 when you
+        submit, so in local development pass a tunnel&apos;s public URL instead.
+      </p>
       <CodeTabs
         tabs={[
           {
@@ -347,6 +352,7 @@ app.Run();`,
       <p>
         Sign a sample body with your secret and send it the way we would. A receiver that
         verifies correctly accepts this and rejects the same request with the body changed.
+        (This tests your receiver only: real deliveries need the public URL above.)
       </p>
       <CodeBlock
         language="bash"

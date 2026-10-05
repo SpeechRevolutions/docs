@@ -68,7 +68,7 @@ func main() {
 
     fmt.Println(result.Text())
     for _, u := range result.Utterances {
-        fmt.Printf("Speaker %s: %s\\n", u.Speaker, u.Text)
+        fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
     }
 }`}
       />
@@ -239,6 +239,11 @@ result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.Transc
         the file upload and the transcription, as a console bar, callbacks, or
         both. They compose: the bars render <em>and</em> your callbacks fire for
         every event.
+      </p>
+      <p>
+        Files under about 3 MiB go straight to the GPU and may report no transcription
+        progress before they complete, so expect the bar to jump from the end of the upload
+        to done.
       </p>
       <CodeBlock
         language="go"

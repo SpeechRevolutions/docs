@@ -50,7 +50,7 @@ var result = await client.TranscribeAsync("meeting.mp3", new TranscribeOptions
 
 Console.WriteLine(result.Text);
 foreach (var u in result.Utterances)
-    Console.WriteLine($"Speaker {u.Speaker}: {u.Text}");`}
+    Console.WriteLine($"{u.Speaker}: {u.Text}");`}
       />
 
       <h2>From a URL or file</h2>
@@ -229,6 +229,11 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
         the file upload and the transcription, as a console bar, a callback, or
         both. They compose: the bars render <em>and</em> your callbacks still
         fire for every event.
+      </p>
+      <p>
+        Files under about 3 MiB go straight to the GPU and may report no transcription
+        progress before they complete, so expect the bar to jump from the end of the upload
+        to done.
       </p>
       <p>
         Set <code>Progress = true</code> for bars. An <code>Uploading</code>{" "}

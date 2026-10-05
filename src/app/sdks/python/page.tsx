@@ -51,7 +51,7 @@ result = client.transcribe("meeting.mp3", speaker_labels=True)
 
 print(result.text)
 for u in result.utterances:
-    print(f"Speaker {u.speaker}: {u.text}")`}
+    print(f"{u.speaker}: {u.text}")`}
       />
 
       <h2>From a URL or file</h2>
@@ -250,6 +250,11 @@ result = client.transcribe(
         the file upload and the transcription, as a console bar, a callback, or
         both. They compose: the bars render <em>and</em> your callbacks still
         fire for every event.
+      </p>
+      <p>
+        Files under about 3 MiB go straight to the GPU and may report no transcription
+        progress before they complete, so expect the bar to jump from the end of the upload
+        to done.
       </p>
       <CodeBlock
         language="python"

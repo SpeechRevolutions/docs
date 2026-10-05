@@ -63,10 +63,13 @@ export default function VersioningPage() {
         <a href="https://www.rfc-editor.org/rfc/rfc8594.html">RFC 8594</a>:
       </p>
 
+      <p>
+        For example (illustrative dates — nothing is deprecated today):
+      </p>
       <CodeBlock
         language="http"
-        code={`Deprecation: @1780272000
-Sunset: Sat, 01 Aug 2026 00:00:00 GMT
+        code={`Deprecation: @1893456000
+Sunset: Wed, 01 Jan 2031 00:00:00 GMT
 Link: <https://docs.speechrevolutions.com/versioning>; rel="deprecation"`}
       />
 

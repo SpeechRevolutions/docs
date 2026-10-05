@@ -925,7 +925,7 @@ catch (RateLimitException e)
             code: `result = client.transcribe("meeting.mp3", speaker_labels=True)
 
 for u in result.utterances:
-    print(f"Speaker {u.speaker}: {u.text}")`,
+    print(f"{u.speaker}: {u.text}")`,
           },
           {
             label: "JavaScript",
@@ -933,7 +933,7 @@ for u in result.utterances:
             code: `const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 
 for (const u of result.utterances) {
-  console.log(\`Speaker \${u.speaker}: \${u.text}\`);
+  console.log(\`\${u.speaker}: \${u.text}\`);
 }`,
           },
           {
@@ -947,7 +947,7 @@ if err != nil {
 }
 
 for _, u := range result.Utterances {
-	fmt.Printf("Speaker %s: %s\n", u.Speaker, u.Text)
+	fmt.Printf("%s: %s\n", u.Speaker, u.Text)
 }`,
           },
           {
@@ -957,7 +957,7 @@ for _, u := range result.Utterances {
     new TranscribeOptions { SpeakerLabels = true });
 
 foreach (var u in result.Utterances)
-    Console.WriteLine($"Speaker {u.Speaker}: {u.Text}");`,
+    Console.WriteLine($"{u.Speaker}: {u.Text}");`,
           },
         ]}
       />

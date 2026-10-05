@@ -113,13 +113,17 @@ class Meeting:
 
 
 async def transcribe_meeting(audio: str, meeting: Meeting) -> None:
-    async with AsyncSpeechRevolutions() as client:
-        result = await client.transcribe(
-            audio,
-            speaker_labels=True,             # <- label who spoke each segment
-            on_upload_progress=meeting.on_upload,
-            on_progress=meeting.on_transcribe,
-        )
+    try:
+        async with AsyncSpeechRevolutions() as client:
+            result = await client.transcribe(
+                audio,
+                speaker_labels=True,         # <- label who spoke each segment
+                on_upload_progress=meeting.on_upload,
+                on_progress=meeting.on_transcribe,
+            )
+    except Exception:
+        meeting._bar("failed", meeting.percent)  # the frontend stops polling on "failed"
+        raise
     # Turn the SDK's utterances into plain dicts for the UI.
     meeting.turns = [
         {"speaker": u.speaker, "text": u.text, "start": u.start, "end": u.end}
@@ -386,8 +390,12 @@ app.post("/meetings", (req, res) => {
   const jobId = randomUUID();
   const meeting = new Meeting();
   meetings.set(jobId, meeting);
-  transcribeMeeting(req.body.url, meeting); // runs in the background
-  res.json({ jobId });                      // returns immediately
+  // Runs in the background. A failed job must not become an unhandled
+  // rejection (which crashes Node); mark it so the frontend stops polling.
+  transcribeMeeting(req.body.url, meeting).catch(() => {
+    meeting.phase = "failed";
+  });
+  res.json({ jobId }); // returns immediately
 });
 
 app.get("/meetings/:jobId", (req, res) => {

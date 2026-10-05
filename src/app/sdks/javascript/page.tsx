@@ -47,7 +47,7 @@ const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 
 console.log(result.text);
 for (const u of result.utterances) {
-  console.log(\`Speaker \${u.speaker}: \${u.text}\`);
+  console.log(\`\${u.speaker}: \${u.text}\`);
 }`}
       />
 
@@ -228,6 +228,11 @@ const result2 = await client.transcribeUrl("https://example.com/audio.mp3");`}
         the file upload and the transcription, as a console bar, a callback, or
         both. They compose: the bars render <em>and</em> your callbacks still
         fire for every event.
+      </p>
+      <p>
+        Files under about 3 MiB go straight to the GPU and may report no transcription
+        progress before they complete, so expect the bar to jump from the end of the upload
+        to done.
       </p>
       <CodeBlock
         language="ts"

@@ -32,7 +32,7 @@ export default function FastapiIntegrationPage() {
       <h2>Install</h2>
       <CodeBlock
         language="bash"
-        code={`pip install fastapi uvicorn speechrevolutions
+        code={`pip install fastapi uvicorn python-multipart speechrevolutions
 
 export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />

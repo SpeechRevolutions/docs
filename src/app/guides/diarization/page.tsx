@@ -100,9 +100,9 @@ result = await client.TranscribeAsync("meeting.mp3",
             code: `result = client.transcribe("meeting.mp3", speaker_labels=True)
 
 for u in result.utterances:
-    print(f"[{u.start:.1f}s] Speaker {u.speaker}: {u.text}")
-# [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
-# [3.2s] Speaker SPEAKER_2: Happy to be here.`,
+    print(f"[{u.start:.1f}s] {u.speaker}: {u.text}")
+# [0.5s] SPEAKER_1: Hi, thanks for joining.
+# [3.2s] SPEAKER_2: Happy to be here.`,
           },
           {
             label: "JavaScript",
@@ -110,10 +110,10 @@ for u in result.utterances:
             code: `const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 
 for (const u of result.utterances) {
-  console.log(\`[\${u.start.toFixed(1)}s] Speaker \${u.speaker}: \${u.text}\`);
+  console.log(\`[\${u.start.toFixed(1)}s] \${u.speaker}: \${u.text}\`);
 }
-// [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
-// [3.2s] Speaker SPEAKER_2: Happy to be here.`,
+// [0.5s] SPEAKER_1: Hi, thanks for joining.
+// [3.2s] SPEAKER_2: Happy to be here.`,
           },
           {
             label: "Go",
@@ -130,10 +130,10 @@ for _, u := range result.Utterances {
 	if u.Start != nil {
 		start = *u.Start
 	}
-	fmt.Printf("[%.1fs] Speaker %s: %s\\n", start, u.Speaker, u.Text)
+	fmt.Printf("[%.1fs] %s: %s\\n", start, u.Speaker, u.Text)
 }
-// [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
-// [3.2s] Speaker SPEAKER_2: Happy to be here.`,
+// [0.5s] SPEAKER_1: Hi, thanks for joining.
+// [3.2s] SPEAKER_2: Happy to be here.`,
           },
           {
             label: "C#",
@@ -142,9 +142,9 @@ for _, u := range result.Utterances {
     new TranscribeOptions { SpeakerLabels = true });
 
 foreach (var u in result.Utterances)
-    Console.WriteLine($"[{u.Start:F1}s] Speaker {u.Speaker}: {u.Text}");
-// [0.5s] Speaker SPEAKER_1: Hi, thanks for joining.
-// [3.2s] Speaker SPEAKER_2: Happy to be here.`,
+    Console.WriteLine($"[{u.Start:F1}s] {u.Speaker}: {u.Text}");
+// [0.5s] SPEAKER_1: Hi, thanks for joining.
+// [3.2s] SPEAKER_2: Happy to be here.`,
           },
         ]}
       />

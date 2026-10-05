@@ -86,11 +86,14 @@ export async function transcribeFromStorage(id: string, storagePath: string) {
   // 2. Pass the URL straight to Speech Revolutions (auto-detected as a URL).
   const result = await stt.transcribe(data.signedUrl, {
     speakerLabels: true,
-    onProgress: (e) =>
-      supabase
+    onProgress: (e) => {
+      // A Supabase query only runs once it is awaited or then'd.
+      void supabase
         .from("transcriptions")
         .update({ percent: e.percent ?? 0 })
-        .eq("id", id), // drives Realtime updates (see below)
+        .eq("id", id) // drives Realtime updates (see below)
+        .then(({ error }) => error && console.error(error));
+    },
   });
 
   // 3. Store the transcript in Postgres.

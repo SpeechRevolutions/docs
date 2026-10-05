@@ -207,6 +207,11 @@ curl -N -X POST \\
         as console bars (<code>progress=True</code>) or callbacks with a{" "}
         <code>percent</code> field, so a long file is never a silent wait.
       </p>
+      <p>
+        Files under about 3 MiB go straight to the GPU and may report no transcription
+        progress before they complete, so expect the bar to jump from the end of the upload
+        to done.
+      </p>
       <CodeTabs
         tabs={[
           {
