@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Using Speech Revolutions with Supabase",
   description:
-    "If your users upload audio to Supabase Storage, you can transcribe it without downloading a byte: create a signed URL for the object, hand it to Speech Revolutions, and…",
+    "Transcribe audio in Supabase Storage without downloading it: create a signed URL, pass it to Speech Revolutions, write the transcript to a Postgres table, and stream progress over Realtime.",
 };
 
 export default function SupabaseIntegrationPage() {
@@ -15,26 +15,25 @@ export default function SupabaseIntegrationPage() {
     <>
       <h1>Using Speech Revolutions with Supabase</h1>
       <p>
-        If your users upload audio to Supabase Storage, you can transcribe it
-        without downloading a byte: create a signed URL for the object, hand it
-        to Speech Revolutions, and write the transcript into a Postgres table. Optionally
-        stream progress to the browser over Supabase Realtime. All Speech Revolutions and
-        service-role keys stay server-side.
+        If your users upload audio to Supabase Storage, you can transcribe it without
+        downloading it: create a signed URL for the object, pass it to Speech Revolutions,
+        and write the transcript to a Postgres table. You can also stream progress to the
+        browser over Supabase Realtime. The Speech Revolutions API key and the Supabase
+        service role key stay on the server.
       </p>
 
       <Callout title="Use the service role key on the server only" tone="warn">
         <p>
-          Signed-URL creation and privileged table writes use the Supabase
-          service role key — keep it (and{" "}
-          <code>SPEECHREVOLUTIONS_API_KEY</code>) on your server. The browser
-          only ever uses the anon key and reads rows through Row Level Security.
+          Creating signed URLs and privileged table writes use the Supabase service role
+          key. Keep it, and <code>SPEECHREVOLUTIONS_API_KEY</code>, on your server. The
+          browser uses only the anon key and reads rows through Row Level Security.
         </p>
       </Callout>
 
       <h2>The table</h2>
       <p>
-        A row per job: the storage path, a status, a <code>0–100</code>{" "}
-        progress number, and the transcript text once it lands.
+        Create one row per job with the storage path, a status, a <code>0–100</code>{" "}
+        progress value, and the transcript text when the job completes.
       </p>
       <CodeBlock
         language="sql"
@@ -55,10 +54,10 @@ alter publication supabase_realtime add table transcriptions;`}
 
       <h2>Transcribe a file in Supabase Storage</h2>
       <p>
-        Create a signed URL for the uploaded object (valid long enough to
-        outlast transcription) and pass it to <code>transcribe()</code> — the
-        SDK auto-detects the URL and streams the audio directly from Supabase.
-        Then upsert the transcript into the table.
+        Create a signed URL for the uploaded object, with an expiry longer than the
+        transcription time, and pass it to <code>transcribe()</code>. The SDK detects the
+        URL and Speech Revolutions fetches the audio directly from Supabase. Then write the
+        transcript to the table.
       </p>
       <CodeTabs
         tabs={[
@@ -304,10 +303,9 @@ await TranscribeFromStorageAsync("row-id", "meeting.mp3");`,
 
       <h2>Optional: live progress over Realtime</h2>
       <p>
-        Because the <code>on_progress</code>/<code>onProgress</code> callback
-        writes <code>percent</code> back to the row, the browser can subscribe
-        to that row over Supabase Realtime and update a progress bar with no
-        polling. The percentage comes straight from the SDK callback.
+        The <code>on_progress</code>/<code>onProgress</code> callback writes{" "}
+        <code>percent</code> to the row, so the browser can subscribe to that row over
+        Supabase Realtime and update a progress bar without polling.
       </p>
       <CodeBlock
         language="ts"
@@ -336,14 +334,14 @@ const channel = supabase
         <p>
           For long recordings, use <code>submit()</code> with a{" "}
           <code>callback_url</code> instead of blocking on{" "}
-          <code>transcribe()</code>, and update the row from a signed webhook
-          handler (verify <code>X-SR-Signature</code> with your signing secret — see{" "}
+          <code>transcribe()</code>, and update the row from your webhook handler after
+          verifying <code>X-SR-Signature</code> with your signing secret (see{" "}
           <Link href="/guides/webhooks">Webhooks</Link>). The{" "}
           <Link href="/integrations/nextjs">Next.js</Link> and{" "}
           <Link href="/integrations/fastapi">FastAPI</Link> guides show complete
           receivers, and{" "}
-          <Link href="/guides/live-progress">Live progress for web apps</Link>{" "}
-          covers the callback-to-bar weighting.
+          <Link href="/guides/live-progress">Live progress for web apps</Link> explains
+          how to weight the callbacks into one progress bar.
         </p>
       </Callout>
     </>
