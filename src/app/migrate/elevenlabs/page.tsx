@@ -18,27 +18,27 @@ export default function MigrateElevenLabsPage() {
         ElevenLabs&apos; Scribe speech-to-text is a single synchronous multipart{" "}
         <code>POST</code> to <code>/v1/speech-to-text</code>. Word timestamps come
         back by default and <code>diarize=true</code> adds a{" "}
-        <code>speaker_id</code> to each word. Speech Revolutions covers the same ground —
-        transcript, per-word times, and speakers — and the SDK reduces it to one{" "}
-        <code>transcribe()</code> call. This guide maps auth, upload, and the
-        response shape (including a token quirk to watch for), and points to where
-        Speech Revolutions measures ahead for Scribe migrators.
+        <code>speaker_id</code> to each word. Speech Revolutions returns the same data
+        (transcript, per-word times, and speakers), and the SDK does it in one{" "}
+        <code>transcribe()</code> call. This guide maps authentication, upload, and the
+        response shape, including the <code>spacing</code> tokens you no longer need to
+        filter.
       </p>
 
       <Callout title="What changes, what doesn't" tone="tip">
         <p>
-          Your <code>diarize</code> flag ports as-is (Speech Revolutions accepts{" "}
+          Your <code>diarize</code> flag works unchanged (Speech Revolutions accepts{" "}
           <code>diarize</code> as an alias for <code>speaker_labels</code>), and{" "}
-          <code>result.text</code> maps directly. The main cleanup is dropping
-          ElevenLabs&apos; <code>spacing</code> word-array tokens — the Speech Revolutions{" "}
-          <code>result.words</code> are already words only.
+          <code>result.text</code> maps directly. The main change is removing handling for
+          ElevenLabs&apos; <code>spacing</code> tokens: <code>result.words</code> contains
+          only words.
         </p>
       </Callout>
 
       <h2>Authentication</h2>
       <p>
         ElevenLabs authenticates with an <code>xi-api-key</code> header. Speech Revolutions
-        uses <code>X-API-Key</code>, read from the environment by the SDK.
+        uses <code>X-API-Key</code>. The SDK reads the key from the environment.
       </p>
       <div className="table-scroll">
         <table>
@@ -105,14 +105,14 @@ export default function MigrateElevenLabsPage() {
           </tbody>
         </table>
       </div>
-      
+
       <h2>Upload differences</h2>
       <p>
         ElevenLabs takes the audio as a multipart <code>file</code> field with{" "}
-        <code>model_id</code> in the form body. With Speech Revolutions you pass a path, URL, or
-        bytes to the SDK, which uploads straight to storage in parts. Speech Revolutions
-        also reports live <code>upload</code> and <code>transcribe</code> progress
-        (see <Link href="/guides/live-progress">live progress</Link>).
+        <code>model_id</code> in the form body. With Speech Revolutions, you pass a path, URL,
+        or bytes to the SDK, which uploads the file to storage in parts. Speech Revolutions
+        also reports live <code>upload</code> and <code>transcribe</code> progress (see{" "}
+        <Link href="/guides/live-progress">live progress</Link>).
       </p>
 
       <h2>Response shape</h2>
@@ -120,9 +120,9 @@ export default function MigrateElevenLabsPage() {
         ElevenLabs returns <code>text</code> plus a <code>words[]</code> array in
         which entries have a <code>type</code> of <code>word</code> or{" "}
         <code>spacing</code>; the <code>spacing</code> entries are not real words.
-        Speakers appear as <code>speaker_id</code> strings (e.g.{" "}
-        <code>speaker_0</code>). The Speech Revolutions <code>result.words</code> contains
-        words only, with matching string speaker labels.
+        Speakers appear as <code>speaker_id</code> strings (for example,{" "}
+        <code>speaker_0</code>). Speech Revolutions&apos; <code>result.words</code> contains
+        only words, with string speaker labels.
       </p>
       <div className="table-scroll">
         <table>
@@ -156,7 +156,7 @@ export default function MigrateElevenLabsPage() {
               <td>
                 <code>words[]</code> where <code>type == &quot;spacing&quot;</code>
               </td>
-              <td>— (dropped; you no longer filter these out)</td>
+              <td>— (not returned; no filtering needed)</td>
             </tr>
             <tr>
               <td>— (regroup by <code>speaker_id</code> yourself)</td>
@@ -178,8 +178,7 @@ export default function MigrateElevenLabsPage() {
       <Callout title="Retire the spacing filter" tone="info">
         <p>
           If your code skips <code>word.type === &quot;spacing&quot;</code>{" "}
-          entries, you can delete that filter — <code>result.words</code> is
-          already words only.
+          entries, delete that filter. <code>result.words</code> contains only words.
         </p>
       </Callout>
 
@@ -187,32 +186,28 @@ export default function MigrateElevenLabsPage() {
       <p>
         ElevenLabs diarizes with <code>diarize=true</code>, adding a{" "}
         <code>speaker_id</code> per word. Speech Revolutions uses the same <code>diarize</code>{" "}
-        flag (alias for <code>speaker_labels</code>, on by default) and also groups
-        words into <code>result.utterances</code>, so you don&apos;t reconstruct
-        turns from per-word ids. Diarization accuracy is a clear Speech Revolutions strength —
-        it leads on every subset in our testing; see the{" "}
+        flag (an alias for <code>speaker_labels</code>, on by default) and also groups
+        words into <code>result.utterances</code>, so you don&apos;t need to rebuild turns
+        from per-word IDs. For measured diarization error rate (DER), see the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}
-        <a href={SITE.landingUrl}>comparison table</a> for the measured DER.
+        <a href={SITE.landingUrl}>comparison table</a>.
       </p>
 
       <h2>Timestamps</h2>
       <p>
-        Both return per-word start/end times in seconds by default. Timestamp
-        precision is another area Speech Revolutions measures well on for Scribe migrators —
-        the <Link href="/benchmarks">benchmarks</Link> report the median
-        word-boundary error side by side, so you can compare rather than take our
-        word for it.
+        Both return per-word start and end times in seconds by default. The{" "}
+        <Link href="/benchmarks">benchmarks</Link> compare median word-boundary error
+        side by side.
       </p>
 
       <h2>Language selection</h2>
       <p>
         ElevenLabs takes <code>language_code</code>. Speech Revolutions auto-detects by
-        default, and detects changes <em>within</em> a file, so a
-        recording that switches languages mid-sentence comes back correctly rather than
-        forced into one. Each word carries its own <code>language</code>, which is what you
-        want if you are cutting subtitles per language rather than per file. To fix the
-        language instead, pass <code>language</code> with an ISO 639-1 code (e.g.{" "}
-        <code>en</code>); that skips detection, including mid-file switching. See{" "}
+        default and detects language changes <em>within</em> a file, so a recording that
+        switches languages mid-sentence is transcribed in each language. Each word has its
+        own <code>language</code>, which you can use to split subtitles by language. To set
+        a fixed language, pass <code>language</code> with an ISO 639-1 code (for example,{" "}
+        <code>en</code>). This skips detection, including mid-file switching. See{" "}
         <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
@@ -278,17 +273,16 @@ for (const u of result.utterances) {
           <code>X-API-Key</code>.
         </li>
         <li>
-          <strong>Spacing tokens.</strong> The Speech Revolutions <code>words</code> array omits
-          them — remove any <code>type</code> filtering.
+          <strong>Spacing tokens.</strong> The <code>words</code> array omits them. Remove any{" "}
+          <code>type</code> filtering.
         </li>
         <li>
-          <strong>Speaker grouping.</strong> Prefer <code>result.utterances</code>{" "}
-          over regrouping per-word <code>speaker_id</code> values.
+          <strong>Speaker grouping.</strong> Use <code>result.utterances</code> instead of
+          regrouping per-word <code>speaker_id</code> values.
         </li>
         <li>
-          <strong>Keyword biasing.</strong> ElevenLabs biases Scribe v2 with keyterm
-          prompting; the equivalent here is <code>custom_vocabulary</code>, which takes the
-          same kind of list of domain terms.
+          <strong>Keyword biasing.</strong> Scribe v2 keyterm prompting maps to{" "}
+          <code>custom_vocabulary</code>, a list of domain terms.
         </li>
       </ul>
 

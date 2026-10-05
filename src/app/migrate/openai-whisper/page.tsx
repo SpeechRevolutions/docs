@@ -17,31 +17,30 @@ export default function MigrateOpenAIWhisperPage() {
       <h1>Migrating from the OpenAI Whisper API to Speech Revolutions</h1>
       <p>
         OpenAI&apos;s transcription API is a single synchronous multipart{" "}
-        <code>POST</code> to <code>/v1/audio/transcriptions</code>. It&apos;s
-        simple, but three constraints tend to push teams to migrate: a hard{" "}
-        <strong>25 MB file limit</strong>, and — on the current{" "}
-        <code>gpt-4o-transcribe</code> model — <strong>no word-level
-        timestamps</strong> and <strong>no speaker diarization</strong>. Speech Revolutions
-        returns transcript, word timestamps, and diarized speaker turns from a
-        single call, for files up to 10 GB through the SDK.
+        <code>POST</code> to <code>/v1/audio/transcriptions</code>. It has a{" "}
+        <strong>25 MB file limit</strong>, and the current <code>gpt-4o-transcribe</code>{" "}
+        model returns <strong>no word-level timestamps</strong> and{" "}
+        <strong>no speaker diarization</strong>. Speech Revolutions returns the transcript,
+        word timestamps, and speaker turns from a single call, for files up to 10 GB
+        through the SDK.
       </p>
 
-      <Callout title="The capability gap this closes" tone="tip">
+      <Callout title="Timestamps and speakers in one call" tone="tip">
         <p>
           On OpenAI, word timestamps require the older <code>whisper-1</code>{" "}
           model (via <code>response_format=verbose_json</code> +{" "}
           <code>timestamp_granularities</code>), and speaker labels require a
           separate <code>gpt-4o-transcribe-diarize</code> model —{" "}
-          <code>gpt-4o-transcribe</code> returns text only. Speech Revolutions gives you{" "}
+          <code>gpt-4o-transcribe</code> returns text only. Speech Revolutions returns{" "}
           <code>result.text</code>, <code>result.words</code> (with times), and{" "}
-          <code>result.utterances</code> (speakers) together, every time.
+          <code>result.utterances</code> (speakers) in every response.
         </p>
       </Callout>
 
       <h2>Authentication</h2>
       <p>
         OpenAI uses <code>Authorization: Bearer &lt;key&gt;</code>. Speech Revolutions uses{" "}
-        <code>X-API-Key</code>, read from the environment by the SDK.
+        <code>X-API-Key</code>. The SDK reads the key from the environment.
       </p>
       <div className="table-scroll">
         <table>
@@ -107,28 +106,26 @@ export default function MigrateOpenAIWhisperPage() {
           </tbody>
         </table>
       </div>
-      
-      <h2>Upload differences &amp; the 25 MB limit</h2>
+
+      <h2>Upload differences and the 25 MB limit</h2>
       <p>
-        OpenAI expects the audio as a multipart <code>file</code> field in the
-        request body, which is why the API rejects anything over{" "}
-        <strong>25 MB</strong> — you have to pre-split or compress long recordings
-        yourself. Speech Revolutions has no 25 MB ceiling: the SDKs upload files up to{" "}
-        {LIMITS.sdkUploadMax} straight to storage in parts, so you just pass a path, URL, or
-        bytes.
+        OpenAI expects the audio as a multipart <code>file</code> field in the request body
+        and rejects files over <strong>25 MB</strong>, so you split or compress long
+        recordings yourself. Speech Revolutions has no 25 MB limit: the SDKs upload files up
+        to {LIMITS.sdkUploadMax} to storage in parts. Pass a path, URL, or bytes.
       </p>
       <Callout title="No more chunking long files" tone="tip">
         <p>
-          If you built a splitter to keep files under 25 MB for OpenAI, you can
-          retire it. Send the whole recording to <code>transcribe()</code>.
+          If you split files to stay under 25 MB for OpenAI, remove that step. Send the
+          whole recording to <code>transcribe()</code>.
         </p>
       </Callout>
 
       <h2>Response shape</h2>
       <p>
         With <code>response_format=json</code>, OpenAI&apos;s{" "}
-        <code>gpt-4o-transcribe</code> returns essentially <code>{`{ text }`}</code>
-        {" "}— no words, no segments, no speakers. Speech Revolutions returns those too:
+        <code>gpt-4o-transcribe</code> returns only <code>{`{ text }`}</code>, with no words,
+        segments, or speakers. Speech Revolutions returns all of these:
       </p>
       <div className="table-scroll">
         <table>
@@ -175,38 +172,38 @@ export default function MigrateOpenAIWhisperPage() {
 
       <h2>Diarization</h2>
       <p>
-        <code>gpt-4o-transcribe</code> cannot diarize — you would switch to the
-        separate <code>gpt-4o-transcribe-diarize</code> model (as of July 2026).
-        Speech Revolutions diarizes in the same call: set{" "}
-        <code>speaker_labels</code> (on by default) and read{" "}
-        <code>result.utterances</code>. Diarization is one of Zephyr&apos;s headline strengths; the <Link href="/benchmarks">benchmarks</Link> and{" "}
-        <a href={SITE.landingUrl}>comparison table</a> have the measured numbers.
+        <code>gpt-4o-transcribe</code> does not diarize; OpenAI offers the separate{" "}
+        <code>gpt-4o-transcribe-diarize</code> model (as of July 2026). Speech Revolutions
+        diarizes in the same call: set <code>speaker_labels</code> (on by default) and read{" "}
+        <code>result.utterances</code>. For measured diarization accuracy, see the{" "}
+        <Link href="/benchmarks">benchmarks</Link> and the{" "}
+        <a href={SITE.landingUrl}>comparison table</a>.
       </p>
 
       <h2>Timestamps</h2>
       <p>
-        On OpenAI, word timestamps mean dropping back to <code>whisper-1</code>{" "}
-        with <code>response_format=verbose_json</code> and{" "}
+        On OpenAI, word timestamps require <code>whisper-1</code> with{" "}
+        <code>response_format=verbose_json</code> and{" "}
         <code>timestamp_granularities: [&quot;word&quot;]</code>. On Speech Revolutions,{" "}
-        <code>word_timestamps</code> is on by default and the times live on{" "}
-        <code>result.words</code> in seconds — no model swap.
+        <code>word_timestamps</code> is on by default and the times are returned on{" "}
+        <code>result.words</code> in seconds, with no model change.
       </p>
 
       <h2>Language selection</h2>
       <p>
-        OpenAI takes an ISO-639-1 <code>language</code> hint. Speech Revolutions auto-detects
-        by default, and the detected spans come back in <code>result.languages</code> for you
-        to check. The same <code>language</code> parameter, with the same ISO-639-1 codes, is
-        available when you know the language and want to skip detection. The same caution
-        applies as on Whisper: a wrong code does not fail, it makes the model translate into
-        that language. See <Link href="/cookbook#pin-language">pinning the language</Link>.
+        OpenAI takes an ISO 639-1 <code>language</code> hint. Speech Revolutions
+        auto-detects by default and returns the detected spans in{" "}
+        <code>result.languages</code>. To skip detection, pass the same{" "}
+        <code>language</code> parameter with an ISO 639-1 code. As with Whisper, a wrong
+        code does not fail: the model translates into that language. See{" "}
+        <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Custom vocabulary</h2>
       <p>
-        OpenAI&apos;s only biasing lever is the free-text <code>prompt</code>{" "}
-        (capped at roughly 224 tokens). Speech Revolutions takes an explicit{" "}
-        <code>custom_vocabulary</code> list of domain terms.
+        OpenAI biases transcription only through the free-text <code>prompt</code> (about
+        224 tokens maximum). Speech Revolutions takes a <code>custom_vocabulary</code> list
+        of domain terms.
       </p>
 
       <h2>Side by side</h2>
@@ -269,12 +266,12 @@ for (const u of result.utterances) console.log(\`\${u.speaker}: \${u.text}\`);`,
         </li>
         <li>
           <strong>Expecting text only.</strong> Speech Revolutions returns{" "}
-          <code>words</code> and <code>utterances</code> by default — you no
-          longer need a second model for timestamps or speakers.
+          <code>words</code> and <code>utterances</code> by default. You don&apos;t need a
+          second model for timestamps or speakers.
         </li>
         <li>
-          <strong>Left-over 25 MB workarounds.</strong> Chunking / compression
-          steps built for OpenAI are unnecessary.
+          <strong>Leftover 25 MB workarounds.</strong> Remove chunking or compression steps
+          built for OpenAI.
         </li>
         <li>
           <strong>Prompt-based biasing.</strong> Replace the{" "}
