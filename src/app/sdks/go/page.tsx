@@ -6,14 +6,14 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Go SDK",
   description:
-    "Official Go client for the Speech Revolutions STT API.",
+    "The official Go client for the Speech Revolutions STT API.",
 };
 
 export default function GoSdkPage() {
   return (
     <>
       <h1>Go SDK</h1>
-      <p>Official Go client for the Speech Revolutions STT API.</p>
+      <p>The official Go client for the Speech Revolutions STT API.</p>
 
       <p>
         Source on{" "}
@@ -33,10 +33,10 @@ export default function GoSdkPage() {
       <p>
         <code>Transcribe</code> accepts a local file path, an{" "}
         <code>http(s)</code> URL, or raw bytes (<code>TranscribeBytes</code>).
-        The third argument is an optional transcription-progress callback
+        The last argument is an optional transcription-progress callback
         (<code>nil</code> for none). Bool and tier options are pointers, so an
-        unset field is distinct from <code>false</code> — leave them{" "}
-        <code>nil</code> to accept the default.
+        unset field is distinct from <code>false</code>. Leave them{" "}
+        <code>nil</code> to use the default.
       </p>
       <CodeBlock
         language="go"
@@ -87,8 +87,8 @@ result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.Transc
 
       <h2>Options</h2>
       <p>
-        <code>TranscribeOptions</code> fields — an empty{" "}
-        <code>TranscribeOptions{"{}"}</code> gets all defaults applied.
+        Set fields on <code>TranscribeOptions</code>. An empty{" "}
+        <code>TranscribeOptions{"{}"}</code> uses every default.
       </p>
       <div className="table-scroll">
         <table>
@@ -148,7 +148,7 @@ result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.Transc
               </td>
               <td>—</td>
               <td>
-                Deepgram-compatible alias for <code>SpeakerLabels</code>
+                Alias for <code>SpeakerLabels</code>
               </td>
             </tr>
             <tr>
@@ -200,8 +200,9 @@ result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.Transc
                 <code>&quot;&quot;</code>
               </td>
               <td>
-                ISO 639-1 code (e.g. <code>&quot;en&quot;</code>) to skip detection; empty
-                auto-detects. <Link href="/cookbook#pin-language">When to pin</Link>
+                ISO 639-1 code (e.g. <code>&quot;en&quot;</code>) to skip detection;
+                empty detects the language automatically.{" "}
+                <Link href="/cookbook#pin-language">When to pin</Link>
               </td>
             </tr>
             <tr>
@@ -234,16 +235,15 @@ result, err = client.Transcribe(ctx, "https://example.com/audio.mp3", stt.Transc
 
       <h2>Live progress</h2>
       <p>
-        Unlike AssemblyAI and Deepgram — which expose no percentage for
-        pre-recorded audio — you get real-time progress for <strong>both</strong>{" "}
-        the file upload and the transcription, as a console bar, callbacks, or
-        both. They compose: the bars render <em>and</em> your callbacks fire for
-        every event.
+        The SDK reports progress for <strong>both</strong> the file upload and
+        the transcription, as a console bar, callbacks, or both. When you
+        enable both, the bars render <em>and</em> your callbacks fire for every
+        event.
       </p>
       <p>
-        Files under about 3 MiB go straight to the GPU and may report no transcription
-        progress before they complete, so expect the bar to jump from the end of the upload
-        to done.
+        Files under about 3 MiB may report no transcription progress before
+        they complete. Expect the bar to jump from the end of the upload to
+        done.
       </p>
       <CodeBlock
         language="go"
@@ -273,16 +273,15 @@ result, _ = client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
 }, onProgress)`}
       />
       <p>
-        Building a UI?{" "}
-        <Link href="/guides/live-progress">Live progress for web apps</Link>{" "}
-        shows how to fold both callbacks into a single 0–100 bar you can serve
-        to your frontend.
+        For a web UI, see{" "}
+        <Link href="/guides/live-progress">Live progress for web apps</Link>.
+        It combines both callbacks into a single 0–100 bar for your frontend.
       </p>
 
       <h2>Result shape</h2>
       <p>
-        With <code>OutputJSON</code> the result is parsed into a
-        transcript-first object:
+        With <code>OutputJSON</code>, the SDK parses the response into a
+        result object:
       </p>
       <div className="table-scroll">
         <table>
@@ -297,31 +296,31 @@ result, _ = client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
               <td>
                 <code>result.Text()</code>
               </td>
-              <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
+              <td>Full transcript text</td>
             </tr>
             <tr>
               <td>
                 <code>result.TranscriptText()</code>
               </td>
-              <td>Deepgram-style alias</td>
+              <td>Alias for <code>result.Text()</code></td>
             </tr>
             <tr>
               <td>
                 <code>result.Words</code>
               </td>
-              <td>Word + start / end / speaker</td>
+              <td>Words with start, end, and speaker</td>
             </tr>
             <tr>
               <td>
                 <code>result.Utterances</code>
               </td>
-              <td>AssemblyAI-style speaker turns</td>
+              <td>Speaker turns</td>
             </tr>
             <tr>
               <td>
                 <code>result.ToDeepgram()</code>
               </td>
-              <td>Deepgram-shaped map</td>
+              <td>Deepgram-shaped map, for migrations</td>
             </tr>
             <tr>
               <td>
@@ -333,7 +332,7 @@ result, _ = client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
               <td>
                 <code>result.Content</code> / <code>result.Save(path)</code>
               </td>
-              <td>Raw bytes / write to disk</td>
+              <td>Raw bytes / write the output to disk</td>
             </tr>
           </tbody>
         </table>
@@ -350,18 +349,24 @@ fmt.Println("saved to", out)`}
 
       <h2>Webhooks</h2>
       <p>
-        Set <code>CallbackURL</code> to be notified when a job finishes instead
-        of holding the call open. On completion or permanent failure the
-        platform POSTs a signed JSON body{" "}
+        Set <code>CallbackURL</code> to get notified when a job finishes
+        instead of holding the call open. When the job completes or fails
+        permanently, Speech Revolutions sends a signed JSON <code>POST</code>{" "}
+        to your URL. The body is{" "}
         <code>
           {`{job_id, status: "completed"|"failed", download_url?, step?, reason?}`}
-        </code>{" "}
-        to your URL, signed with HMAC-SHA256 over the raw body in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
-        <code>X-SR-Delivery</code> id). Verify it against the raw request bytes
-        with <code>hmac</code> + <code>crypto/subtle.ConstantTimeCompare</code>.
-        Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
-        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
+        </code>
+        . It is signed with HMAC-SHA256 over the raw body, in the{" "}
+        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. The request
+        also carries <code>X-SR-Event</code> (the status) and a unique{" "}
+        <code>X-SR-Delivery</code> ID. Verify the signature against the raw
+        request bytes with <code>crypto/hmac</code> and{" "}
+        <code>crypto/subtle.ConstantTimeCompare</code>. Copy your signing
+        secret from the console (
+        <strong>API Keys → Webhook signing secret</strong>) into{" "}
+        <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>. The{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload,
+        retries, and secret rotation.
       </p>
       <CodeBlock
         language="go"
@@ -376,8 +381,9 @@ fmt.Println("submitted", jobID) // the hook fires when it finishes`}
 
       <h2>Retrieve results later</h2>
       <p>
-        Fetch a job by id anytime — useful after a webhook, or when rebuilding
-        state after a restart. The download URL is regenerated on demand.
+        Fetch a job by ID at any time, for example after a webhook arrives or
+        after your service restarts. The download URL is generated on each
+        request, so you can fetch results long after the original upload.
       </p>
       <CodeBlock
         language="go"
@@ -409,7 +415,8 @@ if status.IsCompleted() {
 }`}
       />
 
-      <h2>Auth</h2>
+      <h2>Authentication</h2>
+      <p>The SDK reads your API key from the environment, or you can pass it directly:</p>
       <CodeBlock
         language="bash"
         code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
@@ -422,11 +429,11 @@ explicit, _ := stt.NewClient("stt_...")  // or pass it directly`}
 
       <Callout title="Under the hood" tone="info">
         <p>
-          The SDK uploads the file (in parts, retrying any part that fails) and
-          waits on the{" "}
-          <Link href="/api-reference/jobs">SSE job stream</Link>, converting the
-          server&apos;s <code>completed</code>/<code>total</code> counts into a{" "}
-          <code>Percent()</code> for you.
+          The SDK uploads the file in parts, retrying any part that fails. It
+          then listens on the{" "}
+          <Link href="/api-reference/jobs">SSE job stream</Link> and converts
+          the <code>completed</code> and <code>total</code> counts into{" "}
+          <code>Percent()</code>.
         </p>
       </Callout>
     </>
