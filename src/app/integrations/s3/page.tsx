@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Using Speech Revolutions with Amazon S3",
   description:
-    "Already storing audio in S3? You don't need to download it first. Presign a short-lived GET URL for the object, hand that URL to Speech Revolutions, and write the JSON…",
+    "Transcribe audio stored in Amazon S3 without downloading it: presign a short-lived GET URL, pass it to Speech Revolutions, and write the JSON transcript back to a bucket.",
 };
 
 export default function S3IntegrationPage() {
@@ -15,29 +15,27 @@ export default function S3IntegrationPage() {
     <>
       <h1>Using Speech Revolutions with Amazon S3</h1>
       <p>
-        Already storing audio in S3? You don&apos;t need to download it first.
-        Presign a short-lived GET URL for the object, hand that URL to Speech Revolutions,
-        and write the JSON transcript straight back to a bucket. Everything runs
-        server-side, so your AWS credentials and Speech Revolutions API key never leave your
-        backend.
+        To transcribe audio stored in S3, you don&apos;t need to download it first.
+        Presign a short-lived GET URL for the object, pass that URL to Speech Revolutions,
+        and write the JSON transcript back to a bucket. Everything runs server-side, so
+        your AWS credentials and Speech Revolutions API key stay in your backend.
       </p>
 
-      <Callout title="Why presign instead of making the object public" tone="tip">
+      <Callout title="Use a presigned URL, not a public object" tone="tip">
         <p>
-          A presigned GET URL grants Speech Revolutions time-limited read access to one
-          object without opening the bucket to the world. Give it a lifetime
-          comfortably longer than your largest file&apos;s transcription time,
-          then let it expire.
+          A presigned GET URL gives Speech Revolutions time-limited read access to one
+          object without making the bucket public. Set an expiry longer than the
+          transcription time of your largest file.
         </p>
       </Callout>
 
       <h2>Transcribe an object already in S3</h2>
       <p>
-        Presign a GET for the source object and pass the URL to Speech Revolutions — the SDK
-        auto-detects <code>http(s)</code> URLs, so <code>transcribe()</code>{" "}
-        streams the audio directly from S3. Then serialize{" "}
-        <code>result.to_dict()</code> / <code>result.toDict()</code> and{" "}
-        <code>PutObject</code> it back to your output bucket.
+        Presign a GET URL for the source object and pass it to Speech Revolutions. The SDK
+        detects <code>http(s)</code> URLs, so <code>transcribe()</code> fetches the audio
+        directly from S3. Then serialize <code>result.to_dict()</code> (or{" "}
+        <code>result.toDict()</code>) and write it to your output bucket with{" "}
+        <code>PutObject</code>.
       </p>
       <CodeTabs
         tabs={[
@@ -243,12 +241,11 @@ Console.WriteLine(await TranscribeS3ObjectAsync("meeting.mp3"));`,
         ]}
       />
 
-      <h2>Long files: submit() + a webhook</h2>
+      <h2>Long files: submit() and a webhook</h2>
       <p>
-        For large recordings, don&apos;t block on <code>transcribe()</code>.
-        Presign the GET, call <code>submit()</code> with a{" "}
-        <code>callback_url</code>, and store the result to S3 from your webhook
-        handler once the job completes.
+        For large recordings, don&apos;t block on <code>transcribe()</code>. Presign the
+        GET URL, call <code>submit()</code> with a <code>callback_url</code>, and write the
+        result to S3 from your webhook handler when the job completes.
       </p>
       <CodeTabs
         tabs={[
@@ -342,23 +339,22 @@ var jobId = await client.SubmitAsync(audioUrl, new TranscribeOptions
       <Callout title="Verify the webhook signature" tone="warn">
         <p>
           The completion POST is signed with HMAC-SHA256 in the{" "}
-          <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header — always verify
-          it against the raw request bytes before trusting{" "}
-          <code>download_url</code>, using your organization&apos;s signing secret
-          from the console (<strong>API Keys → Webhook signing secret</strong>). The{" "}
+          <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Always verify it against
+          the raw request bytes before you use <code>download_url</code>, using your
+          organization&apos;s signing secret from the console (
+          <strong>API Keys → Webhook signing secret</strong>). The{" "}
           <Link href="/guides/webhooks">webhooks guide</Link> shows how in every
           language.
         </p>
       </Callout>
 
-      <Callout title="Under the hood" tone="info">
+      <Callout title="Related API endpoints" tone="info">
         <p>
-          Passing a URL lets Speech Revolutions fetch the audio directly; the SDK then waits
-          on the{" "}
-          <Link href="/api-reference/jobs">SSE job stream</Link> and parses the
-          result. See the <Link href="/sdks/python">Python</Link> and{" "}
-          <Link href="/sdks/javascript">JavaScript</Link> SDK pages for the full
-          option and result surface.
+          When you pass a URL, Speech Revolutions fetches the audio directly. The SDK then
+          waits on the <Link href="/api-reference/jobs">SSE job stream</Link> and parses
+          the result. See the <Link href="/sdks/python">Python</Link> and{" "}
+          <Link href="/sdks/javascript">JavaScript</Link> SDK pages for all options and
+          result fields.
         </p>
       </Callout>
     </>
