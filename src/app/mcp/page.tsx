@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "MCP server",
   description:
-    "Give Claude, ChatGPT or any MCP client the ability to transcribe audio directly, with speaker labels, using your Speech Revolutions key.",
+    "Let Claude, ChatGPT, or any MCP client transcribe audio with speaker labels, using your Speech Revolutions API key.",
 };
 
 export default function McpPage() {
@@ -14,12 +14,13 @@ export default function McpPage() {
     <>
       <h1>MCP server</h1>
       <p>
-        The Model Context Protocol lets an assistant call tools directly. Our MCP server turns
-        this API into five of them, so someone can say &ldquo;transcribe this recording and tell
-        me who said what&rdquo; and have it happen — no code, no copying job ids around.
+        The Model Context Protocol (MCP) lets an assistant call tools directly. The Speech
+        Revolutions MCP server exposes this API as five tools, so you can ask an assistant to
+        &ldquo;transcribe this recording and tell me who said what&rdquo; without writing code
+        or copying job IDs.
       </p>
       <p>
-        It ships inside the JavaScript SDK, so there is nothing separate to install.
+        The server ships inside the JavaScript SDK. There is nothing separate to install.
       </p>
 
       <h2>Setup</h2>
@@ -44,15 +45,15 @@ export default function McpPage() {
       />
 
       <p>
-        Restart the client. Create a key at{" "}
-        <a href={SITE.consoleUrl}>the console</a> if you do not have one — new accounts start
-        with $10 of credit, which is about 55 hours of audio.
+        Restart the client. If you don&apos;t have an API key, create one in{" "}
+        <a href={SITE.consoleUrl}>the console</a>. New accounts start with $10 of credit,
+        about 55 hours of audio.
       </p>
 
       <Callout tone="info">
-        The key is read from the environment and never leaves your machine: the server runs
-        locally as a subprocess of your MCP client, and talks to our API the same way the SDK
-        does.
+        The server runs locally as a subprocess of your MCP client and reads the API key from
+        its environment. The key is sent only to the Speech Revolutions API, the same way the
+        SDK sends it.
       </Callout>
 
       <h2>Tools</h2>
@@ -70,7 +71,7 @@ export default function McpPage() {
             </td>
             <td>
               Transcribe a local file or public URL and return the text. Waits for the result,
-              so it suits recordings up to about half an hour.
+              so use it for recordings up to about 30 minutes.
             </td>
           </tr>
           <tr>
@@ -78,7 +79,7 @@ export default function McpPage() {
               <code>submit_transcription_job</code>
             </td>
             <td>
-              Start a long recording and return a job id immediately. Use for anything longer,
+              Submit a recording and return a job ID immediately. Use it for longer recordings
               and for batches.
             </td>
           </tr>
@@ -86,29 +87,29 @@ export default function McpPage() {
             <td>
               <code>check_job</code>
             </td>
-            <td>Whether a job is processing, complete or failed.</td>
+            <td>Report whether a job is processing, complete, or failed.</td>
           </tr>
           <tr>
             <td>
               <code>get_transcript</code>
             </td>
             <td>
-              Read a completed transcript as text, JSON, SRT or VTT.
+              Return a completed transcript as text, JSON, SRT, or VTT.
             </td>
           </tr>
           <tr>
             <td>
               <code>list_jobs</code>
             </td>
-            <td>Recent jobs on the account, newest first.</td>
+            <td>List recent jobs on the account, newest first.</td>
           </tr>
         </tbody>
       </table>
 
-      <h2>What comes back</h2>
+      <h2>Output</h2>
       <p>
         Transcripts are returned as readable text with speaker labels and timestamps, not as
-        the raw JSON payload:
+        raw JSON:
       </p>
 
       <CodeBlock
@@ -121,27 +122,25 @@ can just communicate competently.
       />
 
       <p>
-        That is deliberate. The caller is a language model, and word-level JSON for a long
-        recording spends the context it needs to answer the question. Ask{" "}
-        <code>get_transcript</code> for <code>format: &quot;json&quot;</code> when you actually
-        want per-word timings and confidences.
+        This keeps long recordings within the assistant&apos;s context. To get per-word
+        timings and confidences, call <code>get_transcript</code> with{" "}
+        <code>format: &quot;json&quot;</code>.
       </p>
       <p>
-        Long transcripts are truncated with an explicit notice naming the job id and how much
-        was cut, so nothing is silently summarised as if it were complete. Raise{" "}
-        <code>max_characters</code> to get more.
+        Long transcripts are truncated with a notice that names the job ID and how much was
+        cut. Raise <code>max_characters</code> to get more.
       </p>
 
       <h2>Cost</h2>
       <p>
-        The same as any other call: $0.003 per minute of audio, with diarization and timestamps
-        included. Tool calls that only check status or list jobs are free.
+        The same as any other API call: $0.003 per minute of audio, with diarization and
+        timestamps included. Tool calls that only check status or list jobs are free.
       </p>
 
       <h2>Troubleshooting</h2>
       <p>
-        If the server does not appear, run it by hand — it prints its errors to stderr, which
-        some clients hide:
+        If the server doesn&apos;t appear in your client, run it manually. It prints errors to
+        stderr, which some clients hide:
       </p>
 
       <CodeBlock
@@ -150,8 +149,9 @@ can just communicate competently.
       />
 
       <p>
-        It should print a readiness line and then wait for input. A message about the key being
-        unset means the <code>env</code> block above did not reach the process.
+        It prints a readiness line and then waits for input. If it reports that the key is
+        unset, the <code>env</code> block in your configuration isn&apos;t reaching the
+        process.
       </p>
     </>
   );
