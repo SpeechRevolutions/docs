@@ -35,7 +35,7 @@ export default function FeaturesPage() {
               <td>
                 <code>true</code>
               </td>
-              <td>Start/end time per word (seconds)</td>
+              <td>Start and end time of each word, in seconds</td>
             </tr>
             <tr>
               <td>
@@ -44,7 +44,7 @@ export default function FeaturesPage() {
               <td>
                 <code>true</code>
               </td>
-              <td>Diarization / speaker turns</td>
+              <td>Speaker diarization (who spoke when)</td>
             </tr>
             <tr>
               <td>
@@ -69,7 +69,7 @@ export default function FeaturesPage() {
                 <code>custom_vocabulary</code>
               </td>
               <td>—</td>
-              <td>List of names / jargon to recover</td>
+              <td>Names and terms to recognize</td>
             </tr>
             <tr>
               <td>
@@ -121,8 +121,8 @@ export default function FeaturesPage() {
                 <code>json</code>
               </td>
               <td>
-                Structured <code>words</code> (+ optional diarization). SDKs parse
-                this into <code>text</code>, <code>words</code>,{" "}
+                Structured <code>words</code>, plus diarization when enabled. The
+                SDKs parse this into <code>text</code>, <code>words</code>, and{" "}
                 <code>utterances</code>.
               </td>
             </tr>
@@ -130,7 +130,7 @@ export default function FeaturesPage() {
               <td>
                 <code>txt</code>
               </td>
-              <td>Plain transcript (speaker blocks when labels on)</td>
+              <td>Plain transcript, in speaker blocks when <code>speaker_labels</code> is on</td>
             </tr>
             <tr>
               <td>
@@ -149,7 +149,7 @@ export default function FeaturesPage() {
       </div>
 
       <h2>JSON shape (native)</h2>
-      <p>Default JSON looks like:</p>
+      <p>The default JSON output looks like this:</p>
       <pre className="mt-5 overflow-x-auto rounded-lg border border-hairline/10 bg-code-bg p-4 text-[13px] leading-6 text-zinc-200">
         <code>{`{
   "words": [
@@ -167,22 +167,23 @@ export default function FeaturesPage() {
 
       <h2>Live progress</h2>
       <p>
-        Every SDK reports real-time progress for <strong>both</strong> the file
-        upload and the transcription — as console bars (<code>progress</code>{" "}
-        toggle) or as <code>onProgress</code> / <code>onUploadProgress</code>{" "}
-        callbacks that carry <code>completed</code>, <code>total</code>,{" "}
-        <code>step</code>, and a computed <code>percent</code>. It is derived
-        from the{" "}
+        Every SDK reports progress for <strong>both</strong> the file upload
+        and the transcription, either as console bars (the <code>progress</code>{" "}
+        option) or through <code>onProgress</code> / <code>onUploadProgress</code>{" "}
+        callbacks. Each callback receives <code>completed</code>,{" "}
+        <code>total</code>, <code>step</code>, and a computed{" "}
+        <code>percent</code>. The values come from the{" "}
         <Link href="/api-reference/jobs">job SSE stream</Link>&apos;s{" "}
-        <code>completed</code>/<code>total</code> counts, so the bar moves against real
-        work done rather than an estimate.
+        <code>completed</code>/<code>total</code> counts, so they track
+        completed work, not an estimate.
       </p>
 
       <Callout title="SDK adapters" tone="tip">
         <p>
-          Python/JS SDKs expose AssemblyAI-style <code>result.text</code> /{" "}
-          <code>result.utterances</code>, plus{" "}
-          <code>result.to_deepgram()</code> for Deepgram-shaped migrations.
+          The Python and JavaScript SDKs expose AssemblyAI-style{" "}
+          <code>result.text</code> and <code>result.utterances</code>, plus{" "}
+          <code>result.to_deepgram()</code> for code that expects Deepgram&apos;s
+          response shape.
         </p>
       </Callout>
     </>

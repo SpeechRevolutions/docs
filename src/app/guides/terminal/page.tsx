@@ -16,18 +16,18 @@ export default function TerminalGuidePage() {
       <h1>Terminal & cURL</h1>
       <p>
         For shell scripts and one-off jobs, use{" "}
-        <code>POST /api/v1/transcribe</code>. You stream the raw audio bytes as
-        the request body (options go in the query string); the server streams the
-        upload straight to storage, then holds the connection open and streams
-        job progress back as SSE until the transcript is ready.
+        <code>POST /api/v1/transcribe</code>. Send the raw audio bytes as the
+        request body and the options in the query string. The server keeps the
+        connection open and streams job progress back as SSE until the
+        transcript is ready.
       </p>
 
       <EndpointBadge method="POST" path="/api/v1/transcribe" />
 
       <Callout title="When to use this" tone="tip">
         <p>
-          Use <code>/transcribe</code> from terminals and simple scripts. Use
-          the <Link href="/sdks/python">SDK</Link> inside applications — it handles
+          Use <code>/transcribe</code> from terminals and simple scripts. Inside
+          applications, use an <Link href="/sdks/python">SDK</Link>: it handles
           large uploads, retries, and reconnects for you.
         </p>
       </Callout>
@@ -52,8 +52,9 @@ curl -N -X POST \\
 
       <h2>Query parameters</h2>
       <p>
-        Options are passed in the query string (the request body is the raw
-        audio). Same options as <Link href="/api-reference/upload">upload</Link>:
+        Pass options in the query string; the request body is the raw audio.
+        The options are the same as for{" "}
+        <Link href="/api-reference/upload">upload</Link>:
       </p>
       <div className="table-scroll">
         <table>
@@ -86,7 +87,7 @@ curl -N -X POST \\
               <td>
                 <code>true</code>
               </td>
-              <td>Per-word timing</td>
+              <td>Start and end time of each word</td>
             </tr>
             <tr>
               <td>
@@ -96,7 +97,7 @@ curl -N -X POST \\
               <td>
                 <code>true</code>
               </td>
-              <td>Diarization</td>
+              <td>Speaker diarization</td>
             </tr>
             <tr>
               <td>
@@ -106,7 +107,7 @@ curl -N -X POST \\
               <td>
                 <code>true</code>
               </td>
-              <td>Punctuation / cleanup</td>
+              <td>Restore punctuation and capitalization</td>
             </tr>
             <tr>
               <td>
@@ -146,8 +147,8 @@ curl -N -X POST \\
       <h2>Progress stream</h2>
       <p>
         While the job runs, the response body streams events. Progress is
-        reported as <strong>steps completed out of a total</strong>, not a
-        percentage &mdash; divide to get one:
+        reported as <strong>steps completed out of a total</strong>, not as a
+        percentage. Divide the two to get one:
       </p>
       <CodeBlock
         language="text"
@@ -174,18 +175,17 @@ event: transcript
 data: <the transcript, one data: line per line of output>`}
       />
       <p>
-        <code>total</code> is the number of pipeline steps for your file, so it
-        depends on how many chunks the audio is split into &mdash; don&apos;t
+        <code>total</code> is the number of processing steps for your file. It
+        depends on how many chunks the audio is split into, so don&apos;t
         hard-code it. Chunk steps are named <code>chunk:N</code> and can arrive
-        out of order (they finish in whatever order the workers do). A short
-        file that finishes in one pass may emit no <code>progress</code> events
-        at all, going straight from <code>accepted</code> to{" "}
-        <code>completed</code>; treat progress as advisory and drive completion
-        off the <code>completed</code> event.
+        out of order because chunks are processed in parallel. A short file
+        may emit no <code>progress</code> events at all and go straight from{" "}
+        <code>accepted</code> to <code>completed</code>. Treat progress as
+        advisory and detect completion with the <code>completed</code> event.
       </p>
       <p>
-        There is no separate upload step: the file upload and the wait for the transcript
-        happen on one connection.
+        There is no separate upload step: the upload and the wait for the
+        transcript happen on one connection.
       </p>
 
       <p>
