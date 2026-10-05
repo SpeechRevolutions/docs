@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Using Speech Revolutions with Next.js",
   description:
-    "Call Speech Revolutions from the server side of your Next.js app — a Route Handler or a Server Action — so your API key never ships to the browser. This guide wires up a…",
+    "Call Speech Revolutions from the server side of your Next.js app (a Route Handler or a Server Action) so your API key never reaches the browser. Covers file upload, live progress, and a webhook Route Handler.",
 };
 
 export default function NextjsIntegrationPage() {
@@ -15,18 +15,18 @@ export default function NextjsIntegrationPage() {
     <>
       <h1>Using Speech Revolutions with Next.js</h1>
       <p>
-        Call Speech Revolutions from the server side of your Next.js app — a Route Handler
-        or a Server Action — so your API key never ships to the browser. This
-        guide wires up a file upload, live progress you can poll from the
-        client, and a webhook Route Handler for completion callbacks.
+        Call Speech Revolutions from the server side of your Next.js app, in a Route
+        Handler or a Server Action, so your API key never reaches the browser. This guide
+        covers a file upload, live progress that the client polls, and a webhook Route
+        Handler for completion callbacks.
       </p>
 
       <Callout title="Keep the key on the server" tone="warn">
         <p>
           The <code>speechrevolutions</code> client reads{" "}
           <code>SPEECHREVOLUTIONS_API_KEY</code>.
-          Only reference it from server code — Route Handlers, Server Actions,
-          or <code>route.ts</code> files. Never expose it through a{" "}
+          Reference it only from server code: Route Handlers, Server Actions, or{" "}
+          <code>route.ts</code> files. Never expose it through a{" "}
           <code>NEXT_PUBLIC_*</code> variable or import the client into a{" "}
           <code>&quot;use client&quot;</code> component.
         </p>
@@ -59,10 +59,9 @@ export const stt = new SpeechRevolutions();`}
 
       <h2>Upload a user file from a Route Handler</h2>
       <p>
-        Accept the browser&apos;s <code>multipart/form-data</code> in a Route
-        Handler, hand the bytes straight to <code>transcribe()</code>, and
-        return the transcript. The file never touches the client&apos;s view of
-        your key.
+        Accept the browser&apos;s <code>multipart/form-data</code> in a Route Handler,
+        pass the bytes to <code>transcribe()</code>, and return the transcript. The API
+        key stays on the server.
       </p>
       <CodeBlock
         language="ts"
@@ -89,8 +88,8 @@ export async function POST(req: NextRequest) {
 
       <h2>Or a Server Action</h2>
       <p>
-        Prefer a form that posts directly to a Server Action? Same rule — the
-        function body runs only on the server, so the key never reaches the browser.
+        A form can also post directly to a Server Action. The function body runs only on
+        the server, so the key never reaches the browser.
       </p>
       <CodeBlock
         language="ts"
@@ -108,18 +107,17 @@ export async function transcribeAction(formData: FormData) {
 
       <h2>Show live progress to the client</h2>
       <p>
-        The synchronous <code>transcribe()</code> above blocks the whole
-        request, so the browser only sees the final result. To drive a real
-        progress bar, start the work in the background, store the latest{" "}
-        <code>onProgress</code> / <code>onUploadProgress</code> percentage per
-        job, and expose a small progress endpoint the client polls.{" "}
-        <Link href="/guides/live-progress">Live progress for web apps</Link>{" "}
-        covers the weighting logic in depth; here is the Next.js wiring.
+        <code>transcribe()</code> above blocks the whole request, so the browser sees
+        only the final result. To show a progress bar, start the work in the background,
+        store the latest <code>onProgress</code> and <code>onUploadProgress</code>{" "}
+        percentage per job, and expose a progress endpoint that the client polls.{" "}
+        <Link href="/guides/live-progress">Live progress for web apps</Link> explains the
+        weighting; this section shows the Next.js code.
       </p>
       <CodeTabs
         tabs={[
           {
-            label: "Start + progress store",
+            label: "Start and progress store",
             language: "ts",
             filename: "app/api/jobs/route.ts",
             code: `import { NextRequest, NextResponse } from "next/server";
@@ -225,24 +223,26 @@ export function Upload() {
         ]}
       />
 
-      <Callout title="Why an in-memory map is a starting point" tone="info">
+      <Callout title="Multiple instances need a shared store" tone="info">
         <p>
-          A <code>Map</code> only works when one process handles both the start
-          and the poll requests. On serverless or multi-instance deployments,
-          back the store with Redis, your database, or a durable KV so any
-          instance can answer the poll.
+          A <code>Map</code> works only when one process handles both the start and the
+          poll requests. On serverless or multi-instance deployments, use Redis, your
+          database, or a durable KV store so any instance can answer the poll.
         </p>
       </Callout>
 
       <h2>Webhook Route Handler</h2>
       <p>
-        For long jobs, skip polling entirely: pass a <code>callbackUrl</code>{" "}
-        when you submit and let Speech Revolutions POST you when the job finishes. The
-        platform signs the raw body with HMAC-SHA256 in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Read the raw
-        bytes — not a re-serialized object — and compare in constant time.
-        Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
-        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
+        For long jobs, skip polling: pass a <code>callbackUrl</code> when you submit, and
+        Speech Revolutions POSTs to it when the job finishes. The raw body is signed with
+        HMAC-SHA256 and the signature is sent in the{" "}
+        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Verify against the raw
+        bytes, not a re-serialized object, and compare in constant time. Copy your
+        signing secret from the console (
+        <strong>API Keys → Webhook signing secret</strong>) into{" "}
+        <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>. The{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries,
+        and secret rotation.
       </p>
       <CodeBlock
         language="ts"
@@ -278,14 +278,14 @@ export async function POST(req: NextRequest) {
 }`}
       />
 
-      <Callout title="Under the hood" tone="info">
+      <Callout title="Related API endpoints" tone="info">
         <p>
           <code>transcribe()</code> runs the full{" "}
           <Link href="/api-reference/upload">upload</Link> flow and waits on the{" "}
           <Link href="/api-reference/jobs">SSE job stream</Link>, computing{" "}
           <code>percent</code> for the callbacks. See the{" "}
-          <Link href="/sdks/javascript">JavaScript SDK</Link> for the full
-          option and result surface.
+          <Link href="/sdks/javascript">JavaScript SDK</Link> for all options and result
+          fields.
         </p>
       </Callout>
     </>
