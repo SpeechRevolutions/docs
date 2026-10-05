@@ -15,20 +15,20 @@ export default function CookbookPage() {
       <h1>Cookbook</h1>
       <p>
         Short, copy-pasteable recipes for common Speech Revolutions tasks. Each one is a
-        complete snippet in Python, JavaScript, Go and C#. Every client reads your key
+        complete snippet in Python, JavaScript, Go, and C#. Every client reads your API key
         from <code>SPEECHREVOLUTIONS_API_KEY</code>,
         and its host from <code>SPEECHREVOLUTIONS_BASE_URL</code> if you need to
-        point at something other than production — see any SDK page for install
-        and auth:{" "}
+        point at something other than production. For installation and
+        authentication, see the SDK pages:{" "}
         <Link href="/sdks/python">Python</Link>,{" "}
         <Link href="/sdks/javascript">JavaScript</Link>,{" "}
         <Link href="/sdks/go">Go</Link>, <Link href="/sdks/csharp">C#</Link>.
       </p>
       <p>
-        Want them as files instead? The{" "}
+        The{" "}
         <a href="https://github.com/SpeechRevolutions/cookbook">cookbook repo</a>{" "}
-        has each recipe as a runnable script with its own command-line
-        arguments, and every one is tested on each change.
+        has each recipe as a tested, runnable script with its own command-line
+        arguments.
       </p>
       <ul>
         <li>
@@ -62,9 +62,9 @@ export default function CookbookPage() {
 
       <h2 id="file">Transcribe a local file</h2>
       <p>
-        The one-liner. <code>transcribe()</code> uploads the file, waits for the
-        result, and parses it into a transcript object. Point it at a path, raw
-        bytes, or a file object.
+        <code>transcribe()</code> uploads the file, waits for the result, and
+        parses it into a transcript object. Pass a path, raw bytes, or a file
+        object.
       </p>
       <CodeTabs
         tabs={[
@@ -135,9 +135,9 @@ Console.WriteLine(result.Text);`,
 
       <h2 id="url">Transcribe from a URL</h2>
       <p>
-        <code>transcribe()</code> auto-detects an <code>http(s)</code> URL; the{" "}
-        <code>transcribe_url()</code> / <code>transcribeUrl()</code> aliases make
-        the intent explicit.
+        <code>transcribe()</code> detects an <code>http(s)</code> URL
+        automatically. The <code>transcribe_url()</code> /{" "}
+        <code>transcribeUrl()</code> aliases make the intent explicit.
       </p>
       <CodeTabs
         tabs={[
@@ -182,13 +182,13 @@ result = await client.TranscribeUrlAsync("https://example.com/audio.mp3");`,
 
       <h2 id="submit-poll">Submit and poll</h2>
       <p>
-        When you don&apos;t want to hold a connection open for the whole job,{" "}
-        <code>submit()</code> uploads the audio, enqueues it, and returns a{" "}
+        To avoid holding a connection open for the whole job, use{" "}
+        <code>submit()</code>. It uploads the audio, queues the job, and returns a{" "}
         <code>job_id</code> immediately. Fetch the result later with{" "}
         <code>get_job_status()</code> and <code>get_transcript()</code>. A job&apos;s
         status is one of <code>processing</code>, <code>completed</code>, or{" "}
-        <code>failed</code>; the download URL is regenerated on demand, so results
-        are fetchable long after the upload.
+        <code>failed</code>. The download URL is regenerated on demand, so you can
+        fetch results long after the upload.
       </p>
       <CodeTabs
         tabs={[
@@ -348,10 +348,9 @@ static async Task<TranscriptResult> PollUntilDoneAsync(
 
       <h2 id="batch">Batch many files</h2>
       <p>
-        The scalable pattern: <strong>submit every file first</strong>, then
-        gather the results. Because <code>submit()</code> holds no long-lived
-        connection per job, you can enqueue a whole directory up front and poll
-        for completion afterwards — nothing stays open while the server works.
+        <strong>Submit every file first</strong>, then gather the results.{" "}
+        <code>submit()</code> holds no connection open per job, so you can queue
+        a whole directory up front and poll for completion afterwards.
       </p>
       <CodeTabs
         tabs={[
@@ -555,22 +554,21 @@ foreach (var (jobId, result) in results)
           },
         ]}
       />
-      <Callout title="Why submit + poll for batches" tone="tip">
+      <Callout title="Use submit for batches" tone="tip">
         <p>
           <code>transcribe()</code> keeps one connection open per file until it
-          finishes — fine for a single clip, wasteful for hundreds.{" "}
-          <code>submit()</code> decouples enqueue from retrieval, so throughput is
-          bounded by the platform, not by how many sockets you can hold open. For
-          fully hands-off delivery, combine it with a{" "}
-          <a href="#webhooks">webhook</a> and skip polling entirely.
+          finishes. Use it for single files.{" "}
+          <code>submit()</code> separates queuing from retrieval, so throughput
+          doesn&apos;t depend on how many connections you can hold open. To skip
+          polling, combine it with a <a href="#webhooks">webhook</a>.
         </p>
       </Callout>
 
       <h2 id="webhooks">Get notified with a webhook</h2>
       <p>
-        Pass <code>callback_url</code> and the platform POSTs a signed JSON
-        notification when the job finishes — no polling, no open connection. This
-        is the right pattern for server and background workloads.
+        Pass <code>callback_url</code> to receive a signed JSON POST when the job
+        finishes, with no polling and no open connection. Use this for server and
+        background workloads.
       </p>
       <p>
         The body is{" "}
@@ -579,8 +577,8 @@ foreach (var (jobId, result) in results)
         </code>
         , signed with HMAC-SHA256 over the <em>raw</em> body in the{" "}
         <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
-        <code>X-SR-Delivery</code> id). Always verify against the raw bytes you
-        received — not a re-serialized dict — with a constant-time comparison.
+        <code>X-SR-Delivery</code> ID). Always verify against the raw bytes you
+        received, not a re-serialized object, with a constant-time comparison.
         Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
         <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
       </p>
@@ -806,17 +804,15 @@ app.Run();`,
 
       <h2 id="retries">Retries and timeouts</h2>
       <p>
-        Every client retries transient failures automatically — <code>429</code>,{" "}
-        <code>5xx</code>, and network errors — honoring the server&apos;s{" "}
-        <code>Retry-After</code> header. Tune the budget and backoff on the
-        client. Requests that create a job are the exception: they are never
-        retried after the bytes leave you, because a retry there would bill you
-        for a second transcription.
+        Every client retries transient failures automatically (<code>429</code>,{" "}
+        <code>5xx</code>, and network errors) and honors the server&apos;s{" "}
+        <code>Retry-After</code> header. Configure the retry budget and backoff
+        on the client. Requests that create a job are never retried once the
+        audio has been sent, because a retry would bill a second transcription.
       </p>
       <p>
-        Errors are typed and carry the HTTP status and the server request id, so
-        a failure is enough for support to find the job in our logs without you
-        reproducing it.
+        Errors are typed and include the HTTP status and the server request ID.
+        Include the request ID when you contact support.
       </p>
       <CodeTabs
         tabs={[
@@ -912,9 +908,8 @@ catch (RateLimitException e)
       <p>
         <code>speaker_labels</code> (on by default) labels who spoke each segment.{" "}
         <code>diarize</code> is a Deepgram-compatible alias for the same flag. The
-        result exposes <code>.utterances</code> — contiguous speaker turns — and
-        every word in <code>.words</code> carries a <code>speaker</code>. Full
-        detail in the{" "}
+        result has <code>.utterances</code> (contiguous speaker turns), and
+        every word in <code>.words</code> has a <code>speaker</code>. See the{" "}
         <Link href="/guides/diarization">speaker diarization guide</Link>.
       </p>
       <CodeTabs
@@ -964,9 +959,9 @@ foreach (var u in result.Utterances)
 
       <h2 id="multilingual">Multilingual audio</h2>
       <p>
-        By default there is no language flag to set. Speech Revolutions detects the spoken
-        language and transcribes it, including audio that switches languages mid-file —
-        each word carries its own <code>language</code>. Just call <code>transcribe()</code>{" "}
+        You don&apos;t need to set a language. The spoken language is detected
+        automatically, including in audio that switches languages mid-file, and
+        each word has its own <code>language</code>. Call <code>transcribe()</code>{" "}
         as usual. For domain-specific names and jargon, pass <code>custom_vocabulary</code>{" "}
         to bias the model toward those terms.
       </p>
@@ -1014,13 +1009,13 @@ Console.WriteLine(result.Text);`,
         ]}
       />
       <p>
-        For per-language accuracy across our benchmark suite, see the{" "}
+        For per-language accuracy, see the{" "}
         <Link href="/benchmarks">benchmarks page</Link>.
       </p>
 
       <h3 id="pin-language">Pin the language</h3>
       <p>
-        When you already know what language the recording is in, pass it as{" "}
+        If you know the recording&apos;s language, pass it as{" "}
         <code>language</code>: an ISO 639-1 code such as <code>&quot;en&quot;</code>,{" "}
         <code>&quot;ru&quot;</code> or <code>&quot;de&quot;</code>. Detection is skipped
         and the whole file is transcribed in that language. Leave it out (or pass{" "}
@@ -1065,7 +1060,7 @@ Console.WriteLine(result.Text);`,
       <ul>
         <li>
           <strong>Pin</strong> when every file in the workload is in one language you know
-          in advance — for example, strongly accented speech that automatic detection could
+          in advance, for example strongly accented speech that automatic detection could
           mistake for another language.
         </li>
         <li>
@@ -1074,7 +1069,7 @@ Console.WriteLine(result.Text);`,
           every word is transcribed in the pinned language.
         </li>
       </ul>
-      <Callout title="A wrong code translates rather than fails" tone="warn">
+      <Callout title="A wrong language code translates instead of failing" tone="warn">
         <p>
           Pinning the wrong language does not produce an error. The model translates the
           speech into the pinned language: Russian audio pinned to <code>&quot;en&quot;</code>{" "}
@@ -1190,10 +1185,10 @@ Console.WriteLine(result.Text);`,
       <h2 id="subtitles">Subtitles (SRT / VTT)</h2>
       <p>
         Set <code>output_type</code> to <code>srt</code> or <code>vtt</code> and
-        the server returns ready-to-use subtitle bytes — no client-side
-        formatting. For subtitles, <code>.text</code> holds the decoded file and{" "}
-        <code>.save()</code> writes it (inferring the extension from the output
-        type). See{" "}
+        the server returns a finished subtitle file, with no client-side
+        formatting needed. For subtitles, <code>.text</code> holds the decoded file and{" "}
+        <code>.save()</code> writes it, inferring the extension from the output
+        type. See{" "}
         <Link href="/guides/output-formats">output formats &amp; subtitles</Link>{" "}
         for all six formats and when to use each.
       </p>
