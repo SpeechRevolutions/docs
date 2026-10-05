@@ -17,20 +17,19 @@ export default function TimestampsGuidePage() {
       <p>
         Speech Revolutions returns a start and end time for every word, in seconds from the
         beginning of the audio. Word timestamps are on by default
-        (<code>word_timestamps=true</code>); leave them on and read them off the
-        result. They power everything downstream — <a href="#subtitles">subtitle
-        cues</a>, <Link href="/guides/diarization">speaker turns</Link>, clip
-        extraction, and karaoke-style highlighting.
+        (<code>word_timestamps=true</code>). Use them for{" "}
+        <a href="#subtitles">subtitle cues</a>,{" "}
+        <Link href="/guides/diarization">speaker turns</Link>, clip extraction,
+        and karaoke-style highlighting.
       </p>
 
-      <h2 id="words">Read them off .words</h2>
+      <h2 id="words">Read timestamps from .words</h2>
       <p>
-        With the default <code>output_type="json"</code> the SDK parses the
+        With the default <code>output_type="json"</code>, the SDK parses the
         response into a transcript object. Each entry in <code>result.words</code>{" "}
-        carries the word text plus its <code>start</code> and <code>end</code>{" "}
-        (floats, in seconds), and — when{" "}
-        <Link href="/guides/diarization">speaker labels</Link> are on — a{" "}
-        <code>speaker</code>.
+        has the word text, its <code>start</code> and <code>end</code>{" "}
+        (floats, in seconds), and a <code>speaker</code> when{" "}
+        <Link href="/guides/diarization">speaker labels</Link> are on.
       </p>
       <CodeTabs
         tabs={[
@@ -125,7 +124,7 @@ foreach (var w in result.Words.Take(5))
               <td>
                 <code>float</code>
               </td>
-              <td>Seconds to the word offset.</td>
+              <td>Seconds from the start of the audio to the word offset.</td>
             </tr>
             <tr>
               <td>
@@ -155,7 +154,7 @@ foreach (var w in result.Words.Take(5))
                 <code>string | null</code>
               </td>
               <td>
-                The detected language for this word — see{" "}
+                The detected language of this word. See{" "}
                 <Link href="/migrate/deepgram">language detection</Link> for
                 the transcript-level <code>result.languages</code> segments.
               </td>
@@ -166,11 +165,10 @@ foreach (var w in result.Words.Take(5))
 
       <h2 id="json">The JSON shape</h2>
       <p>
-        Under the hood the <code>json</code> output is a document with a{" "}
-        <code>words</code> array. The SDK parses this into <code>result.words</code>{" "}
-        and derives <code>result.text</code> and{" "}
-        <code>result.utterances</code> from it. You rarely need the raw form, but
-        it&apos;s available as <code>result.raw</code>.
+        The <code>json</code> output is a document with a <code>words</code>{" "}
+        array. The SDK parses it into <code>result.words</code> and derives{" "}
+        <code>result.text</code> and <code>result.utterances</code> from it. The
+        raw document is available as <code>result.raw</code>.
       </p>
       <CodeBlock
         language="json"
@@ -183,10 +181,9 @@ foreach (var w in result.Words.Take(5))
 }`}
       />
       <p>
-        Prefer <code>result.to_dict()</code> for a normalized, provider-neutral
-        dict, or <code>result.to_deepgram()</code> for a Deepgram-shaped response
-        during a migration — both preserve the per-word <code>start</code>/
-        <code>end</code>.
+        Use <code>result.to_dict()</code> for a normalized, provider-neutral
+        dict, or <code>result.to_deepgram()</code> for a Deepgram-shaped
+        response. Both keep the per-word <code>start</code>/<code>end</code>.
       </p>
       <CodeBlock
         language="python"
@@ -197,9 +194,9 @@ print(first["start"], first["end"], first["word"])`}
 
       <Callout title="Timestamps without JSON" tone="info">
         <p>
-          Choosing <code>srt</code> or <code>vtt</code> gives you timestamps
-          already formatted as subtitle cues; <code>docx</code>/<code>pdf</code>{" "}
-          are formatted documents. To work with timings in code, use the default{" "}
+          <code>srt</code> and <code>vtt</code> return timestamps already
+          formatted as subtitle cues; <code>docx</code> and <code>pdf</code>{" "}
+          return formatted documents. To work with timings in code, use the default{" "}
           <code>json</code> output and read <code>.words</code>. See{" "}
           <Link href="/guides/output-formats">output formats &amp; subtitles</Link>.
         </p>
@@ -207,26 +204,25 @@ print(first["start"], first["end"], first["word"])`}
 
       <h2 id="subtitles">Turning timestamps into cues</h2>
       <p>
-        You don&apos;t have to build cues yourself — request{" "}
-        <code>output_type="srt"</code> or <code>"vtt"</code> and the server emits
-        properly timed subtitles. Reach for <code>.words</code> only when you need
-        custom windows, e.g. grouping words into fixed-length caption lines or
-        extracting a clip between two timestamps.
+        To get timed subtitles, request <code>output_type="srt"</code> or{" "}
+        <code>"vtt"</code>. Use <code>.words</code> when you need custom
+        windows, such as fixed-length caption lines or a clip between two
+        timestamps.
       </p>
 
       <h2 id="accuracy">Accuracy</h2>
       <p>
-        Timestamp accuracy is measured in our public benchmark suite alongside
-        word error rate and diarization. Rather than quote a figure here, see the{" "}
-        <Link href="/benchmarks">benchmarks page</Link> for the current numbers
-        and methodology.
+        Timestamp accuracy is measured in the public benchmark suite, alongside
+        word error rate and diarization. See the{" "}
+        <Link href="/benchmarks">benchmarks page</Link> for current numbers and
+        methodology.
       </p>
 
       <Callout title="Related" tone="tip">
         <p>
           <Link href="/guides/diarization">Speaker diarization</Link> adds a{" "}
           <code>speaker</code> to each word and groups them into turns.{" "}
-          <Link href="/cookbook#subtitles">The cookbook</Link> has copy-pasteable
+          <Link href="/cookbook#subtitles">The cookbook</Link> has copy-paste
           subtitle recipes.
         </p>
       </Callout>
