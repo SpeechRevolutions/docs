@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "C# SDK",
   description:
-    "Official C# client for the Speech Revolutions STT API. Async-first, targets net8.0, in the style of the Deepgram / ElevenLabs .NET clients.",
+    "The official C# client for the Speech Revolutions STT API. Async methods throughout, targeting net8.0.",
 };
 
 export default function CsharpSdkPage() {
@@ -14,9 +14,8 @@ export default function CsharpSdkPage() {
     <>
       <h1>C# / .NET SDK</h1>
       <p>
-        Official C# client for the Speech Revolutions STT API. Async-first,
-        targets <code>net8.0</code>, in the style of the Deepgram / ElevenLabs
-        .NET clients.
+        The official C# client for the Speech Revolutions STT API. Every
+        network call is async. The SDK targets <code>net8.0</code>.
       </p>
 
       <p>
@@ -32,10 +31,10 @@ export default function CsharpSdkPage() {
       <CodeBlock language="bash" code={`dotnet add package SpeechRevolutions`} />
       <h2>Quickstart</h2>
       <p>
-        <code>TranscribeAsync</code> accepts a local path, an{" "}
-        <code>http(s)</code> URL, or a <code>byte[]</code> overload for
-        in-memory audio. With the default <code>OutputType.Json</code> the SDK
-        parses the response into a transcript-first <code>TranscriptResult</code>.
+        <code>TranscribeAsync</code> accepts a local path or an{" "}
+        <code>http(s)</code> URL. A <code>byte[]</code> overload handles
+        in-memory audio. With the default <code>OutputType.Json</code>, the SDK
+        parses the response into a <code>TranscriptResult</code>.
       </p>
       <CodeBlock
         language="csharp"
@@ -65,9 +64,8 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
 
       <h2>Options</h2>
       <p>
-        Pass a <code>TranscribeOptions</code>. <code>Diarize</code> is a
-        Deepgram-compatible alias for <code>SpeakerLabels</code> (when set, it
-        wins).
+        Pass a <code>TranscribeOptions</code>. <code>Diarize</code> is an alias
+        for <code>SpeakerLabels</code>. When you set it, it takes precedence.
       </p>
       <div className="table-scroll">
         <table>
@@ -182,7 +180,7 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
               </td>
               <td>
                 ISO 639-1 code (e.g. <code>&quot;en&quot;</code>) to skip detection;{" "}
-                <code>null</code> auto-detects.{" "}
+                <code>null</code> detects the language automatically.{" "}
                 <Link href="/cookbook#pin-language">When to pin</Link>
               </td>
             </tr>
@@ -224,22 +222,21 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
 
       <h2>Live progress</h2>
       <p>
-        Unlike AssemblyAI and Deepgram — which expose no percentage for
-        pre-recorded audio — you get real-time progress for <strong>both</strong>{" "}
-        the file upload and the transcription, as a console bar, a callback, or
-        both. They compose: the bars render <em>and</em> your callbacks still
-        fire for every event.
+        The SDK reports progress for <strong>both</strong> the file upload and
+        the transcription, as a console bar, a callback, or both. When you
+        enable both, the bars render <em>and</em> your callbacks fire for every
+        event.
       </p>
       <p>
-        Files under about 3 MiB go straight to the GPU and may report no transcription
-        progress before they complete, so expect the bar to jump from the end of the upload
-        to done.
+        Files under about 3 MiB may report no transcription progress before
+        they complete. Expect the bar to jump from the end of the upload to
+        done.
       </p>
       <p>
         Set <code>Progress = true</code> for bars. An <code>Uploading</code>{" "}
-        byte bar renders first, then a <code>Transcribing</code> bar — both
-        single-line, updated in place, and written to <code>stderr</code> (so
-        they never pollute piped <code>stdout</code>).
+        byte bar renders first, then a <code>Transcribing</code> bar. Each is a
+        single line, updated in place and written to <code>stderr</code>, so
+        piped <code>stdout</code> stays clean.
       </p>
       <CodeBlock
         language="csharp"
@@ -257,14 +254,13 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
       <p>
         Each <code>ProgressEvent</code> carries <code>Completed</code>,{" "}
         <code>Total</code>, <code>Step</code>, <code>ElapsedSeconds</code>, and
-        a computed <code>Percent</code> (a clamped <code>double?</code> in
-        0–100, <code>null</code> until it can be computed).
+        a computed <code>Percent</code> (a <code>double?</code> clamped to
+        0–100, or <code>null</code> until the total is known).
       </p>
       <p>
-        Building a UI?{" "}
-        <Link href="/guides/live-progress">Live progress for web apps</Link>{" "}
-        shows how to fold both callbacks into a single 0–100 bar you can serve
-        to your frontend.
+        For a web UI, see{" "}
+        <Link href="/guides/live-progress">Live progress for web apps</Link>.
+        It combines both callbacks into a single 0–100 bar for your frontend.
       </p>
 
       <h2>Result shape</h2>
@@ -281,27 +277,27 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
               <td>
                 <code>result.Text</code>
               </td>
-              <td>Full transcript (AssemblyAI / ElevenLabs style)</td>
+              <td>Full transcript text</td>
             </tr>
             <tr>
               <td>
                 <code>result.Transcript</code>
               </td>
-              <td>Deepgram-style alias</td>
+              <td>Alias for <code>result.Text</code></td>
             </tr>
             <tr>
               <td>
                 <code>result.Words</code>
               </td>
               <td>
-                Word + <code>Start</code> / <code>End</code> / <code>Speaker</code>
+                Words with <code>Start</code>, <code>End</code>, and <code>Speaker</code>
               </td>
             </tr>
             <tr>
               <td>
                 <code>result.Utterances</code>
               </td>
-              <td>AssemblyAI-style speaker turns</td>
+              <td>Speaker turns</td>
             </tr>
             <tr>
               <td>
@@ -313,16 +309,16 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
               <td>
                 <code>await result.SaveAsync(path)</code>
               </td>
-              <td>Write to disk</td>
+              <td>Write the output to disk</td>
             </tr>
           </tbody>
         </table>
       </div>
       <p>
         <code>SaveAsync("output")</code> writes{" "}
-        <code>output.&lt;OutputType&gt;</code> (extension inferred when the path
-        has none) and returns the final path. The client never writes files on
-        its own.
+        <code>output.&lt;OutputType&gt;</code>. It adds the extension when the
+        path has none and returns the final path. The client writes files only
+        when you call <code>SaveAsync</code>.
       </p>
       <CodeBlock
         language="csharp"
@@ -331,19 +327,24 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
 
       <h2>Webhooks</h2>
       <p>
-        Set <code>CallbackUrl</code> to be notified when a job finishes instead
-        of holding the call open. On completion or permanent failure the
-        platform POSTs a signed JSON body{" "}
+        Set <code>CallbackUrl</code> to get notified when a job finishes
+        instead of holding the call open. When the job completes or fails
+        permanently, Speech Revolutions sends a signed JSON <code>POST</code>{" "}
+        to your URL. The body is{" "}
         <code>
           {`{job_id, status: "completed"|"failed", download_url?, step?, reason?}`}
-        </code>{" "}
-        to your URL, signed with HMAC-SHA256 over the raw body in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header (plus <code>X-SR-Event</code> with the status and a unique{" "}
-        <code>X-SR-Delivery</code> id). Verify it against the raw request bytes
-        with <code>HMACSHA256</code> +{" "}
-        <code>CryptographicOperations.FixedTimeEquals</code>.
-        Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
-        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
+        </code>
+        . It is signed with HMAC-SHA256 over the raw body, in the{" "}
+        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. The request
+        also carries <code>X-SR-Event</code> (the status) and a unique{" "}
+        <code>X-SR-Delivery</code> ID. Verify the signature against the raw
+        request bytes with <code>HMACSHA256</code> and{" "}
+        <code>CryptographicOperations.FixedTimeEquals</code>. Copy your signing
+        secret from the console (
+        <strong>API Keys → Webhook signing secret</strong>) into{" "}
+        <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>. The{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload,
+        retries, and secret rotation.
       </p>
       <CodeBlock
         language="csharp"
@@ -355,8 +356,9 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
 
       <h2>Retrieve results later</h2>
       <p>
-        Fetch a job by id anytime — useful after a webhook, or when rebuilding
-        state after a restart. The download URL is regenerated on demand.
+        Fetch a job by ID at any time, for example after a webhook arrives or
+        after your service restarts. The download URL is generated on each
+        request, so you can fetch results long after the original upload.
       </p>
       <CodeBlock
         language="csharp"
@@ -380,7 +382,8 @@ else if (status.IsFailed)
 }`}
       />
 
-      <h2>Auth</h2>
+      <h2>Authentication</h2>
+      <p>The SDK reads your API key from the environment:</p>
       <CodeBlock
         language="bash"
         code={`export SPEECHREVOLUTIONS_API_KEY=stt_...`}
@@ -400,11 +403,11 @@ else if (status.IsFailed)
 
       <Callout title="Under the hood" tone="info">
         <p>
-          The SDK uploads the file (in parts, retrying any part that fails) and
-          waits on the{" "}
-          <Link href="/api-reference/jobs">SSE job stream</Link>, converting the
-          server&apos;s <code>completed</code>/<code>total</code> counts into{" "}
-          <code>Percent</code> for you.
+          The SDK uploads the file in parts, retrying any part that fails. It
+          then listens on the{" "}
+          <Link href="/api-reference/jobs">SSE job stream</Link> and converts
+          the <code>completed</code> and <code>total</code> counts into{" "}
+          <code>Percent</code>.
         </p>
       </Callout>
     </>
