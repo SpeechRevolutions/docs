@@ -13,8 +13,8 @@ export default function VersioningPage() {
     <>
       <h1>Versioning and deprecation</h1>
       <p>
-        Integrations outlive the decisions that shaped them. This page says what we will and
-        will not change under you, so you can decide how much to pin.
+        This page describes how the API is versioned, which changes can happen without
+        notice, and how you are notified before anything is removed.
       </p>
 
       <h2>How the API is versioned</h2>
@@ -25,15 +25,14 @@ export default function VersioningPage() {
 
       <h2>What is not a breaking change</h2>
       <p>
-        These can land at any time, and your client must tolerate them. Treat this list as the
-        contract it is — code written to break on any of these is code that will break.
+        These changes can happen at any time. Your client must tolerate them.
       </p>
       <ul>
         <li>A new field in a response object.</li>
         <li>A new optional field in a request.</li>
         <li>A new endpoint, or a new value in a list we already return.</li>
         <li>
-          A new event type on the progress stream. Ignore event types you do not recognise
+          A new event type on the progress stream. Ignore event types you do not recognize
           rather than failing.
         </li>
         <li>
@@ -50,15 +49,13 @@ export default function VersioningPage() {
         <li>Changing the meaning of an existing status code.</li>
       </ul>
       <p>
-        Anything in this list goes into a new major version. We do not make breaking changes to{" "}
-        <code>v1</code>.
+        Breaking changes ship only in a new major version. <code>v1</code> receives no
+        breaking changes.
       </p>
 
       <h2>Deprecation policy</h2>
       <p>
-        When something is on its way out, you find out from the API itself rather than from a
-        blog post you did not read. A deprecated endpoint returns two headers on every
-        response, per{" "}
+        A deprecated endpoint returns these headers on every response, per{" "}
         <a href="https://www.rfc-editor.org/rfc/rfc9745.html">RFC 9745</a> and{" "}
         <a href="https://www.rfc-editor.org/rfc/rfc8594.html">RFC 8594</a>:
       </p>
@@ -75,10 +72,10 @@ Link: <https://docs.speechrevolutions.com/versioning>; rel="deprecation"`}
 
       <ul>
         <li>
-          <code>Deprecation</code> — when it became deprecated. It still works.
+          <code>Deprecation</code> — when the endpoint was deprecated. It still works.
         </li>
         <li>
-          <code>Sunset</code> — the date it stops working. Never less than{" "}
+          <code>Sunset</code> — the date it stops working. Always at least{" "}
           <strong>12 months</strong> after the <code>Deprecation</code> date for anything in a
           stable version.
         </li>
@@ -88,28 +85,25 @@ Link: <https://docs.speechrevolutions.com/versioning>; rel="deprecation"`}
       </ul>
 
       <p>
-        We will also email the account owner at deprecation, at three months, and at one month.
-        Log a warning when you see a <code>Sunset</code> header and you will never be surprised
-        by one.
+        The account owner also gets an email at deprecation, three months before the sunset,
+        and one month before it. Log a warning whenever you see a <code>Sunset</code> header.
       </p>
 
       <Callout tone="info" title="Nothing is deprecated today">
-        The <code>v1</code> API has no deprecated endpoints and no scheduled sunsets. This page
-        exists so the policy is known in advance rather than written when it is first needed.
+        The <code>v1</code> API has no deprecated endpoints and no scheduled sunsets.
       </Callout>
 
       <h2>SDK versioning</h2>
       <p>
         The Python, JavaScript, Go and C# SDKs follow semantic versioning independently of the
-        API. A major SDK release may change its own surface without any API change; pin a major
-        version and read the changelog before moving.
+        API. A major SDK release may change the SDK&apos;s interface without any API change. Pin
+        a major version and read the changelog before you upgrade.
       </p>
 
       <h2>Security exception</h2>
       <p>
-        One thing overrides all of the above: if a field or behaviour is actively exposing
-        customer data, we will change it as fast as we can and tell you afterwards. A twelve
-        month notice period on a data leak protects nobody.
+        If a field or behavior exposes customer data, it is changed immediately, without the
+        notice period above, and you are notified afterwards.
       </p>
     </>
   );

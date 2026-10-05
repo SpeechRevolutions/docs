@@ -25,7 +25,7 @@ export default function AuthPage() {
       <CodeBlock language="bash" code={`export SPEECHREVOLUTIONS_API_KEY="stt_…"`} />
 
       <p>
-        Every SDK picks the key up from the environment, or takes it explicitly:
+        Every SDK reads the key from the environment, or you can pass it explicitly:
       </p>
       <CodeTabs
         tabs={[
@@ -64,10 +64,9 @@ using var other = new SpeechRevolutionsClient("stt_…");    // or pass it`,
         <code>SPEECHREVOLUTIONS_BASE_URL</code>.
       </p>
 
-      <h2>Calling the API directly</h2>
+      <h2>Call the API directly</h2>
       <p>
-        Without an SDK, send the key in the <code>X-API-Key</code> header. That is mostly
-        useful for a quick test from a terminal:
+        Without an SDK, send the key in the <code>X-API-Key</code> header:
       </p>
       <CodeBlock
         language="bash"
