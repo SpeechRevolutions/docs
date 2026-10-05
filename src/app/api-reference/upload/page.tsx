@@ -27,9 +27,8 @@ export default function UploadingFilesPage() {
 
       <h2>Upload a file</h2>
       <p>
-        Pass a path and the SDK does the upload: it sends the file in parts straight to storage,
-        retries a part that fails rather than the whole file, reports upload progress, then
-        waits for the result. Up to {LIMITS.sdkUploadMax} per file.
+        Pass a path and the SDK uploads the file in parts, retries any part that fails, reports
+        upload progress, and waits for the result. The limit is {LIMITS.sdkUploadMax} per file.
       </p>
       <CodeTabs
         tabs={[
@@ -79,11 +78,11 @@ Console.WriteLine(result.Text);`,
         ]}
       />
 
-      <h2>Audio that is already online</h2>
+      <h2>Transcribe audio from a URL</h2>
       <p>
-        Pass an <code>https</code> URL instead of a path and the platform fetches the audio
-        itself, so the bytes never pass through your machine. The URL has to be reachable from
-        the public internet; for a private bucket, pass a signed URL that outlives the job (see{" "}
+        Pass an <code>https</code> URL instead of a path and the API fetches the audio for you.
+        The URL must be reachable from the public internet. For a private bucket, pass a signed
+        URL that stays valid until the job finishes (see{" "}
         <Link href="/integrations/s3">Amazon S3</Link> and{" "}
         <Link href="/integrations/supabase">Supabase</Link>).
       </p>
@@ -112,22 +111,22 @@ Console.WriteLine(result.Text);`,
         ]}
       />
 
-      <h2>Don&apos;t wait on the result</h2>
+      <h2>Get notified when a job finishes</h2>
       <p>
-        For batches and background work, submit and move on: pass a <code>callback_url</code>{" "}
-        and we POST a signed notification when each job finishes. The{" "}
+        For batches and background work, pass a <code>callback_url</code>{" "}
+        and the API sends a signed POST to it when each job finishes. The{" "}
         <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, verifying the
         signature, and retries.
       </p>
 
-      <h2>A quick test from a terminal</h2>
+      <h2>Test from a terminal</h2>
       <p>
         <Link href="/api-reference/endpoints/transcribe">
           <code>POST /api/v1/transcribe</code>
         </Link>{" "}
         takes up to {LIMITS.apiUploadMax} as the request body and streams the transcript back
-        on the same connection. It is meant for trying the API from a shell; applications should
-        use an SDK.
+        on the same connection. Use it to try the API from a shell. In applications, use an
+        SDK.
       </p>
       <CodeBlock
         language="bash"
@@ -142,10 +141,10 @@ Console.WriteLine(result.Text);`,
 
       <h2>Formats and limits</h2>
       <p>
-        Common audio and video formats are accepted, and anything we can decode is transcoded for
-        you. The{" "}
+        Common audio and video formats are accepted, and any file that can be decoded is
+        transcoded for you. The{" "}
         <Link href="/api-reference/overview">API overview</Link> lists the formats, size limits,
-        rate limits and every error code.
+        rate limits, and error codes.
       </p>
 
       <h2>Next steps</h2>
