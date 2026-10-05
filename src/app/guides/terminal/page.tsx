@@ -153,7 +153,7 @@ curl -N -X POST \\
         language="text"
         filename="stream"
         code={`event: accepted
-data: {"job_id": "...", "download_url": "https://..."}
+data: {"job_id": "...", "download_url": "https://...", "llm_download_url": null, "resume": "curl ..."}
 
 event: progress
 data: {"completed":1,"total":4,"step":"preprocess"}
@@ -168,7 +168,7 @@ event: progress
 data: {"completed":4,"total":4,"step":"aggregation"}
 
 event: completed
-data: {"download_url": "https://...", "job_id": "..."}
+data: {"download_url": "https://..."}
 
 event: transcript
 data: <the transcript, one data: line per line of output>`}

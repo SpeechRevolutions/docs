@@ -137,7 +137,7 @@
           "Jobs"
         ],
         "summary": "Server-sent progress events for a job",
-        "description": "An SSE stream of progress events, ending when the job completes or fails. Steps are `preprocess`, `chunk:N` and `aggregation`, each reporting `completed` out of `total`. Rate limit: 120 requests per minute.\n\nProgress is best effort: when the stream pool is saturated the connection is still accepted and sends `waiting` heartbeats with an ETA rather than refusing.",
+        "description": "An SSE stream of progress events, ending with one terminal `completed` (data: `{\"download_url\": ...}`) or `failed` (data: `{\"step\": ..., \"reason\": ...}`) event. Steps are `preprocess`, `chunk:N` and `aggregation`, each reporting `completed` out of `total`; an event is sent as each step finishes, so the first has `completed` >= 1. Files under about 3 MiB skip `preprocess` and may send no progress event before `completed`. Each event has an `id` to send back as `Last-Event-ID` on reconnect. Rate limit: 120 requests per minute.\n\nWhen the stream pool is saturated the request is refused with 503; poll `GET /api/v1/jobs/{job_id}` instead, or retry.",
         "parameters": [
           {
             "$ref": "#/components/parameters/JobId"
@@ -151,7 +151,7 @@
                 "schema": {
                   "type": "string"
                 },
-                "example": "event: progress\ndata: {\"step\": \"chunk:3\", \"completed\": 3, \"total\": 8}\n\nevent: completed\ndata: {\"job_id\": \"7c1f...\", \"download_url\": \"https://...\"}\n\n"
+                "example": "id: 1791179526032-0\nevent: progress\ndata: {\"completed\": 1, \"total\": 7, \"step\": \"preprocess\"}\n\nid: 1791179533242-0\nevent: progress\ndata: {\"completed\": 2, \"total\": 7, \"step\": \"chunk:0\"}\n\nid: 1791179547620-0\nevent: progress\ndata: {\"completed\": 7, \"total\": 7, \"step\": \"aggregation\"}\n\nid: 1791179547725-0\nevent: completed\ndata: {\"download_url\": \"https://...\"}\n\n"
               }
             }
           },
@@ -163,6 +163,16 @@
           },
           "429": {
             "$ref": "#/components/responses/RateLimited"
+          },
+          "503": {
+            "description": "The stream pool is saturated. Retry, or poll the job instead.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
@@ -252,7 +262,7 @@
           "Transcribe"
         ],
         "summary": "Stream audio in, get the transcript back",
-        "description": "One shot: the request body is the audio itself and the response is an SSE stream ending in the transcript. Intended for shells and simple scripts; files above 200 MB belong on the upload routes. Rate limit: 120 requests per minute.\n\nThe first event is `accepted` and carries the `job_id` and a `download_url`, emitted before any waiting — so a caller whose connection drops can still retrieve the job it has been billed for. The id is also mirrored in the `X-Job-Id` response header.",
+        "description": "One shot: the request body is the audio itself and the response is an SSE stream ending in the transcript. Intended for shells and simple scripts; files above 200 MB belong on the upload routes. Rate limit: 120 requests per minute.\n\nThe first event is `accepted` and carries the `job_id` and a `download_url`, emitted before any waiting — so a caller whose connection drops can still retrieve the job it has been billed for. The id is also mirrored in the `X-Job-Id` response header. Then come the job's `progress` events, exactly as on the jobs stream (best effort: when the stream pool is saturated you get `waiting` heartbeats with an ETA instead), then `completed` with `{\"download_url\": ...}` and finally `transcript`, whose data is the finished result in the requested `output_type` (one `data:` line per line of output). A failed job ends with `failed` instead; if the wait limit is reached the stream ends with `timeout`, and if the result could not be read back, `error` (both carry `job_id` and `download_url`, so the result can still be fetched).",
         "parameters": [
           {
             "name": "model",
@@ -386,7 +396,7 @@
                 "schema": {
                   "type": "string"
                 },
-                "example": "event: accepted\ndata: {\"job_id\": \"7c1f...\", \"download_url\": \"https://...\"}\n\nevent: transcript\ndata: {\"text\": \"Hi there\", \"words\": [...]}\n\n"
+                "example": "event: accepted\ndata: {\"job_id\": \"57dd9d88-...\", \"download_url\": \"https://...\", \"llm_download_url\": null, \"resume\": \"curl -H \\\"X-API-Key: $SPEECHREVOLUTIONS_API_KEY\\\" https://api.speechrevolutions.com/api/v1/jobs/57dd9d88-...\"}\n\nid: 1791179346392-0\nevent: completed\ndata: {\"download_url\": \"https://...\"}\n\nevent: transcript\ndata: {\"text\": \"Hi there\", \"words\": [...], ...}\n\n"
               }
             }
           },
@@ -569,7 +579,7 @@
         "properties": {
           "status": {
             "type": "string",
-            "example": "ok"
+            "example": "cancel_request_successful"
           }
         }
       },
@@ -599,6 +609,14 @@
             ],
             "format": "uri",
             "description": "Present once status is `completed`."
+          },
+          "llm_download_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "A second transcript refined by LLM post-processing. `null` unless the job requested LLM post-processing and the refined transcript exists."
           },
           "failed_stage": {
             "type": [

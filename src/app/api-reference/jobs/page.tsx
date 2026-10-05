@@ -84,6 +84,7 @@ if (status.IsCompleted)
   "job_id": "…",
   "status": "completed",          // processing | completed | failed
   "download_url": "https://…",    // present when status is "completed"
+  "llm_download_url": null,       // refined transcript, only for jobs with LLM post-processing
   "failed_stage": null,           // present when status is "failed"
   "reason": null                  // present when status is "failed"
 }`}
@@ -160,28 +161,58 @@ foreach (var job in page.Jobs)
 
       <h3>Events</h3>
       <p>
-        The stream emits three event types: <code>progress</code> (repeated),
-        then a terminal <code>completed</code> or <code>failed</code>. The{" "}
-        <code>step</code> name depends on how the file was routed: small files
-        skip straight to a <code>chunk:N</code> step; larger files start with{" "}
-        <code>preprocess</code>, then either a single <code>chunk:0</code> (short
-        audio) or multiple <code>chunk:0</code>, <code>chunk:1</code>, … steps
-        (long audio, one per split chunk) followed by <code>aggregation</code>.
+        The stream emits <code>progress</code> events (zero or more), then one terminal{" "}
+        <code>completed</code> or <code>failed</code> event, after which the server closes it.
+        Each event carries an <code>id:</code>; send the last one back as{" "}
+        <code>Last-Event-ID</code> when you reconnect. Lines starting with <code>:</code> are
+        keep-alive comments; ignore them.
+      </p>
+      <p>
+        A <code>progress</code> event is sent as each step <em>finishes</em>, so the first one
+        you see already has <code>completed</code> of at least 1. The <code>step</code> names
+        depend on how the file was routed:
+      </p>
+      <ul>
+        <li>
+          <strong>Files under about 3 MiB</strong> go straight to the GPU as one chunk. They
+          usually finish in seconds and may send <strong>no</strong> <code>progress</code>{" "}
+          event at all before <code>completed</code>.
+        </li>
+        <li>
+          <strong>Larger files</strong> start with <code>preprocess</code>. Short audio is then
+          one <code>chunk:0</code>; long audio is split into several <code>chunk:N</code> steps,
+          which finish in whatever order the workers do, followed by{" "}
+          <code>aggregation</code>.
+        </li>
+      </ul>
+      <p>
+        <code>total</code> depends on how many chunks the audio was split into, so read it
+        from each event rather than hard-coding it. A 44-minute file, as streamed:
       </p>
       <CodeBlock
         language="text"
         filename="stream"
-        code={`event: progress
-data: {"completed": 0, "total": 8, "step": "preprocess"}
-
+        code={`id: 1791179526032-0
 event: progress
-data: {"completed": 3, "total": 8, "step": "chunk:0"}
+data: {"completed": 1, "total": 7, "step": "preprocess"}
 
+id: 1791179533242-0
 event: progress
-data: {"completed": 8, "total": 8, "step": "aggregation"}
+data: {"completed": 2, "total": 7, "step": "chunk:0"}
 
+id: 1791179542519-0
+event: progress
+data: {"completed": 3, "total": 7, "step": "chunk:4"}
+
+…
+
+id: 1791179547620-0
+event: progress
+data: {"completed": 7, "total": 7, "step": "aggregation"}
+
+id: 1791179547725-0
 event: completed
-data: {"job_id": "…", "download_url": "https://…", "output_type": "json"}`}
+data: {"download_url": "https://…"}`}
       />
       <div className="table-scroll">
         <table>
@@ -205,8 +236,9 @@ data: {"job_id": "…", "download_url": "https://…", "output_type": "json"}`}
                 <code>completed</code>
               </td>
               <td>
-                Terminal success; data may include a <code>download_url</code> and
-                job metadata
+                Terminal success: <code>{`{"download_url": "<url>"}`}</code>, a presigned
+                link to the result. You already know the <code>job_id</code> (it is in the
+                path).
               </td>
             </tr>
             <tr>
@@ -214,12 +246,17 @@ data: {"job_id": "…", "download_url": "https://…", "output_type": "json"}`}
                 <code>failed</code>
               </td>
               <td>
-                Terminal failure; <code>{`{"step": "<name>", "reason": "<msg>"}`}</code>
+                Terminal failure: <code>{`{"step": "<name>", "reason": "<msg>"}`}</code>, e.g.{" "}
+                <code>{`{"step": "user", "reason": "cancelled_by_user"}`}</code> after a cancel
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+      <p>
+        Open the stream for a job that has already finished and it replays from the start:
+        the progress events the job sent, then the terminal one.
+      </p>
 
       <Callout title="completed / total → percent" tone="tip">
         <p>
