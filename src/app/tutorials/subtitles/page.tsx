@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Generate subtitles automatically",
   description:
-    "Speech Revolutions can hand you finished subtitle files, not just raw text. Set output_type to \"srt\" or \"vtt\" and the transcript comes back as a ready-to-ship caption…",
+    "Set output_type to \"srt\" or \"vtt\" to get a finished, time-cued subtitle file instead of plain text.",
 };
 
 export default function SubtitlesTutorialPage() {
@@ -15,30 +15,29 @@ export default function SubtitlesTutorialPage() {
     <>
       <h1>Generate subtitles automatically</h1>
       <p>
-        Speech Revolutions can hand you finished subtitle files, not just raw text. Set{" "}
-        <code>output_type</code> to <code>&quot;srt&quot;</code> or{" "}
+        Set <code>output_type</code> to <code>&quot;srt&quot;</code> or{" "}
         <code>&quot;vtt&quot;</code> and the transcript comes back as a
-        ready-to-ship caption file — correctly numbered, time-cued, and
-        line-wrapped. No post-processing of word timestamps required. This
-        tutorial covers picking the format, saving the file, and the choice
-        between shipping it as a sidecar or burning it into the video.
+        finished caption file: numbered, time-cued, and line-wrapped. You
+        don&apos;t need to process word timestamps yourself. This tutorial
+        covers choosing a format, saving the file, and delivering it as a
+        sidecar or burned into the video.
       </p>
 
       <h2>SRT vs VTT</h2>
       <p>
         Both are supported values of <code>output_type</code> (alongside{" "}
         <code>txt</code>, <code>json</code>, <code>docx</code>, and{" "}
-        <code>pdf</code>). They differ only in where they&apos;re used:
+        <code>pdf</code>). They differ in where you use them:
       </p>
       <ul>
         <li>
-          <code>srt</code> (SubRip) — the universal default. Accepted by
-          virtually every video player, editor, and platform (YouTube, Premiere,
-          VLC). Reach for this unless you specifically need VTT.
+          <code>srt</code> (SubRip): the universal default. Almost every video
+          player, editor, and platform accepts it (YouTube, Premiere, VLC). Use
+          it unless you need VTT.
         </li>
         <li>
-          <code>vtt</code> (WebVTT) — the web-native format for the HTML5{" "}
-          <code>&lt;track&gt;</code> element. Use it when captions are served to
+          <code>vtt</code> (WebVTT): the web format for the HTML5{" "}
+          <code>&lt;track&gt;</code> element. Use it when you serve captions to
           a browser <code>&lt;video&gt;</code> player.
         </li>
       </ul>
@@ -51,10 +50,11 @@ export default function SubtitlesTutorialPage() {
       <h2>Generate and save the file</h2>
       <p>
         Pass the format as <code>output_type</code>, then call{" "}
-        <code>result.save()</code>. It writes the raw content to disk and
-        appends the correct extension if your path has none — <code>save(&quot;captions&quot;)</code>{" "}
-        with <code>output_type=&quot;srt&quot;</code> writes{" "}
-        <code>captions.srt</code> — and returns the path it wrote.
+        <code>result.save()</code>. It writes the content to disk, appends the
+        correct extension if your path has none, and returns the path it
+        wrote. For example, <code>save(&quot;captions&quot;)</code> with{" "}
+        <code>output_type=&quot;srt&quot;</code> writes{" "}
+        <code>captions.srt</code>.
       </p>
       <CodeTabs
         tabs={[
@@ -158,16 +158,16 @@ Console.WriteLine($"Wrote {path}");`,
 
       <Callout title="Timestamps are already handled" tone="tip">
         <p>
-          When you ask for <code>srt</code> or <code>vtt</code>, Speech Revolutions does the
-          cueing for you — you don&apos;t need to request{" "}
-          <code>word_timestamps</code> or assemble cues from <code>.words</code>{" "}
-          yourself. The file is ready to load into a player as-is.
+          With <code>srt</code> or <code>vtt</code>, the cues are built for
+          you. You don&apos;t need to request <code>word_timestamps</code> or
+          assemble cues from <code>.words</code>. Load the file into a player
+          as-is.
         </p>
       </Callout>
 
       <h2>What the file looks like</h2>
       <p>
-        Cues follow the usual captioning rules: one speaker per cue, at most two lines of 42
+        Cues follow standard captioning rules: one speaker per cue, at most two lines of 42
         characters, at most 7 seconds, and a break at pauses longer than a second and at
         sentence ends. With speaker labels on (the default), the first line of each cue starts
         with the speaker, like <code>SPEAKER_1: </code>; turn <code>speaker_labels</code> off
@@ -198,8 +198,8 @@ SPEAKER_2: me to put on my back?`}
 
       <h2>Sidecar vs burned-in</h2>
       <p>
-        Once you have the file, there are two ways to get captions in front of a
-        viewer, and the right one depends on where the video plays.
+        There are two ways to show captions to a viewer. Choose based on where
+        the video plays.
       </p>
       <div className="table-scroll">
         <table>
@@ -258,9 +258,9 @@ SPEAKER_2: me to put on my back?`}
       />
 
       <p>
-        <strong>Burning in</strong> happens outside Speech Revolutions — Speech Revolutions produces the
-        subtitle file; a video tool renders it into the frames. The common tool
-        is <code>ffmpeg</code>, which reads your saved <code>.srt</code>:
+        <strong>Burning in</strong> happens outside Speech Revolutions: you
+        render the subtitle file into the frames with a video tool. The common
+        choice is <code>ffmpeg</code>, which reads your saved <code>.srt</code>:
       </p>
       <CodeBlock
         language="bash"
@@ -271,17 +271,16 @@ ffmpeg -i talk.mp4 -vf "subtitles=captions.srt" talk-captioned.mp4`}
 
       <Callout title="Which should I ship?" tone="info">
         <p>
-          Prefer <strong>sidecar</strong> whenever the player supports it — it
-          keeps captions accessible, toggleable, translatable, and re-editable
-          without re-encoding the video. Reach for <strong>burned-in</strong>{" "}
-          only when the playback surface won&apos;t render a separate track.
+          Use <strong>sidecar</strong> whenever the player supports it. Captions
+          stay accessible, toggleable, translatable, and editable without
+          re-encoding the video. Use <strong>burned-in</strong> only when the
+          player can&apos;t render a separate track.
         </p>
       </Callout>
 
       <p>
-        That&apos;s subtitles end to end: one <code>output_type</code>, one{" "}
-        <code>save()</code>, and a delivery choice. To generate captions from an
-        upload with a live progress bar, combine this with the{" "}
+        To generate captions from an upload with a live progress bar, combine
+        this with the{" "}
         <Link href="/tutorials/meeting-app">meeting-app tutorial</Link>; for the
         full format reference see{" "}
         <Link href="/guides/output-formats">Output formats &amp; subtitles</Link>.
