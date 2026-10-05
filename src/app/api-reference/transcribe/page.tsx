@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Transcribe API",
   description:
-    "One-shot streaming upload for shells and simple scripts. Same transcription options as upload — no separate progress/complete steps.",
+    "Send audio in one request and get the transcript back on the same connection. For shells and simple scripts.",
 };
 
 export default function TranscribeApiPage() {
@@ -15,27 +15,24 @@ export default function TranscribeApiPage() {
     <>
       <h1>Transcribe API (terminal)</h1>
       <p>
-        One-shot streaming upload for shells and simple scripts. Same
-        transcription options as upload — no separate progress/complete steps.
+        Send audio in one request and get the transcript back on the same
+        connection. Use it from shells and simple scripts.
       </p>
 
       <EndpointBadge method="POST" path="/api/v1/transcribe" />
 
       <Callout title="Designed for cURL" tone="tip">
         <p>
-          Prefer this endpoint from the terminal. Prefer the{" "}
-          <Link href="/sdks/python">SDK</Link> (upload flow) in application
-          code.
+          Use this endpoint from the terminal. In application code, use an{" "}
+          <Link href="/sdks/python">SDK</Link>.
         </p>
       </Callout>
 
       <h2>Request</h2>
       <p>
-        The request <strong>body is the raw audio bytes</strong>; transcription
-        options are query parameters (same names and semantics as{" "}
-        <Link href="/api-reference/upload">upload</Link>). Sending the body raw
-        lets the server stream it straight to storage without buffering the whole
-        file.
+        The request <strong>body is the raw audio bytes</strong>. Transcription
+        options are query parameters (see the{" "}
+        <Link href="/api-reference/endpoints/transcribe">endpoint reference</Link>).
       </p>
       <CodeBlock
         language="bash"
@@ -47,27 +44,28 @@ export default function TranscribeApiPage() {
 
       <h2>Behavior</h2>
       <ol>
-        <li>Client streams the raw audio bytes as the request body.</li>
+        <li>You stream the raw audio bytes as the request body.</li>
         <li>
-          The server streams the upload to storage, enqueues the job and sends an{" "}
-          <code>accepted</code> event straight away, before any waiting. It carries the{" "}
+          The server creates the job and immediately sends an <code>accepted</code> event.
+          It carries the{" "}
           <code>job_id</code> (also in the <code>X-Job-Id</code> response header), a{" "}
-          <code>download_url</code> and a ready-made <code>resume</code> command, so if your
-          connection drops you can still fetch the job you started.
+          <code>download_url</code>, and a ready-made <code>resume</code> command. If your
+          connection drops, use these to fetch the job you started.
         </li>
         <li>
-          It then forwards the job&apos;s <code>progress</code> events, identical to the{" "}
+          It then sends the job&apos;s <code>progress</code> events, identical to the{" "}
           <Link href="/api-reference/jobs">Jobs SSE stream</Link> (<code>completed</code>/
           <code>total</code>/<code>step</code>; the first one already has{" "}
-          <code>completed</code> &ge; 1). Files under about 3 MiB go straight to the GPU and
-          usually send none at all. Progress is best effort: when the server&apos;s stream pool
-          is busy you get a <code>waiting</code> heartbeat with an ETA instead.
+          <code>completed</code> &ge; 1). Files under about 3 MiB are processed in a single
+          pass and usually send no progress events. Progress is best effort: when progress is
+          unavailable, you get a <code>waiting</code> heartbeat with an ETA instead.
         </li>
         <li>
-          On success it sends <code>completed</code> (data:{" "}
+          On success, it sends <code>completed</code> (data:{" "}
           <code>{`{"download_url": "…"}`}</code>), then a final <code>transcript</code> event
           whose data is the finished result in your <code>output_type</code>. Multi-line output
-          is sent as one <code>data:</code> line per line, which SSE clients join back together.
+          is sent as one <code>data:</code> field per line, which SSE clients join back
+          together.
         </li>
       </ol>
 
@@ -132,14 +130,14 @@ data: {"completed": 7, "total": 7, "step": "aggregation"}`}
               <td>
                 <code>waiting</code>
               </td>
-              <td>Heartbeat while progress is unavailable; ignore it or show the ETA</td>
+              <td>Heartbeat while progress is unavailable. Ignore it or show the ETA.</td>
             </tr>
             <tr>
               <td>
                 <code>completed</code>
               </td>
               <td>
-                <code>{`{"download_url": "<url>"}`}</code>; the <code>transcript</code> event follows
+                <code>{`{"download_url": "<url>"}`}</code>. The <code>transcript</code> event follows.
               </td>
             </tr>
             <tr>
@@ -163,8 +161,8 @@ data: {"completed": 7, "total": 7, "step": "aggregation"}`}
               </td>
               <td>
                 The wait limit was reached, or the finished result could not be read back.
-                Both carry <code>job_id</code> and <code>download_url</code>; fetch the result
-                from there.
+                Both carry <code>job_id</code> and <code>download_url</code>. Fetch the result
+                from <code>download_url</code>.
               </td>
             </tr>
           </tbody>
@@ -185,13 +183,13 @@ data: {"completed": 7, "total": 7, "step": "aggregation"}`}
               <td>
                 <code>401</code>
               </td>
-              <td>Unauthorized</td>
+              <td>Missing or invalid API key</td>
             </tr>
             <tr>
               <td>
                 <code>413</code>
               </td>
-              <td>File too large for this route</td>
+              <td>File too large for this endpoint</td>
             </tr>
             <tr>
               <td>
@@ -205,7 +203,7 @@ data: {"completed": 7, "total": 7, "step": "aggregation"}`}
               <td>
                 <code>429</code>
               </td>
-              <td>Rate limited</td>
+              <td>Rate limit exceeded</td>
             </tr>
           </tbody>
         </table>

@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Jobs API",
   description:
-    "Wait for a result, retrieve a job by id, list recent jobs, or cancel one.",
+    "Retrieve a job by ID, list recent jobs, follow a job to completion, or cancel one.",
 };
 
 export default function JobsApiPage() {
@@ -14,16 +14,16 @@ export default function JobsApiPage() {
     <>
       <h1>Jobs API</h1>
       <p>
-        Look up a job by id, list recent jobs, follow one to completion, or cancel it. The SDKs
-        wrap every call here; the endpoints and response shapes are listed for reference.
+        Retrieve a job by ID, list recent jobs, follow a job to completion, or cancel it. The
+        SDKs wrap every endpoint on this page.
       </p>
 
       <h2>Retrieve a job</h2>
       <EndpointBadge method="GET" path="/api/v1/jobs/{job_id}" />
       <p>
-        Returns a job&apos;s current status plus a freshly-generated{" "}
-        <code>download_url</code> once it has completed — valid even long after
-        the original upload response.
+        Returns the job&apos;s current status. Once the job has completed, the response also
+        includes a newly generated <code>download_url</code>, so you can fetch the result
+        long after the job was created.
       </p>
       <CodeTabs
         tabs={[
@@ -93,10 +93,10 @@ if (status.IsCompleted)
       <h2>List jobs</h2>
       <EndpointBadge method="GET" path="/api/v1/jobs" />
       <p>
-        The caller&apos;s most-recent jobs (newest first), cursor-paginated.
-        Query params: <code>limit</code> (default 50, 1–100) and{" "}
-        <code>before</code> (an ISO-8601 <code>created_at</code> cursor — pass
-        back the previous page&apos;s <code>next_before</code>).
+        Returns your most recent jobs, newest first, with cursor pagination.
+        Query parameters: <code>limit</code> (default 50, 1–100) and{" "}
+        <code>before</code> (an ISO-8601 <code>created_at</code> cursor; pass
+        the previous page&apos;s <code>next_before</code>).
       </p>
       <CodeTabs
         tabs={[
@@ -153,7 +153,7 @@ foreach (var job in page.Jobs)
       <h2>SSE stream</h2>
       <EndpointBadge method="GET" path="/api/v1/jobs/{job_id}/stream" />
       <p>
-        A Server-Sent Events stream of a job&apos;s progress, ending in its result. You rarely
+        A Server-Sent Events stream of a job&apos;s progress, ending with its result. You rarely
         open it yourself: the SDKs follow it inside <code>transcribe()</code>, reconnect with{" "}
         <code>Last-Event-ID</code> if the connection drops, and report progress through the{" "}
         <a href="/guides/live-progress">progress callbacks</a>.
@@ -163,25 +163,25 @@ foreach (var job in page.Jobs)
       <p>
         The stream emits <code>progress</code> events (zero or more), then one terminal{" "}
         <code>completed</code> or <code>failed</code> event, after which the server closes it.
-        Each event carries an <code>id:</code>; send the last one back as{" "}
+        Each event carries an <code>id:</code>. Send the last one back as{" "}
         <code>Last-Event-ID</code> when you reconnect. Lines starting with <code>:</code> are
         keep-alive comments; ignore them.
       </p>
       <p>
         A <code>progress</code> event is sent as each step <em>finishes</em>, so the first one
         you see already has <code>completed</code> of at least 1. The <code>step</code> names
-        depend on how the file was routed:
+        depend on the file size:
       </p>
       <ul>
         <li>
-          <strong>Files under about 3 MiB</strong> go straight to the GPU as one chunk. They
-          usually finish in seconds and may send <strong>no</strong> <code>progress</code>{" "}
-          event at all before <code>completed</code>.
+          <strong>Files under about 3 MiB</strong> are processed as one chunk. They usually
+          finish in seconds and may send <strong>no</strong> <code>progress</code> event
+          before <code>completed</code>.
         </li>
         <li>
           <strong>Larger files</strong> start with <code>preprocess</code>. Short audio is then
-          one <code>chunk:0</code>; long audio is split into several <code>chunk:N</code> steps,
-          which finish in whatever order the workers do, followed by{" "}
+          one <code>chunk:0</code>. Long audio is split into several <code>chunk:N</code> steps,
+          which can finish in any order, followed by{" "}
           <code>aggregation</code>.
         </li>
       </ul>
@@ -237,8 +237,7 @@ data: {"download_url": "https://…"}`}
               </td>
               <td>
                 Terminal success: <code>{`{"download_url": "<url>"}`}</code>, a presigned
-                link to the result. You already know the <code>job_id</code> (it is in the
-                path).
+                link to the result. The <code>job_id</code> is in the request path.
               </td>
             </tr>
             <tr>
@@ -246,31 +245,32 @@ data: {"download_url": "https://…"}`}
                 <code>failed</code>
               </td>
               <td>
-                Terminal failure: <code>{`{"step": "<name>", "reason": "<msg>"}`}</code>, e.g.{" "}
-                <code>{`{"step": "user", "reason": "cancelled_by_user"}`}</code> after a cancel
+                Terminal failure: <code>{`{"step": "<name>", "reason": "<msg>"}`}</code>, for
+                example <code>{`{"step": "user", "reason": "cancelled_by_user"}`}</code> after a
+                cancel.
               </td>
             </tr>
           </tbody>
         </table>
       </div>
       <p>
-        Open the stream for a job that has already finished and it replays from the start:
-        the progress events the job sent, then the terminal one.
+        If you open the stream for a job that has already finished, it replays from the start:
+        the job&apos;s progress events, then the terminal event.
       </p>
 
       <Callout title="completed / total → percent" tone="tip">
         <p>
           The <code>progress</code> payload carries raw{" "}
-          <code>completed</code> and <code>total</code> step counts — not a
-          percentage. A percentage is a client-side convenience: the official
-          SDKs compute <code>percent = completed / total × 100</code> and
-          surface it as <code>ProgressEvent.percent</code> (which is undefined
-          while <code>total</code> is still unknown). See any{" "}
+          <code>completed</code> and <code>total</code> step counts, not a
+          percentage. The official SDKs compute{" "}
+          <code>percent = completed / total × 100</code> and expose it as{" "}
+          <code>ProgressEvent.percent</code>, which is undefined while{" "}
+          <code>total</code> is unknown. See any{" "}
           <a href="/sdks/python">SDK page</a> for the live-progress callbacks.
         </p>
       </Callout>
 
-      <h2>Cancel</h2>
+      <h2>Cancel a job</h2>
       <EndpointBadge method="POST" path="/api/v1/jobs/cancel" />
       <CodeTabs
         tabs={[
@@ -281,15 +281,18 @@ data: {"download_url": "https://…"}`}
         ]}
       />
       <p>
-        You can only cancel a job that hasn&apos;t already been processed, and
-        only for the portion that hasn&apos;t been processed yet. If a job is
-        already substantially complete when your cancellation is received — say
-        most of the audio has been transcribed — we reserve the right to bill
-        for the work already done.
+        You can cancel only a job that has not finished processing, and only the
+        portion that has not been processed yet. If most of the audio has
+        already been transcribed when the cancellation arrives, you may be
+        billed for the work already done.
       </p>
 
-      <h2>Check failed</h2>
+      <h2>Check failed jobs</h2>
       <EndpointBadge method="POST" path="/api/v1/jobs/check-failed" />
+      <p>
+        Checks several jobs at once. The response lists, in request order, whether each
+        job has failed.
+      </p>
       <CodeBlock language="json" code={`{"job_ids": ["…", "…"]}`} />
       <p>
         Response: <code>{`{"failed_jobs": [true, false]}`}</code>
