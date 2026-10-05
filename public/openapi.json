@@ -4,7 +4,7 @@
     "title": "Speech Revolutions API",
     "version": "1.0.0",
     "summary": "Batch speech-to-text with speaker diarization and word-level timestamps.",
-    "description": "Batch transcription API. Submit audio, get back a transcript with word-level timestamps and diarized speaker turns, in any of six output formats.\n\nThis document is written and maintained by hand against the documented, public surface. It deliberately omits internal routes. Every field here is checked against the running service; where behaviour and this document disagree, the service is right and this is a bug — report it.\n\nSend audio up to 200 MB to `POST /api/v1/transcribe` and read the transcript straight back on the same connection. For larger files (up to 10 GB) and for audio at a URL, use an official SDK, which uploads the file for you. Every job, however it was started, can be followed with `GET /api/v1/jobs/{job_id}/stream`, fetched with `GET /api/v1/jobs/{job_id}`, listed with `GET /api/v1/jobs`, and cancelled with `POST /api/v1/jobs/cancel`.",
+    "description": "Batch transcription API. Submit audio, get back a transcript with word-level timestamps and diarized speaker turns, in any of six output formats.\n\nIf the API behaves differently from this document, report it as a bug.\n\nSend audio up to 200 MB to `POST /api/v1/transcribe` and read the transcript straight back on the same connection. For larger files (up to 10 GB) and for audio at a URL, use an official SDK, which uploads the file for you. Every job, however it was started, can be followed with `GET /api/v1/jobs/{job_id}/stream`, fetched with `GET /api/v1/jobs/{job_id}`, listed with `GET /api/v1/jobs`, and cancelled with `POST /api/v1/jobs/cancel`.",
     "termsOfService": "https://www.speechrevolutions.com/terms",
     "contact": {
       "name": "Speech Revolutions",
@@ -137,7 +137,7 @@
           "Jobs"
         ],
         "summary": "Server-sent progress events for a job",
-        "description": "An SSE stream of progress events, ending with one terminal `completed` (data: `{\"download_url\": ...}`) or `failed` (data: `{\"step\": ..., \"reason\": ...}`) event. Steps are `preprocess`, `chunk:N` and `aggregation`, each reporting `completed` out of `total`; an event is sent as each step finishes, so the first has `completed` >= 1. Files under about 3 MiB skip `preprocess` and may send no progress event before `completed`. Each event has an `id` to send back as `Last-Event-ID` on reconnect. Rate limit: 120 requests per minute.\n\nWhen the stream pool is saturated the request is refused with 503; poll `GET /api/v1/jobs/{job_id}` instead, or retry.",
+        "description": "An SSE stream of progress events, ending with one terminal `completed` (data: `{\"download_url\": ...}`) or `failed` (data: `{\"step\": ..., \"reason\": ...}`) event. Steps are `preprocess`, `chunk:N` and `aggregation`. Each event reports `completed` out of `total` and is sent when a step finishes, so the first event has `completed` >= 1. Files under about 3 MiB skip `preprocess` and may send no progress event before `completed`. Each event has an `id`; send it back as `Last-Event-ID` when you reconnect. Rate limit: 120 requests per minute.\n\nWhen the stream pool is saturated, the request returns 503. Poll `GET /api/v1/jobs/{job_id}` instead, or retry.",
         "parameters": [
           {
             "$ref": "#/components/parameters/JobId"
@@ -262,7 +262,7 @@
           "Transcribe"
         ],
         "summary": "Stream audio in, get the transcript back",
-        "description": "One shot: the request body is the audio itself and the response is an SSE stream ending in the transcript. Intended for shells and simple scripts; files above 200 MB belong on the upload routes. Rate limit: 120 requests per minute.\n\nThe first event is `accepted` and carries the `job_id` and a `download_url`, emitted before any waiting — so a caller whose connection drops can still retrieve the job it has been billed for. The id is also mirrored in the `X-Job-Id` response header. Then come the job's `progress` events, exactly as on the jobs stream (best effort: when the stream pool is saturated you get `waiting` heartbeats with an ETA instead), then `completed` with `{\"download_url\": ...}` and finally `transcript`, whose data is the finished result in the requested `output_type` (one `data:` line per line of output). A failed job ends with `failed` instead; if the wait limit is reached the stream ends with `timeout`, and if the result could not be read back, `error` (both carry `job_id` and `download_url`, so the result can still be fetched).",
+        "description": "Send the audio as the request body and receive an SSE stream that ends with the transcript. Use it from shells and simple scripts. For files over 200 MB, use an SDK, which uploads the file for you. Rate limit: 120 requests per minute.\n\nThe first event is `accepted`. It carries the `job_id` and a `download_url` and is sent immediately, so you can retrieve the job if your connection drops. The `X-Job-Id` response header carries the same id. Next come the job's `progress` events, as on the jobs stream. These are best effort: when the stream pool is saturated you get `waiting` heartbeats with an ETA instead. Then comes `completed` with `{\"download_url\": ...}`, and finally `transcript`, whose data is the result in the requested `output_type` (one `data:` line per line of output). A failed job ends with `failed`. If the wait limit is reached, the stream ends with `timeout`; if the result cannot be read back, it ends with `error`. Both carry `job_id` and `download_url`, so you can still fetch the result.",
         "parameters": [
           {
             "name": "model",
@@ -309,7 +309,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Comma-separated domain terms to bias towards. A query string cannot carry a JSON array, so this route takes the list as one comma-separated string.",
+            "description": "Domain terms to bias recognition towards, as one comma-separated string.",
             "example": "Kubernetes,Grafana,Zephyr"
           },
           {
@@ -318,7 +318,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "ISO 639-1 code of the spoken language, from Whisper's 99-language set (e.g. `en`, `ru`, `de`). Omit it, or pass `auto`, for automatic language detection — the default, which also handles audio that switches language mid-file. When set, detection is skipped and the whole file is transcribed in that language. Pinning the wrong language makes the model translate into it (Russian audio pinned to `en` comes back as an English translation), and disables mid-file language switching. An unsupported code returns 422 with a message naming the bad value.",
+            "description": "ISO 639-1 code of the spoken language, from the 99 supported languages (e.g. `en`, `ru`, `de`). Omit it, or pass `auto`, for automatic language detection (the default), which also handles audio that switches language mid-file. When you set a language, detection is skipped and the whole file is transcribed in that language. Setting the wrong language translates the audio into it (Russian audio sent with `en` comes back as an English translation) and disables mid-file language switching. An unsupported code returns 422 with a message naming the bad value.",
             "example": "en"
           },
           {
@@ -328,7 +328,7 @@
               "type": "string",
               "format": "uri"
             },
-            "description": "Webhook to POST on completion or permanent failure."
+            "description": "Webhook URL to POST to when the job completes or fails permanently."
           }
         ],
         "requestBody": {
@@ -425,7 +425,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-API-Key",
-        "description": "An API key from the console, of the form `stt_` followed by 64 hex characters. Send it on every request. There is no OAuth flow and no scopes: a key carries the full permissions of the account that owns it, so treat it as a server-side secret and never ship it to a browser."
+        "description": "An API key from the console, of the form `stt_` followed by 64 hex characters. Send it on every request. There is no OAuth flow and there are no scopes: a key has the full permissions of its account. Keep it on your server and never send it to a browser."
       }
     },
     "parameters": {
@@ -451,7 +451,7 @@
         }
       },
       "BadRequest": {
-        "description": "The request was understood but cannot be acted on — for example, completing an upload whose bytes never arrived.",
+        "description": "The request is valid but cannot be completed, for example completing an upload whose bytes never arrived.",
         "content": {
           "application/json": {
             "schema": {
@@ -544,7 +544,7 @@
           "zephyr"
         ],
         "default": "zephyr",
-        "description": "The transcription model. One today."
+        "description": "The transcription model. There is currently one."
       },
       "OutputType": {
         "type": "string",
