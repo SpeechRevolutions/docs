@@ -19,29 +19,26 @@ export default function MigrateDeepgramPage() {
         Deepgram&apos;s pre-recorded API is a single synchronous{" "}
         <code>POST</code>: you send raw audio bytes to{" "}
         <code>/v1/listen</code> and get the full transcript back in one
-        response. Speech Revolutions uses a short upload-then-wait flow, but the SDK hides it
-        behind one <code>transcribe()</code> call — so in practice the migration
-        is a rename, not a rewrite. This guide maps every piece across, including
-        a <code>to_deepgram()</code> helper that returns Deepgram-shaped JSON so
-        your existing response parsing keeps working.
+        response. Speech Revolutions uses an upload-then-wait flow, and the SDK wraps it in
+        one <code>transcribe()</code> call, so most of the migration is renaming. This guide
+        maps each part of the API, including the <code>to_deepgram()</code> helper, which
+        returns Deepgram-shaped JSON so your existing response parsing keeps working.
       </p>
 
       <Callout title="The one-line version" tone="tip">
         <p>
-          Deepgram&apos;s <code>diarize=true</code> is supported verbatim —
-          Speech Revolutions accepts <code>diarize</code> as an alias for{" "}
-          <code>speaker_labels</code>. And <code>result.to_deepgram()</code>{" "}
-          reshapes the Speech Revolutions output into the{" "}
-          <code>results.channels[0].alternatives[0]</code> structure you already
-          parse.
+          Speech Revolutions accepts Deepgram&apos;s <code>diarize=true</code> as an alias
+          for <code>speaker_labels</code>. <code>result.to_deepgram()</code> returns the
+          output in the <code>results.channels[0].alternatives[0]</code> structure you
+          already parse.
         </p>
       </Callout>
 
       <h2>Authentication</h2>
       <p>
         Deepgram authenticates with an <code>Authorization: Token &lt;key&gt;</code>{" "}
-        header. Speech Revolutions uses an <code>X-API-Key</code> header, and the SDKs read
-        it from the environment for you.
+        header. Speech Revolutions uses an <code>X-API-Key</code> header. The SDKs read the
+        key from the environment.
       </p>
       <div className="table-scroll">
         <table>
@@ -81,10 +78,10 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
 
       <h2>Endpoint &amp; method mapping</h2>
       <p>
-        Deepgram is one synchronous endpoint. Speech Revolutions splits creation and
-        retrieval, but the SDK&apos;s <code>transcribe()</code> drives the whole
-        flow and blocks until the transcript is ready — the closest analogue to a
-        single Deepgram call.
+        Deepgram uses one synchronous endpoint. Speech Revolutions separates job creation
+        and retrieval. The SDK&apos;s <code>transcribe()</code> runs the whole flow and
+        blocks until the transcript is ready, which is the closest equivalent to a single
+        Deepgram call.
       </p>
       <div className="table-scroll">
         <table>
@@ -130,23 +127,23 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
           </tbody>
         </table>
       </div>
-      
+
       <h2>Upload differences</h2>
       <p>
         Deepgram takes raw audio bytes directly in the request body with a{" "}
-        <code>Content-Type</code> matching the file. With Speech Revolutions you pass a path, URL,
-        bytes, or file object to the SDK&apos;s <code>transcribe()</code>, which streams large
-        files straight to object storage in parts. Speech Revolutions also reports real{" "}
-        <code>upload</code> and <code>transcribe</code> progress; Deepgram
-        exposes no percentage for pre-recorded audio.
+        <code>Content-Type</code> that matches the file. With Speech Revolutions, you pass a
+        path, URL, bytes, or file object to the SDK&apos;s <code>transcribe()</code>, which
+        uploads large files to object storage in parts. Speech Revolutions also reports{" "}
+        <code>upload</code> and <code>transcribe</code> progress; Deepgram reports no
+        progress for pre-recorded audio.
       </p>
 
       <h2>Response shape</h2>
       <p>
         Deepgram nests everything under{" "}
         <code>results.channels[0].alternatives[0]</code>, with word-level
-        speakers as integers. Speech Revolutions returns a transcript-first object. Map it
-        like this:
+        speakers as integers. Speech Revolutions returns a flat transcript object. The
+        fields map as follows:
       </p>
       <div className="table-scroll">
         <table>
@@ -204,10 +201,10 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       </div>
       <Callout title="Drop-in for existing parsers" tone="info">
         <p>
-          If your codebase already digs into{" "}
+          If your code already reads{" "}
           <code>results.channels[0].alternatives[0]</code>, call{" "}
-          <code>result.to_deepgram()</code> and feed that dict to your existing
-          code unchanged.
+          <code>result.to_deepgram()</code> and pass the result to your existing code
+          unchanged.
         </p>
       </Callout>
       <CodeBlock
@@ -220,42 +217,38 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
       <p>
         Deepgram diarizes with <code>diarize=true</code>, tagging each word with
         an integer speaker. Speech Revolutions accepts the same <code>diarize</code> flag (an
-        alias for <code>speaker_labels</code>), and additionally groups the words
-        into <code>result.utterances</code> — ready-made speaker turns you would
-        otherwise have to reconstruct from per-word integers. Diarization quality
-        is one of Zephyr&apos;s strongest results; see the{" "}
+        alias for <code>speaker_labels</code>) and also groups words into{" "}
+        <code>result.utterances</code>, so you don&apos;t need to rebuild speaker turns
+        from per-word labels. For diarization accuracy, see the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}
-        <a href={SITE.landingUrl}>comparison table</a> for measured numbers.
+        <a href={SITE.landingUrl}>comparison table</a>.
       </p>
 
       <h2>Timestamps</h2>
       <p>
-        Both return per-word start/end times in <strong>seconds</strong>. On
-        Speech Revolutions word timestamps are on by default (<code>word_timestamps=true</code>
-        ); the values live on <code>result.words</code>.
+        Both return per-word start and end times in <strong>seconds</strong>. Speech
+        Revolutions enables word timestamps by default (<code>word_timestamps=true</code>)
+        and returns them on <code>result.words</code>.
       </p>
 
       <h2>Language selection</h2>
       <p>
         Deepgram takes a BCP-47 <code>language</code> query param, or{" "}
         <code>detect_language=true</code> to auto-detect. Speech Revolutions auto-detects by
-        default, so <code>detect_language</code> simply comes out of your request. The
-        difference worth knowing is that detection is per-segment rather than
-        per-request — <code>result.languages</code> gives you the spans, so a bilingual call
-        is labelled as two, not averaged into one. If you pinned a language on Deepgram, you
-        can pin it here too: <code>language</code> takes the ISO 639-1 code, so{" "}
-        <code>en-US</code> becomes <code>en</code>. Pinning skips detection for the whole
-        file; see <Link href="/cookbook#pin-language">pinning the language</Link> for when
-        that is the right call.
+        default, so remove <code>detect_language</code> from your request. Detection runs
+        per segment, not per request: <code>result.languages</code> returns language spans,
+        so a bilingual recording is labeled with both languages. To set a fixed language,
+        pass <code>language</code> with an ISO 639-1 code, so <code>en-US</code> becomes{" "}
+        <code>en</code>. This skips detection for the whole file; see{" "}
+        <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Side by side</h2>
       <p>
-        Diarized transcription, before and after. The &quot;before&quot; column
-        is <code>deepgram-sdk</code> v3, which is what most existing integrations
-        are running. Deepgram kept that shape through v4 and reshaped the client in v5, so
-        if you are on v5 or newer your code will differ from the left-hand side. The
-        right-hand side is unaffected either way.
+        Diarized transcription, before and after. The &quot;before&quot; example uses{" "}
+        <code>deepgram-sdk</code> v3; v4 has the same shape. The v5 client is different, so
+        if you use v5 or newer, your existing code differs from this example. The Speech
+        Revolutions code is the same either way.
       </p>
       <CodeTabs
         tabs={[
@@ -319,34 +312,32 @@ console.log(dg.results.channels[0].alternatives[0].transcript);`,
       <h2>Common pitfalls</h2>
       <ul>
         <li>
-          <strong>Auth header.</strong> It&apos;s <code>X-API-Key</code>, not{" "}
-          <code>Authorization: Token</code> — the SDK sets it, but hand-rolled
-          HTTP calls need updating.
+          <strong>Auth header.</strong> Use <code>X-API-Key</code>, not{" "}
+          <code>Authorization: Token</code>. The SDK sets it for you; update any direct
+          HTTP calls.
         </li>
         <li>
-          <strong>Speaker type changes.</strong> Speech Revolutions speakers are strings
+          <strong>Speaker type.</strong> Speech Revolutions speakers are strings
           (<code>SPEAKER_1</code>), not integers. Use{" "}
           <code>result.utterances</code> instead of grouping words yourself, or
           call <code>to_deepgram()</code> for the integer form.
         </li>
         <li>
-          <strong>No inline response.</strong> There is a job to wait on.{" "}
-          <code>transcribe()</code> hides this; if you call the REST API
-          directly, follow the upload → complete → poll/stream flow.
+          <strong>No inline response.</strong> Each request creates a job that you wait on.{" "}
+          <code>transcribe()</code> handles this. If you call the REST API directly, follow
+          the upload → complete → poll or stream flow.
         </li>
         <li>
           <strong>Keyword biasing.</strong> Deepgram&apos;s repeatable{" "}
-          <code>keyterm</code> becomes the <code>custom_vocabulary</code>{" "}
-          list.
+          <code>keyterm</code> maps to the <code>custom_vocabulary</code> list.
         </li>
       </ul>
 
       <Callout title="Next steps" tone="info">
         <p>
-          See the general{" "}
-          <Link href="/migrate/playbook">migration playbook</Link> for cutover
-          strategy, and the <Link href="/benchmarks">benchmarks</Link> for how
-          the two compare on accuracy and diarization.
+          See the <Link href="/migrate/playbook">migration playbook</Link> for cutover,
+          and the <Link href="/benchmarks">benchmarks</Link> for accuracy and diarization
+          comparisons.
         </p>
       </Callout>
     </>

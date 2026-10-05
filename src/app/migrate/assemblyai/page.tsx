@@ -19,20 +19,19 @@ export default function MigrateAssemblyAIPage() {
         AssemblyAI already uses an async flow: upload the file to{" "}
         <code>/v2/upload</code>, submit a job to <code>/v2/transcript</code>, then
         poll <code>/v2/transcript/{`{id}`}</code> until{" "}
-        <code>status === &quot;completed&quot;</code>. The Speech Revolutions model is the
-        same shape, so if you&apos;re used to AssemblyAI&apos;s upload-then-poll
-        rhythm you&apos;ll feel at home. The Speech Revolutions SDK collapses all three steps
-        into one blocking <code>transcribe()</code>, or keeps them separate with{" "}
-        <code>submit()</code> + <code>get_transcript()</code>.
+        <code>status === &quot;completed&quot;</code>. Speech Revolutions follows the
+        same async model. The SDK runs all three steps in one blocking{" "}
+        <code>transcribe()</code> call, or you can keep them separate with{" "}
+        <code>submit()</code> and <code>get_transcript()</code>.
       </p>
 
       <Callout title="Familiar ergonomics" tone="tip">
         <p>
-          The Speech Revolutions <code>result.text</code> and{" "}
-          <code>result.utterances</code> match AssemblyAI&apos;s{" "}
-          <code>text</code> and speaker-utterance model directly, and the SDK
-          accepts options either as keyword arguments or as a{" "}
-          <code>TranscribeOptions</code> config object — the AssemblyAI style.
+          <code>result.text</code> and <code>result.utterances</code> map directly
+          to AssemblyAI&apos;s <code>text</code> and <code>utterances</code>. The SDK
+          accepts options as keyword arguments or as a{" "}
+          <code>TranscribeOptions</code> config object, like AssemblyAI&apos;s{" "}
+          <code>TranscriptionConfig</code>.
         </p>
       </Callout>
 
@@ -116,31 +115,29 @@ export default function MigrateAssemblyAIPage() {
         </table>
       </div>
       <p>
-        Note the shape difference: AssemblyAI uploads first, gets an <code>upload_url</code>,
-        then creates a transcript from it. With a Speech Revolutions SDK that is one call:
-        pass a path or URL to <code>transcribe()</code> and it uploads, waits, and returns the
-        transcript. For a quick test from a terminal, <code>/api/v1/transcribe</code> does the
-        same in one request.
+        AssemblyAI uploads first, returns an <code>upload_url</code>, then creates a
+        transcript from it. In a Speech Revolutions SDK this is one call: pass a path or URL
+        to <code>transcribe()</code> and it uploads the file, waits, and returns the
+        transcript. To test from a terminal, <code>/api/v1/transcribe</code> does the same in
+        one request.
       </p>
 
       <h2>Upload differences</h2>
       <p>
-        Both platforms are async and both accept a hosted URL, so if you already
-        pass <code>audio_url</code> pointing at your own storage, hand the same
-        URL to <code>transcribe()</code>. For local files, AssemblyAI streams
-        bytes to <code>/v2/upload</code>; Speech Revolutions streams them to a presigned
-        object-storage URL. Speech Revolutions additionally surfaces live{" "}
-        <code>upload</code> and <code>transcribe</code> progress you can render as
-        a bar (see <Link href="/guides/live-progress">live progress</Link>),
-        rather than polling a status field.
+        Both platforms accept a hosted URL. If you already pass an{" "}
+        <code>audio_url</code> that points at your own storage, pass the same URL to{" "}
+        <code>transcribe()</code>. For local files, AssemblyAI streams bytes to{" "}
+        <code>/v2/upload</code>; Speech Revolutions streams them to a presigned
+        object-storage URL. Speech Revolutions also reports live <code>upload</code> and{" "}
+        <code>transcribe</code> progress that you can render as a progress bar instead of
+        polling a status field (see <Link href="/guides/live-progress">live progress</Link>).
       </p>
 
       <h2>Response shape</h2>
       <p>
         AssemblyAI returns a flat object with <code>text</code> and a{" "}
-        <code>words[]</code> array. Timestamps are in{" "}
-        <strong>milliseconds</strong>. Speech Revolutions returns times in{" "}
-        <strong>seconds</strong>.
+        <code>words[]</code> array, with timestamps in <strong>milliseconds</strong>.
+        Speech Revolutions returns timestamps in <strong>seconds</strong>.
       </p>
       <div className="table-scroll">
         <table>
@@ -190,8 +187,8 @@ export default function MigrateAssemblyAIPage() {
       </div>
       <Callout title="Watch the units" tone="warn">
         <p>
-          AssemblyAI timestamps are milliseconds; Speech Revolutions timestamps are seconds.
-          If you divide by 1000 anywhere, remove that step after migrating.
+          AssemblyAI timestamps are in milliseconds; Speech Revolutions timestamps are in
+          seconds. If your code divides by 1000, remove that step.
         </p>
       </Callout>
 
@@ -199,30 +196,29 @@ export default function MigrateAssemblyAIPage() {
       <p>
         AssemblyAI enables diarization with <code>speaker_labels: true</code>.
         Speech Revolutions uses the same <code>speaker_labels</code> flag (on by default) and
-        exposes the same <code>utterances</code> concept, so speaker-turn code
-        ports almost verbatim. Zephyr&apos;s diarization accuracy leads the field
-        in our testing — see the <Link href="/benchmarks">benchmarks</Link> and
-        the <a href={SITE.landingUrl}>comparison table</a>.
+        returns <code>utterances</code> in the same way, so speaker-turn code ports with
+        few changes. For diarization accuracy, see the{" "}
+        <Link href="/benchmarks">benchmarks</Link> and the{" "}
+        <a href={SITE.landingUrl}>comparison table</a>.
       </p>
 
       <h2>Timestamps</h2>
       <p>
-        Word timestamps are always available on both. The only change is the unit
-        (ms → seconds). Speech Revolutions also measures well on timestamp precision; the{" "}
-        <Link href="/benchmarks">benchmarks</Link> have the figures.
+        Both return word timestamps. The only change is the unit (milliseconds →
+        seconds). For timestamp precision, see the{" "}
+        <Link href="/benchmarks">benchmarks</Link>.
       </p>
 
       <h2>Language selection</h2>
       <p>
         AssemblyAI takes <code>language_code</code>, or{" "}
-        <code>language_detection: true</code> to auto-detect. Speech Revolutions auto-detects
-        by default, so <code>language_detection</code> comes out of your request with nothing
-        to replace it. Detection is per-segment, so <code>result.languages</code> reports
-        spans rather than one verdict for the file — closer to what{" "}
-        <code>language_detection</code> gave you, but without a second pass. A fixed{" "}
-        <code>language_code</code> maps to <code>language</code> with the ISO 639-1 code
-        (e.g. <code>en</code>), which skips detection for the whole file; see{" "}
-        <Link href="/cookbook#pin-language">pinning the language</Link>.
+        <code>language_detection: true</code> to auto-detect. Speech Revolutions
+        auto-detects by default, so remove <code>language_detection</code> from your
+        request. Detection runs per segment, so <code>result.languages</code> reports
+        language spans rather than one language for the whole file. To set a fixed
+        language, replace <code>language_code</code> with <code>language</code> and an
+        ISO 639-1 code (for example, <code>en</code>). This skips detection for the whole
+        file; see <Link href="/cookbook#pin-language">pinning the language</Link>.
       </p>
 
       <h2>Side by side</h2>
@@ -284,9 +280,9 @@ for (const u of result.utterances) {
 
       <h2>Non-blocking, if you polled before</h2>
       <p>
-        If your AssemblyAI code submits and polls on its own schedule (e.g. from a
-        worker), mirror it with <code>submit()</code> + <code>get_job_status()</code>{" "}
-        instead of the blocking <code>transcribe()</code>:
+        If your AssemblyAI code submits and polls on its own schedule (for example, from a
+        worker), use <code>submit()</code> and <code>get_job_status()</code> instead of the
+        blocking <code>transcribe()</code>:
       </p>
       <CodeBlock
         language="python"
@@ -298,38 +294,38 @@ if status.is_completed:
     print(result.text)`}
       />
       <p>
-        Or skip polling entirely with a <code>callback_url</code>{" "}
-        <Link href="/guides/webhooks">webhook</Link> — the platform POSTs a signed
-        notification when the job finishes.
+        To skip polling, set a <code>callback_url</code>{" "}
+        <Link href="/guides/webhooks">webhook</Link>. Speech Revolutions sends a signed POST
+        when the job finishes.
       </p>
 
       <h2>Common pitfalls</h2>
       <ul>
         <li>
-          <strong>Timestamp units.</strong> Milliseconds → seconds. This is the
-          most common bug after migrating.
+          <strong>Timestamp units.</strong> Milliseconds → seconds. This is the most
+          common bug after migrating.
         </li>
         <li>
           <strong>Auth header name.</strong> <code>authorization</code> →{" "}
           <code>X-API-Key</code>.
         </li>
         <li>
-          <strong>Upload shape.</strong> AssemblyAI uploads, then references the upload URL in a
-          second request. The Speech Revolutions SDK does both in one <code>transcribe()</code>{" "}
-          call.
+          <strong>Upload flow.</strong> AssemblyAI uploads, then references the upload URL in a
+          second request. The Speech Revolutions SDK does both in one{" "}
+          <code>transcribe()</code> call.
         </li>
         <li>
           <strong>Keyword biasing.</strong> AssemblyAI&apos;s{" "}
-          <code>keyterms_prompt</code> — and the older <code>word_boost</code>, which it
-          deprecated — both become <code>custom_vocabulary</code>.
+          <code>keyterms_prompt</code> and the deprecated <code>word_boost</code> both map
+          to <code>custom_vocabulary</code>.
         </li>
       </ul>
 
       <Callout title="Next steps" tone="info">
         <p>
-          The <Link href="/migrate/playbook">migration playbook</Link> covers
-          cutover; the <Link href="/benchmarks">benchmarks</Link> cover accuracy,
-          diarization, and timestamp precision.
+          See the <Link href="/migrate/playbook">migration playbook</Link> for cutover,
+          and the <Link href="/benchmarks">benchmarks</Link> for accuracy, diarization,
+          and timestamp precision.
         </p>
       </Callout>
     </>
