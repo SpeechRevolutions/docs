@@ -348,7 +348,7 @@ var jobId = await client.SubmitAsync(audioUrl, new TranscribeOptions
         </p>
       </Callout>
 
-      <Callout title="Related API endpoints" tone="info">
+      <Callout title="How it works" tone="info">
         <p>
           When you pass a URL, Speech Revolutions fetches the audio directly. The SDK then
           waits on the <Link href="/api-reference/jobs">SSE job stream</Link> and parses

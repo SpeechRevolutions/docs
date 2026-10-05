@@ -193,7 +193,8 @@ Console.WriteLine(result.Text);`,
         <li>Custom vocabulary / keyterm prompting</li>
         <li>
           <strong>Live progress</strong> — real-time upload and transcription
-          percentage via SDK console bars or callbacks
+          percentage via SDK console bars or callbacks (AssemblyAI and Deepgram
+          expose no percentage for pre-recorded audio)
         </li>
       </ul>
 

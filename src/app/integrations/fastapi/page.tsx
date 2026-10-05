@@ -198,7 +198,7 @@ async def receive(request: Request):
     return {"ok": True}  # a 2xx acks delivery; 5xx is retried`}
       />
 
-      <Callout title="Related API endpoints" tone="info">
+      <Callout title="How it works" tone="info">
         <p>
           The async client runs the <Link href="/api-reference/upload">upload</Link> flow
           and waits on the <Link href="/api-reference/jobs">SSE job stream</Link>,

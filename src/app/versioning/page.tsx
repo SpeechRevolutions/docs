@@ -102,7 +102,7 @@ Link: <https://docs.speechrevolutions.com/versioning>; rel="deprecation"`}
 
       <h2>Security exception</h2>
       <p>
-        If a field or behavior exposes customer data, it is changed immediately, without the
+        If a field or behavior exposes customer data, it is changed as quickly as possible, without the
         notice period above, and you are notified afterwards.
       </p>
     </>

@@ -278,7 +278,7 @@ export async function POST(req: NextRequest) {
 }`}
       />
 
-      <Callout title="Related API endpoints" tone="info">
+      <Callout title="How it works" tone="info">
         <p>
           <code>transcribe()</code> runs the full{" "}
           <Link href="/api-reference/upload">upload</Link> flow and waits on the{" "}

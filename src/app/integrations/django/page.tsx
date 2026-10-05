@@ -204,7 +204,7 @@ urlpatterns = [
 ]`}
       />
 
-      <Callout title="Related API endpoints" tone="info">
+      <Callout title="How it works" tone="info">
         <p>
           <code>submit()</code> creates the job through the{" "}
           <Link href="/api-reference/upload">upload</Link> flow and returns its ID. You

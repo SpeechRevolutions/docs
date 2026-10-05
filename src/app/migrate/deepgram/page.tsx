@@ -134,8 +134,8 @@ export SPEECHREVOLUTIONS_API_KEY=stt_...`}
         <code>Content-Type</code> that matches the file. With Speech Revolutions, you pass a
         path, URL, bytes, or file object to the SDK&apos;s <code>transcribe()</code>, which
         uploads large files to object storage in parts. Speech Revolutions also reports{" "}
-        <code>upload</code> and <code>transcribe</code> progress; Deepgram reports no
-        progress for pre-recorded audio.
+        <code>upload</code> and <code>transcribe</code> progress; Deepgram exposes no
+        percentage for pre-recorded audio.
       </p>
 
       <h2>Response shape</h2>
@@ -219,7 +219,8 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
         an integer speaker. Speech Revolutions accepts the same <code>diarize</code> flag (an
         alias for <code>speaker_labels</code>) and also groups words into{" "}
         <code>result.utterances</code>, so you don&apos;t need to rebuild speaker turns
-        from per-word labels. For diarization accuracy, see the{" "}
+        from per-word labels. Zephyr ranks #1 on diarization error rate on every
+        benchmark subset. See the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}
         <a href={SITE.landingUrl}>comparison table</a>.
       </p>

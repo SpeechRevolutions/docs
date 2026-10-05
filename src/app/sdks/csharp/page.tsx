@@ -225,7 +225,7 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
         The SDK reports progress for <strong>both</strong> the file upload and
         the transcription, as a console bar, a callback, or both. When you
         enable both, the bars render <em>and</em> your callbacks fire for every
-        event.
+        event. AssemblyAI and Deepgram expose no percentage for pre-recorded audio.
       </p>
       <p>
         Files under about 3 MiB may report no transcription progress before

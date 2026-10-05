@@ -22,7 +22,7 @@ export default function MigrateSelfHostedWhisperPage() {
         VRAM for <code>large-v3</code>, warming models, batching, autoscaling, and running
         a separate diarization stack. Speech Revolutions runs Zephyr, its speech-to-text
         engine, as a hosted API and returns word timestamps and diarization in one
-        response.
+        response, with a diarization error rate that ranks #1 on every benchmark subset.
       </p>
 
       <Callout title="What you no longer run" tone="tip">
@@ -169,7 +169,8 @@ export default function MigrateSelfHostedWhisperPage() {
         <code>pyannote.audio</code>) and align its speaker turns to the Whisper words
         yourself. Speech Revolutions diarizes in the same call: set{" "}
         <code>speaker_labels</code> (on by default) and read{" "}
-        <code>result.utterances</code>. For diarization accuracy, see the{" "}
+        <code>result.utterances</code>. Zephyr ranks #1 on diarization error rate on every
+        benchmark subset. See the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}
         <a href={SITE.landingUrl}>comparison table</a>.
       </p>

@@ -188,16 +188,17 @@ export default function MigrateElevenLabsPage() {
         <code>speaker_id</code> per word. Speech Revolutions uses the same <code>diarize</code>{" "}
         flag (an alias for <code>speaker_labels</code>, on by default) and also groups
         words into <code>result.utterances</code>, so you don&apos;t need to rebuild turns
-        from per-word IDs. For measured diarization error rate (DER), see the{" "}
+        from per-word IDs. Zephyr ranks #1 on diarization error rate (DER) on every
+        benchmark subset. See the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}
         <a href={SITE.landingUrl}>comparison table</a>.
       </p>
 
       <h2>Timestamps</h2>
       <p>
-        Both return per-word start and end times in seconds by default. The{" "}
-        <Link href="/benchmarks">benchmarks</Link> compare median word-boundary error
-        side by side.
+        Both return per-word start and end times in seconds by default. On the{" "}
+        <Link href="/benchmarks">word-alignment benchmark</Link>, Zephyr&apos;s mean
+        word-start error is 40 ms, against 58 ms for ElevenLabs.
       </p>
 
       <h2>Language selection</h2>

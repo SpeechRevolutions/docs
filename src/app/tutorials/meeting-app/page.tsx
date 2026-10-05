@@ -340,7 +340,7 @@ public static class Meetings
         ]}
       />
 
-      <h2>Step 2: Expose start, progress, and transcript endpoints</h2>
+      <h2>Step 2: Expose start and status endpoints</h2>
       <p>
         Start the job in the background and return a <code>job_id</code>{" "}
         immediately. The frontend polls the meeting endpoint for the bar. Once{" "}
