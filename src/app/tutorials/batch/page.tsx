@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Batch-transcribe thousands of files",
   description:
-    "You have a backlog — thousands of recordings sitting in a bucket — and you want them all transcribed. The naive approach, calling transcribe() in a loop…",
+    "Transcribe a large backlog of files: submit each job with bounded concurrency, persist the job IDs, and collect the transcripts by polling or webhook.",
 };
 
 export default function BatchTutorialPage() {
@@ -14,52 +14,49 @@ export default function BatchTutorialPage() {
     <>
       <h1>Batch-transcribe thousands of files</h1>
       <p>
-        You have a backlog — thousands of recordings sitting in a bucket — and
-        you want them all transcribed. The naive approach, calling{" "}
-        <code>transcribe()</code> in a loop, blocks on each file and holds a
-        live connection open for the entire job. That doesn&apos;t scale. This
-        tutorial shows the pattern that does: <strong>submit</strong> every file
-        (with bounded concurrency), persist the returned job ids, then{" "}
-        <strong>collect</strong> results separately by polling or via webhooks.
+        To transcribe thousands of files, don&apos;t call{" "}
+        <code>transcribe()</code> in a loop: it blocks on each file and holds a
+        connection open for the entire job. Instead, <strong>submit</strong>{" "}
+        every file with bounded concurrency, persist the returned job IDs, then{" "}
+        <strong>collect</strong> the results separately by polling or with
+        webhooks.
       </p>
 
-      <h2>Why submit + collect beats N live connections</h2>
+      <h2>Submit and collect vs. transcribe()</h2>
       <p>
-        <code>transcribe()</code> is a convenience: it uploads, waits, and
-        returns the transcript in one call — perfect for one file, wasteful for
-        thousands. Each in-flight call keeps a long-lived connection open for
-        the full duration of the transcription. Run a thousand of those at once
-        and you&apos;re holding a thousand sockets, any one of which can drop and
-        lose the result you were waiting on.
+        <code>transcribe()</code> uploads, waits, and returns the transcript in
+        one call. Use it for single files. Each call keeps a connection open
+        for the full transcription, so a thousand concurrent calls hold a
+        thousand connections, and any dropped connection loses its result.
       </p>
       <p>
-        <code>submit()</code> uploads the audio, enqueues the job, and returns a{" "}
-        <code>job_id</code> immediately — no connection held while Speech Revolutions works.
-        Once you have the ids, the work is durable: you can collect the results
-        minutes or hours later, survive a restart, and retry a single file
-        without redoing the batch. The upload is the only part that needs
-        concurrency control; the transcription itself runs server-side.
+        <code>submit()</code> uploads the audio, queues the job, and returns a{" "}
+        <code>job_id</code> immediately. No connection stays open while the job
+        runs. With the job IDs saved, you can collect results minutes or hours
+        later, survive a restart, and retry a single file without redoing the
+        batch. Only the upload needs concurrency control; transcription runs
+        server-side.
       </p>
 
       <Callout title="The two phases" tone="tip">
         <p>
-          <strong>Submit</strong> — upload + enqueue every file, bounded by a
+          <strong>Submit</strong>: upload and queue every file, bounded by a
           semaphore so you don&apos;t open thousands of uploads at once. Save the
           returned <code>job_id</code>s somewhere durable.{" "}
-          <strong>Collect</strong> — fetch each transcript once its job
+          <strong>Collect</strong>: fetch each transcript once its job
           completes, either by polling <code>get_job_status</code> /{" "}
-          <code>get_transcript</code> or by having Speech Revolutions POST a{" "}
+          <code>get_transcript</code> or by receiving a POST to your{" "}
           <code>callback_url</code> when each job finishes.
         </p>
       </Callout>
 
-      <h2>Step 1 — submit everything with bounded concurrency</h2>
+      <h2>Step 1: Submit every file with bounded concurrency</h2>
       <p>
-        Use the async client and gather all submissions behind a semaphore. The
-        semaphore caps how many uploads run at once (tune it to your bandwidth);
-        every task returns a <code>(path, job_id)</code> pair you persist before
-        moving on. If a submission fails, record the error instead of the id so
-        you can retry just that file.
+        Use the async client and run all submissions behind a semaphore. The
+        semaphore caps how many uploads run at once; tune it to your bandwidth.
+        Each task returns a <code>(path, job_id)</code> pair that you persist.
+        If a submission fails, record the error instead of the job ID so you
+        can retry that file.
       </p>
       <CodeTabs
         tabs={[
@@ -277,23 +274,22 @@ Console.WriteLine($"submitted {jobIds.Count}/{paths.Count} files; saved jobs.jso
         ]}
       />
 
-      <Callout title="Persist ids before collecting" tone="warn">
+      <Callout title="Persist job IDs before collecting" tone="warn">
         <p>
-          Write the job ids to durable storage (a file, a table, a queue) as
-          soon as you have them, and only then start collecting. The ids are
-          your recovery point: if collection crashes, you re-read them and pick
-          up where you left off — you never re-upload. Speech Revolutions regenerates a
-          job&apos;s download URL on demand, so results stay fetchable by id long
+          Write the job IDs to durable storage (a file, a table, a queue) as
+          soon as you have them, then start collecting. If collection crashes,
+          re-read the IDs and resume without re-uploading. A job&apos;s download
+          URL is regenerated on demand, so results stay fetchable by job ID long
           after upload.
         </p>
       </Callout>
 
-      <h2>Step 2 (option A) — collect by polling</h2>
+      <h2>Step 2, option A: Collect by polling</h2>
       <p>
-        Read back the ids and poll each job until it completes, then fetch the
-        transcript. The async client with the same semaphore keeps the polling
-        pressure bounded. <code>get_job_status</code> returns a status you check
-        for <code>completed</code> / <code>failed</code>; <code>get_transcript</code>{" "}
+        Read the job IDs back and poll each job until it completes, then fetch
+        the transcript. Reuse the semaphore to bound the number of concurrent
+        requests. <code>get_job_status</code> returns a status to check for{" "}
+        <code>completed</code> / <code>failed</code>; <code>get_transcript</code>{" "}
         downloads and parses the result.
       </p>
       <CodeTabs
@@ -550,13 +546,12 @@ await Parallel.ForEachAsync(
         ]}
       />
 
-      <h2>Step 2 (option B) — collect by webhook</h2>
+      <h2>Step 2, option B: Collect by webhook</h2>
       <p>
-        At large scale, polling thousands of jobs is a lot of wasted requests.
-        Pass a <code>callback_url</code> when you submit, and Speech Revolutions POSTs a
-        signed notification the moment each job finishes — you fetch the
-        transcript in the handler and never poll at all. Change one line in
-        Step 1:
+        Polling thousands of jobs wastes requests. Pass a{" "}
+        <code>callback_url</code> when you submit, and you receive a signed POST
+        when each job finishes. Fetch the transcript in your handler instead of
+        polling. Change one line in Step 1:
       </p>
       <CodeTabs
         tabs={[
@@ -607,31 +602,31 @@ var jobId = await client.SubmitAsync(path, new TranscribeOptions
         <code>{`{ job_id, status, download_url?, step?, reason? }`}</code>, signed
         with HMAC-SHA256 in the <code>X-SR-Signature: sha256=&lt;hmac&gt;</code>{" "}
         header, keyed with your organization&apos;s signing secret from the console
-        (<strong>API Keys → Webhook signing secret</strong>) — always verify it against
-        the raw request bytes before trusting the payload (see{" "}
-        <Link href="/guides/webhooks">Webhooks</Link>). In the handler, look up which file the <code>job_id</code>{" "}
-        belongs to, then call <code>get_transcript(job_id)</code> (or download{" "}
+        (<strong>API Keys → Webhook signing secret</strong>). Always verify the
+        signature against the raw request bytes before trusting the payload (see{" "}
+        <Link href="/guides/webhooks">Webhooks</Link>). In the handler, look up
+        the file that the <code>job_id</code> belongs to, then call{" "}
+        <code>get_transcript(job_id)</code> (or download{" "}
         <code>download_url</code> directly) and save it.
       </p>
 
       <Callout title="Polling or webhooks?" tone="info">
         <p>
-          <strong>Polling</strong> is simplest and needs no public endpoint —
-          great for a one-off backfill run from a script.{" "}
-          <strong>Webhooks</strong> scale better and cost fewer requests once
-          you have a server that can receive them — the right default for an
-          ongoing pipeline. Both collect from the same durable job ids, so you
-          can start with polling and switch later without changing Step 1.
+          <strong>Polling</strong> is simplest and needs no public endpoint.
+          Use it for a one-off backfill run from a script.{" "}
+          <strong>Webhooks</strong> scale better and use fewer requests, but
+          need a server that can receive them. Use them for an ongoing
+          pipeline. Both collect from the same job IDs, so you can start with
+          polling and switch later without changing Step 1.
         </p>
       </Callout>
 
       <h2>Track and resume with the jobs list</h2>
       <p>
-        You don&apos;t have to rely solely on your own <code>jobs.json</code>.{" "}
         <code>list_jobs(limit=, before=)</code> returns your recent jobs,
-        newest first, cursor-paginated — handy for a dashboard or for rebuilding
-        state after losing your local record. Page through with the returned{" "}
-        <code>next_before</code> cursor.
+        newest first, with cursor pagination. Use it for a dashboard or to
+        rebuild state if you lose your local <code>jobs.json</code>. Page
+        through with the returned <code>next_before</code> cursor.
       </p>
       <CodeTabs
         tabs={[
@@ -728,9 +723,7 @@ while (true)
       />
 
       <p>
-        That&apos;s the scalable shape: submit with bounded concurrency, persist
-        the ids, collect out of band. For the live single-file experience
-        instead, see the{" "}
+        For live progress on a single file, see the{" "}
         <Link href="/tutorials/meeting-app">meeting-transcription tutorial</Link>{" "}
         and the <Link href="/guides/live-progress">live progress guide</Link>;
         for more patterns, the <Link href="/cookbook">cookbook</Link>.
