@@ -16,9 +16,9 @@ export default function WebhooksGuidePage() {
     <>
       <h1>Webhooks</h1>
       <p>
-        Pass a <code>callback_url</code> and Speech Revolutions POSTs a signed notification
-        to it when the job finishes, so your server can submit work and move on instead of
-        holding a connection open.
+        Pass a <code>callback_url</code> and Speech Revolutions sends a signed POST to it
+        when the job finishes. Your server submits the job and moves on instead of holding a
+        connection open.
       </p>
 
       <h2>Get your signing secret</h2>
@@ -28,7 +28,7 @@ export default function WebhooksGuidePage() {
           console
         </a>{" "}
         under <strong>API Keys → Webhook signing secret</strong>: choose <strong>Reveal</strong>,
-        copy it, and store it where your receiver can read it — the examples below use{" "}
+        copy it, and store it where your receiver can read it. The examples below use{" "}
         <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>.
       </p>
       <CodeBlock
@@ -36,8 +36,8 @@ export default function WebhooksGuidePage() {
         code={`export SPEECHREVOLUTIONS_WEBHOOK_SECRET="whsec_…"`}
       />
       <p>
-        The secret belongs to the organization, not to an API key: webhooks for jobs from any
-        of its keys are signed with it. Anyone who can create API keys can reveal it; owners
+        The secret belongs to the organization, not to an API key. Webhooks for jobs from any
+        of its API keys are signed with it. Anyone who can create API keys can reveal it; owners
         and admins can rotate it.
       </p>
 
@@ -48,8 +48,8 @@ export default function WebhooksGuidePage() {
       </p>
       <p>
         The URL must be publicly reachable over the internet. A <code>localhost</code> or{" "}
-        <code>127.0.0.1</code> URL (or any private address) is refused with HTTP 403 when you
-        submit, so in local development pass a tunnel&apos;s public URL instead.
+        <code>127.0.0.1</code> URL, or any private address, is rejected with HTTP 403 when you
+        submit. In local development, pass a tunnel&apos;s public URL instead.
       </p>
       <CodeTabs
         tabs={[
@@ -103,9 +103,9 @@ await client.SubmitAsync("meeting.mp3",
         public address.
       </p>
 
-      <h2>What we send</h2>
+      <h2>Webhook payload</h2>
       <p>
-        One POST when the job completes or fails permanently. The body is JSON:
+        You receive one POST when the job completes or fails permanently. The body is JSON:
       </p>
       <CodeBlock
         language="json"
@@ -148,7 +148,7 @@ await client.SubmitAsync("meeting.mp3",
               <td>
                 <code>X-SR-Delivery</code>
               </td>
-              <td>A unique id per delivery. Retries reuse it, so use it to drop duplicates.</td>
+              <td>A unique ID per delivery. Retries reuse it, so use it to drop duplicates.</td>
             </tr>
             <tr>
               <td>
@@ -163,14 +163,14 @@ await client.SubmitAsync("meeting.mp3",
       </div>
       <p>
         Respond with any <code>2xx</code> to acknowledge. A <code>5xx</code>, a timeout (10
-        seconds per attempt) or a connection error is retried with backoff, up to 4 attempts in
-        all. A <code>4xx</code> is final and not retried.
+        seconds per attempt), or a connection error is retried with backoff, up to 4 attempts in
+        total. A <code>4xx</code> is final and not retried.
       </p>
 
       <h2>Verify the signature</h2>
       <p>
-        Compute the HMAC over the <em>exact bytes</em> you received — not a re-serialized
-        object, which can reorder keys or change spacing — and compare with a constant-time
+        Compute the HMAC over the <em>exact bytes</em> you received, not a re-serialized
+        object (which can reorder keys or change spacing). Compare with a constant-time
         check. Reject anything that doesn&apos;t match.
       </p>
       <CodeTabs
@@ -350,9 +350,9 @@ app.Run();`,
 
       <h2>Test your receiver locally</h2>
       <p>
-        Sign a sample body with your secret and send it the way we would. A receiver that
-        verifies correctly accepts this and rejects the same request with the body changed.
-        (This tests your receiver only: real deliveries need the public URL above.)
+        Sign a sample body with your secret and send it to your receiver. A receiver that
+        verifies correctly accepts this request and rejects it if the body changes. This tests
+        your receiver only; real deliveries need a public URL.
       </p>
       <CodeBlock
         language="bash"
@@ -369,7 +369,7 @@ curl -X POST http://localhost:8000/webhooks/stt \\
       <p>
         If the secret leaks, an owner or admin can choose <strong>Rotate</strong> on the same
         console card. Webhooks sent after that are signed with the new secret, and a receiver
-        still using the old one rejects them — so update your receivers right after rotating.
+        still using the old one rejects them, so update your receivers right after rotating.
         Every reveal and rotation is recorded in the organization&apos;s activity log.
       </p>
       <Callout title="Keep it server-side" tone="warn">
@@ -388,7 +388,7 @@ curl -X POST http://localhost:8000/webhooks/stt \\
         </li>
         <li>
           <Link href="/integrations/fastapi">FastAPI</Link>,{" "}
-          <Link href="/integrations/django">Django</Link> and{" "}
+          <Link href="/integrations/django">Django</Link>, and{" "}
           <Link href="/integrations/nextjs">Next.js</Link>: a receiver wired into a full app.
         </li>
         <li>

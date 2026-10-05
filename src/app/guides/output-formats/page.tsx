@@ -15,11 +15,10 @@ export default function OutputFormatsGuidePage() {
     <>
       <h1>Output formats &amp; subtitles</h1>
       <p>
-        One transcription, six shapes. Set <code>output_type</code> to choose
-        what the server returns — structured JSON, plain text, subtitle files, or
-        ready-to-share documents. The default is <code>json</code>. The server
-        does the formatting; the SDK never writes a file unless you call{" "}
-        <code>save()</code>.
+        Set <code>output_type</code> to choose what the server returns:
+        structured JSON, plain text, subtitle files, or formatted documents.
+        The default is <code>json</code>. The server does the formatting. The
+        SDK writes a file only when you call <code>save()</code>.
       </p>
 
       <h2 id="formats">The six formats</h2>
@@ -31,7 +30,7 @@ export default function OutputFormatsGuidePage() {
                 <code>output_type</code>
               </th>
               <th>What you get</th>
-              <th>Reach for it when</th>
+              <th>Use it when</th>
             </tr>
           </thead>
           <tbody>
@@ -40,7 +39,7 @@ export default function OutputFormatsGuidePage() {
                 <code>json</code> <em>(default)</em>
               </td>
               <td>
-                Structured document with per-word timings and speakers; parsed into{" "}
+                Structured document with per-word timings and speakers. The SDK parses it into{" "}
                 <code>.text</code>, <code>.words</code>, <code>.utterances</code>.
               </td>
               <td>You&apos;re writing code against the result.</td>
@@ -56,7 +55,7 @@ export default function OutputFormatsGuidePage() {
               <td>
                 <code>srt</code>
               </td>
-              <td>SubRip subtitles — numbered cues with start/end times.</td>
+              <td>SubRip subtitles: numbered cues with start and end times.</td>
               <td>Captions for most video players and editors.</td>
             </tr>
             <tr>
@@ -86,24 +85,23 @@ export default function OutputFormatsGuidePage() {
         </table>
       </div>
       <p>
-        <code>output_type</code> is a request option across every SDK — a kwarg
-        in Python, an option field in JavaScript, and the <code>OutputType</code>{" "}
+        Every SDK accepts <code>output_type</code>: as a keyword argument in
+        Python, an option field in JavaScript, and the <code>OutputType</code>{" "}
         enum in <Link href="/sdks/go">Go</Link> (<code>stt.OutputSRT</code>) and{" "}
         <Link href="/sdks/csharp">C#</Link> (<code>OutputType.Srt</code>).
       </p>
 
       <h2 id="json">The JSON schema</h2>
       <p>
-        The default <code>json</code> output is a document whose core is a{" "}
-        <code>words</code> array; each word has the token plus optional{" "}
+        The default <code>json</code> output is a document built around a{" "}
+        <code>words</code> array. Each word has the token plus optional{" "}
         <code>start</code>, <code>end</code>, <code>speaker</code>,{" "}
-        <code>confidence</code>, and <code>language</code>. When diarization
-        runs, the document may also carry <code>diarization</code> segments;
-        when the audio switches languages mid-file, it may also carry a{" "}
+        <code>confidence</code>, and <code>language</code> fields. With
+        diarization on, the document may also include <code>diarization</code>{" "}
+        segments. When the audio switches languages, it may also include a{" "}
         <code>languages</code> array. The SDK reads this into a transcript
-        object — deriving <code>.text</code>, grouping words into{" "}
-        <code>.utterances</code>, and keeping the original under{" "}
-        <code>.raw</code>.
+        object: it derives <code>.text</code>, groups words into{" "}
+        <code>.utterances</code>, and keeps the original in <code>.raw</code>.
       </p>
       <CodeBlock
         language="json"
@@ -122,7 +120,7 @@ export default function OutputFormatsGuidePage() {
 }`}
       />
       <p>
-        The SDK normalizes it into a predictable object. Use{" "}
+        Use{" "}
         <code>result.to_dict()</code> for a provider-neutral dict:
       </p>
       <CodeBlock
@@ -146,8 +144,8 @@ export default function OutputFormatsGuidePage() {
 }`}
       />
       <p>
-        For migrations, <code>result.to_deepgram()</code> reshapes the same data
-        into Deepgram&apos;s pre-recorded response — access it at{" "}
+        For migrations, <code>result.to_deepgram()</code> returns the same data
+        in Deepgram&apos;s pre-recorded response shape, with the text at{" "}
         <code>results.channels[0].alternatives[0].transcript</code>. See the{" "}
         <Link href="/sdks/python">Python SDK</Link> result-shape table for the
         full member list.
@@ -155,11 +153,10 @@ export default function OutputFormatsGuidePage() {
 
       <h2 id="subtitles">Subtitles: SRT &amp; VTT</h2>
       <p>
-        Ask for <code>srt</code> or <code>vtt</code> and the server returns
-        formatted subtitle bytes — you don&apos;t assemble cues from word
-        timings yourself. For these non-JSON outputs, <code>result.text</code> is
-        the decoded file contents and <code>result.save()</code> writes it,
-        inferring the extension from the output type when your path has none.
+        Request <code>srt</code> or <code>vtt</code> and the server returns a
+        formatted subtitle file. For these outputs, <code>result.text</code> is
+        the decoded file contents and <code>result.save()</code> writes it to
+        disk, adding the extension for the output type when your path has none.
       </p>
       <CodeTabs
         tabs={[
@@ -230,9 +227,9 @@ await vtt.SaveAsync("meeting");   // -> meeting.vtt`,
       </ul>
       <p>
         A cue runs from its first word&apos;s start to its last word&apos;s end. With speaker
-        labels on (the default), the cue&apos;s first line starts with the speaker, e.g.{" "}
-        <code>SPEAKER_1: </code>; turn <code>speaker_labels</code> off for captions without
-        it. SRT times are <code>HH:MM:SS,mmm</code>; VTT times are{" "}
+        labels on (the default), the cue&apos;s first line starts with the speaker, for example{" "}
+        <code>SPEAKER_1: </code>. Turn <code>speaker_labels</code> off for captions without
+        speaker names. SRT times are <code>HH:MM:SS,mmm</code>; VTT times are{" "}
         <code>HH:MM:SS.mmm</code>, after a <code>WEBVTT</code> header.
       </p>
       <CodeBlock
@@ -286,8 +283,8 @@ SPEAKER_2: me to put on my back?`}
       <h2 id="documents">Documents: DOCX &amp; PDF</h2>
       <p>
         <code>docx</code> and <code>pdf</code> return a formatted document as raw
-        bytes. These aren&apos;t text you decode — save them straight to disk (or
-        stream to your user). <code>docx</code> stays editable; <code>pdf</code>{" "}
+        bytes. Save them to disk or stream them to your user; don&apos;t decode
+        them as text. <code>docx</code> is editable; <code>pdf</code>{" "}
         is fixed-layout and print-ready.
       </p>
       <CodeTabs
@@ -352,30 +349,30 @@ await File.WriteAllBytesAsync("meeting.pdf", pdf.Content);`,
           When you <Link href="/cookbook#submit-poll">submit and poll</Link>, ask
           for the format at retrieval time. Python{" "}
           <code>get_transcript(job_id, output_type=&quot;srt&quot;)</code>, Go{" "}
-          <code>GetTranscript(id, stt.OutputSRT)</code>. Choosing{" "}
-          <code>json</code> when you submit keeps the richest data; you can always
-          render subtitles or documents from it afterwards.
+          <code>GetTranscript(id, stt.OutputSRT)</code>. Submit with{" "}
+          <code>json</code> to keep the richest data; you can render subtitles or
+          documents from it later.
         </p>
       </Callout>
 
       <h2 id="choosing">Choosing a format</h2>
       <ul>
         <li>
-          <strong>Building software</strong> — use <code>json</code>. It&apos;s
-          the only format with structured{" "}
+          <strong>Building software</strong>: <code>json</code>. It is the only
+          format with structured{" "}
           <Link href="/guides/timestamps">timestamps</Link> and{" "}
           <Link href="/guides/diarization">speaker</Link> data you can iterate.
         </li>
         <li>
-          <strong>Captioning video</strong> — <code>srt</code> or{" "}
-          <code>vtt</code>, formatted server-side and ready to drop in.
+          <strong>Captioning video</strong>: <code>srt</code> or{" "}
+          <code>vtt</code>, formatted by the server.
         </li>
         <li>
-          <strong>Sharing with people</strong> — <code>docx</code> (editable) or{" "}
+          <strong>Sharing with people</strong>: <code>docx</code> (editable) or{" "}
           <code>pdf</code> (print-ready).
         </li>
         <li>
-          <strong>Just the words</strong> — <code>txt</code>.
+          <strong>Just the words</strong>: <code>txt</code>.
         </li>
       </ul>
 
