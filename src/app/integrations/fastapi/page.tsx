@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Using Speech Revolutions with FastAPI",
   description:
-    "Wire Speech Revolutions into a FastAPI service: submit a job from an endpoint, stream progress into a per-job store from the async client's callbacks, expose a…",
+    "Integrate Speech Revolutions into a FastAPI service: submit a job from an endpoint, record progress from the async client's callbacks, expose a progress endpoint, and receive signed completion webhooks.",
 };
 
 export default function FastapiIntegrationPage() {
@@ -14,18 +14,18 @@ export default function FastapiIntegrationPage() {
     <>
       <h1>Using Speech Revolutions with FastAPI</h1>
       <p>
-        Wire Speech Revolutions into a FastAPI service: submit a job from an endpoint,
-        stream progress into a per-job store from the async client&apos;s
-        callbacks, expose a <code>/progress/{`{job_id}`}</code> endpoint your
-        frontend polls, and receive signed completion webhooks. Your API key
-        lives only in the server environment.
+        Integrate Speech Revolutions into a FastAPI service: submit a job from an
+        endpoint, write progress from the async client&apos;s callbacks into a per-job
+        store, expose a <code>/progress/{`{job_id}`}</code> endpoint for your frontend to
+        poll, and receive signed completion webhooks. Your API key stays in the server
+        environment.
       </p>
 
       <Callout title="Keep the key server-side" tone="warn">
         <p>
           <code>AsyncSpeechRevolutions()</code> reads{" "}
-          <code>SPEECHREVOLUTIONS_API_KEY</code> from the environment. It stays on your FastAPI host — the browser only
-          ever sees job ids and progress numbers.
+          <code>SPEECHREVOLUTIONS_API_KEY</code> from the environment. The key stays on
+          your FastAPI host; the browser only sees job IDs and progress values.
         </p>
       </Callout>
 
@@ -37,14 +37,14 @@ export default function FastapiIntegrationPage() {
 export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />
 
-      <h2>Submit in a background task + a progress endpoint</h2>
+      <h2>Submit in a background task and expose a progress endpoint</h2>
       <p>
-        Kick off the transcription in a FastAPI <code>BackgroundTasks</code> job
-        so the request returns immediately. The async client&apos;s{" "}
-        <code>on_upload_progress</code> and <code>on_progress</code> callbacks
-        write into a per-job store; the <code>/progress/{`{job_id}`}</code>{" "}
-        endpoint reads the latest snapshot. This mirrors the{" "}
-        <code>live_progress_webapp.py</code> pattern from the cookbook.
+        Start the transcription in a FastAPI <code>BackgroundTasks</code> job so the
+        request returns immediately. The async client&apos;s{" "}
+        <code>on_upload_progress</code> and <code>on_progress</code> callbacks write to a
+        per-job store, and the <code>/progress/{`{job_id}`}</code> endpoint returns the
+        latest snapshot. This follows the <code>live_progress_webapp.py</code> pattern
+        from the cookbook.
       </p>
       <CodeBlock
         language="python"
@@ -122,23 +122,21 @@ def progress(job_id: str):
     return store.snapshot()  # {"phase": "transcribe", "percent": 63.5, "text": null}`}
       />
 
-      <Callout title="A per-process dict is the simplest store" tone="info">
+      <Callout title="Multiple workers need a shared store" tone="info">
         <p>
-          The in-memory <code>JOBS</code> dict works when one worker serves both
-          the submit and the poll. Behind multiple Uvicorn/Gunicorn workers, put
-          the snapshot in Redis or your database so any worker can answer the
-          poll. See{" "}
-          <Link href="/guides/live-progress">Live progress for web apps</Link>{" "}
-          for the weighting details.
+          The in-memory <code>JOBS</code> dict works only when one worker handles both
+          the submit and the poll. With multiple Uvicorn or Gunicorn workers, store the
+          snapshot in Redis or your database so any worker can answer the poll. See{" "}
+          <Link href="/guides/live-progress">Live progress for web apps</Link> for the
+          weighting details.
         </p>
       </Callout>
 
-      <h2>Prefer submit() for fire-and-forget?</h2>
+      <h2>Fire-and-forget with submit()</h2>
       <p>
-        If you don&apos;t need live progress, <code>submit()</code> returns a
-        job id without holding the connection open. Poll{" "}
-        <code>get_job_status()</code> (or add a <code>callback_url</code>) and
-        fetch the transcript when it finishes.
+        If you don&apos;t need live progress, <code>submit()</code> returns a job ID
+        without holding the connection open. Poll <code>get_job_status()</code> (or set a{" "}
+        <code>callback_url</code>) and fetch the transcript when the job finishes.
       </p>
       <CodeBlock
         language="python"
@@ -153,13 +151,16 @@ def progress(job_id: str):
 
       <h2>Signed webhook receiver</h2>
       <p>
-        For long jobs, pass a <code>callback_url</code> and let Speech Revolutions POST you
-        on completion. The platform signs the raw body with HMAC-SHA256 in the{" "}
-        <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Verify against
-        the exact bytes you received — not a re-serialized dict — with a
-        constant-time compare. This mirrors <code>webhook_receiver_fastapi.py</code> from the
-        cookbook. Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
-        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
+        For long jobs, pass a <code>callback_url</code> and Speech Revolutions POSTs to it
+        when the job finishes. The raw body is signed with HMAC-SHA256 and the signature
+        is sent in the <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header. Verify it
+        against the exact bytes you received, not a re-serialized dict, with a
+        constant-time comparison. This follows <code>webhook_receiver_fastapi.py</code>{" "}
+        from the cookbook. Copy your signing secret from the console (
+        <strong>API Keys → Webhook signing secret</strong>) into{" "}
+        <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>. The{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries,
+        and secret rotation.
       </p>
       <CodeBlock
         language="python"
@@ -197,14 +198,13 @@ async def receive(request: Request):
     return {"ok": True}  # a 2xx acks delivery; 5xx is retried`}
       />
 
-      <Callout title="Under the hood" tone="info">
+      <Callout title="Related API endpoints" tone="info">
         <p>
-          The async client drives the{" "}
-          <Link href="/api-reference/upload">upload</Link> flow and waits on the{" "}
-          <Link href="/api-reference/jobs">SSE job stream</Link>, converting the
-          server&apos;s <code>completed</code>/<code>total</code> counts into{" "}
-          <code>percent</code>. See the <Link href="/sdks/python">Python SDK</Link>{" "}
-          for the full surface.
+          The async client runs the <Link href="/api-reference/upload">upload</Link> flow
+          and waits on the <Link href="/api-reference/jobs">SSE job stream</Link>,
+          converting its <code>completed</code>/<code>total</code> counts into{" "}
+          <code>percent</code>. See the <Link href="/sdks/python">Python SDK</Link> for
+          the full API.
         </p>
       </Callout>
     </>

@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Using Speech Revolutions with Django",
   description:
-    "Integrate Speech Revolutions into a Django app: a view that submits a file for transcription, a model that stores each job's status and progress, and a webhook view that…",
+    "Integrate Speech Revolutions into a Django app: a view that submits a file for transcription, a model that stores each job's status and progress, and a webhook view that verifies the signature and records the result.",
 };
 
 export default function DjangoIntegrationPage() {
@@ -17,15 +17,15 @@ export default function DjangoIntegrationPage() {
         Integrate Speech Revolutions into a Django app: a view that submits a file for
         transcription, a model that stores each job&apos;s status and progress,
         and a webhook view that verifies the signature and records the result.
-        The API key stays in Django settings / the server environment — it never
+        The API key stays in Django settings or the server environment and never
         reaches the browser.
       </p>
 
       <Callout title="Keep the key server-side" tone="warn">
         <p>
           <code>SpeechRevolutions()</code> reads{" "}
-          <code>SPEECHREVOLUTIONS_API_KEY</code> from the environment. Views run on the server, so the client and key
-          never ship to templates or JavaScript.
+          <code>SPEECHREVOLUTIONS_API_KEY</code> from the environment. Views run on the
+          server, so the client and key are never sent to templates or JavaScript.
         </p>
       </Callout>
 
@@ -37,11 +37,11 @@ export default function DjangoIntegrationPage() {
 export SPEECHREVOLUTIONS_API_KEY=stt_...`}
       />
 
-      <h2>A model to store status + progress</h2>
+      <h2>A model to store status and progress</h2>
       <p>
-        Persist the Speech Revolutions <code>job_id</code> plus a status and a{" "}
-        <code>0–100</code> progress number. Store the download URL and transcript
-        once the job completes.
+        Store the Speech Revolutions <code>job_id</code>, a status, and a{" "}
+        <code>0–100</code> progress value. Store the download URL and transcript when
+        the job completes.
       </p>
       <CodeBlock
         language="python"
@@ -69,10 +69,10 @@ class TranscriptionJob(models.Model):
 
       <h2>A view that submits</h2>
       <p>
-        Take the uploaded file, call <code>submit()</code> to get a job id
-        without blocking the request, and create the row. Pass a{" "}
-        <code>callback_url</code> so Speech Revolutions notifies you when the job finishes —
-        the webhook view below fills in the result.
+        Read the uploaded file, call <code>submit()</code> to get a job ID without
+        blocking the request, and create the row. Pass a <code>callback_url</code> so
+        Speech Revolutions notifies you when the job finishes. The webhook view below
+        records the result.
       </p>
       <CodeBlock
         language="python"
@@ -105,8 +105,8 @@ def start_transcription(request):
 
 
 def job_progress(request, job_id):
-    # get() would raise DoesNotExist and return a 500 for an id that has been
-    # mistyped, expired, or never existed. 404 is the honest answer.
+    # Return 404 for an unknown, mistyped, or expired id
+    # (get() would raise DoesNotExist and return a 500).
     job = get_object_or_404(TranscriptionJob, job_id=job_id)
     return JsonResponse(
         {"status": job.status, "percent": job.percent, "text": job.text}
@@ -115,25 +115,28 @@ def job_progress(request, job_id):
 
       <Callout title="Driving the percent field" tone="info">
         <p>
-          <code>submit()</code> returns immediately and doesn&apos;t stream
-          progress. To move <code>percent</code> between submit and completion,
-          run the blocking <code>transcribe()</code> with{" "}
-          <code>on_progress</code>/<code>on_upload_progress</code> callbacks in a
-          background worker (Celery, RQ, or a thread) that writes each update to
-          the row. See{" "}
-          <Link href="/guides/live-progress">Live progress for web apps</Link>{" "}
-          for the callback-to-bar weighting.
+          <code>submit()</code> returns immediately and doesn&apos;t report progress. To
+          update <code>percent</code> between submit and completion, run the blocking{" "}
+          <code>transcribe()</code> with <code>on_progress</code> and{" "}
+          <code>on_upload_progress</code> callbacks in a background worker (Celery, RQ,
+          or a thread) that writes each update to the row. See{" "}
+          <Link href="/guides/live-progress">Live progress for web apps</Link> for how to
+          weight the callbacks into one progress bar.
         </p>
       </Callout>
 
       <h2>Webhook view with signature verification</h2>
       <p>
-        Speech Revolutions POSTs a signed JSON body to your <code>callback_url</code> on
-        completion or permanent failure. The signature is HMAC-SHA256 over the
-        raw body in the <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header.
-        Verify against <code>request.body</code> (the exact bytes) and exempt the
-        view from CSRF — it&apos;s a server-to-server POST, not a browser form. Copy your signing secret from the console (<strong>API Keys → Webhook signing secret</strong>) into <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>; the{" "}
-        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries and rotation.
+        Speech Revolutions POSTs a signed JSON body to your <code>callback_url</code> when
+        the job completes or fails permanently. The signature is an HMAC-SHA256 of the
+        raw body, sent in the <code>X-SR-Signature: sha256=&lt;hex&gt;</code> header.
+        Verify it against <code>request.body</code> (the exact bytes) and exempt the view
+        from CSRF, because the request is a server-to-server POST, not a browser form.
+        Copy your signing secret from the console (
+        <strong>API Keys → Webhook signing secret</strong>) into{" "}
+        <code>SPEECHREVOLUTIONS_WEBHOOK_SECRET</code>. The{" "}
+        <Link href="/guides/webhooks">webhooks guide</Link> covers the payload, retries,
+        and secret rotation.
       </p>
       <CodeBlock
         language="python"
@@ -201,13 +204,13 @@ urlpatterns = [
 ]`}
       />
 
-      <Callout title="Under the hood" tone="info">
+      <Callout title="Related API endpoints" tone="info">
         <p>
-          <code>submit()</code> creates the job via the{" "}
-          <Link href="/api-reference/upload">upload</Link> flow and returns its
-          id; status and the transcript are fetched later through the{" "}
+          <code>submit()</code> creates the job through the{" "}
+          <Link href="/api-reference/upload">upload</Link> flow and returns its ID. You
+          fetch status and the transcript later through the{" "}
           <Link href="/api-reference/jobs">jobs</Link> endpoints. See the{" "}
-          <Link href="/sdks/python">Python SDK</Link> for the full surface.
+          <Link href="/sdks/python">Python SDK</Link> for the full API.
         </p>
       </Callout>
     </>
