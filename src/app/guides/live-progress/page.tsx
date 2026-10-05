@@ -6,7 +6,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Live progress for web apps",
   description:
-    "You're building a transcription app and want to show each user a live progress bar while their file is transcribed. The SDK surfaces progress through two…",
+    "Show a live progress bar for each upload and transcription by combining the SDK's two progress callbacks into one 0–100 value.",
 };
 
 export default function LiveProgressGuidePage() {
@@ -14,54 +14,53 @@ export default function LiveProgressGuidePage() {
     <>
       <h1>Live progress for web apps</h1>
       <p>
-        You&apos;re building a transcription app and want to show each user a
-        live progress bar while their file is transcribed. The SDK surfaces
-        progress through two callbacks — this guide turns them into a single
-        0–100 number you store per job and serve to your frontend.
+        This guide shows how to display a live progress bar while a file is
+        transcribed. The SDK reports progress through two callbacks. You
+        combine them into a single 0–100 value, store it per job, and serve it
+        to your frontend.
       </p>
 
-      <Callout title="A Speech Revolutions extra" tone="tip">
+      <Callout title="Upload and transcription progress" tone="tip">
         <p>
-          Neither AssemblyAI nor Deepgram exposes a percentage for pre-recorded
-          audio. Speech Revolutions reports progress for <strong>both</strong>{" "}
-          the file upload and the transcription, so you can drive a real bar
-          instead of a spinner.
+          Speech Revolutions reports progress for <strong>both</strong> the file
+          upload and the transcription of pre-recorded audio, so you can show a
+          real progress bar instead of a spinner. AssemblyAI and Deepgram
+          don&apos;t expose a percentage for pre-recorded audio.
         </p>
       </Callout>
 
       <h2>The two callbacks</h2>
       <p>
-        <code>transcribe()</code> accepts two progress callbacks, each receiving
-        a progress event:
+        <code>transcribe()</code> accepts two progress callbacks. Each receives a
+        progress event:
       </p>
       <ul>
         <li>
-          <code>on_upload_progress</code> / <code>onUploadProgress</code> — fires
+          <code>on_upload_progress</code> / <code>onUploadProgress</code> fires
           while the file uploads (<code>event.step === &quot;upload&quot;</code>).
         </li>
         <li>
-          <code>on_progress</code> / <code>onProgress</code> — fires while the
+          <code>on_progress</code> / <code>onProgress</code> fires while the
           server transcribes.
         </li>
       </ul>
       <p>
-        Each event carries <code>percent</code>, a <code>0–100</code> number
-        that is <code>None</code>/<code>undefined</code> before the totals are
-        known. You decide what to do with it: write it to your DB, push it over
-        a WebSocket, or store it in memory for an HTTP endpoint to read.
+        Each event has a <code>percent</code> field, a <code>0–100</code> value
+        that is <code>None</code>/<code>undefined</code> until the totals are
+        known. Write it to your database, push it over a WebSocket, or keep it
+        in memory for an HTTP endpoint to read.
       </p>
       <p>
-        Files under about 3 MiB go straight to the GPU and may report no transcription
-        progress before they complete, so expect the bar to jump from the end of the upload
-        to done.
+        Files under about 3 MiB may report no transcription progress before they complete.
+        Expect the bar to jump from the end of the upload straight to done.
       </p>
 
       <h2>Weight the two phases into one bar</h2>
       <p>
         Upload is usually quick, so give it the first slice of the bar and let
-        transcription fill the rest. Store the latest value per job — guarded so
-        events that arrive slightly out of order never make the bar go backwards
-        — and serve <code>{`{ phase, percent }`}</code> to your frontend.
+        transcription fill the rest. Store the latest value per job, never let
+        it decrease (events can arrive slightly out of order), and serve{" "}
+        <code>{`{ phase, percent }`}</code> to your frontend.
       </p>
       <CodeTabs
         tabs={[
@@ -317,10 +316,9 @@ public static class Transcriber
 
       <h2>Serve it to the frontend</h2>
       <p>
-        Keep a map keyed by job id, run the transcription in the background, and
-        return immediately. Your frontend polls a progress endpoint (or you push
-        each snapshot over a WebSocket). The percentage comes straight from the
-        SDK callbacks.
+        Keep a map keyed by job ID, run the transcription in the background, and
+        return immediately. Your frontend polls a progress endpoint, or you push
+        each snapshot over a WebSocket.
       </p>
       <CodeTabs
         tabs={[
@@ -442,14 +440,15 @@ public record StartRequest(string JobId, string Url);`,
 
       <Callout title="Where percent comes from" tone="info">
         <p>
-          The server streams raw <code>completed</code>/<code>total</code> step
+          The server streams <code>completed</code>/<code>total</code> step
           counts over{" "}
-          <Link href="/api-reference/jobs">SSE</Link>; the SDK computes{" "}
-          <code>percent = completed / total × 100</code> and hands it to your
-          callbacks. See any SDK page — <Link href="/sdks/python">Python</Link>,{" "}
+          <Link href="/api-reference/jobs">SSE</Link>. The SDK computes{" "}
+          <code>percent = completed / total × 100</code> and passes it to your
+          callbacks. For the callback signatures, see the{" "}
+          <Link href="/sdks/python">Python</Link>,{" "}
           <Link href="/sdks/javascript">JavaScript</Link>,{" "}
-          <Link href="/sdks/go">Go</Link>, <Link href="/sdks/csharp">C#</Link> —
-          for the callback signatures.
+          <Link href="/sdks/go">Go</Link>, and <Link href="/sdks/csharp">C#</Link>{" "}
+          SDK pages.
         </p>
       </Callout>
     </>
