@@ -16,10 +16,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const e = endpointBySlug((await params).slug);
   if (!e) return {};
-  // The summary is the fallback, not "": an operation added to the spec without prose used to
-  // produce a page with no meta description at all, which is invisible in review because the
-  // page itself still reads fine. A one-line summary is a worse description than a written one
-  // and a far better one than none.
+  // Fall back to the summary so every page has a meta description.
   const lead = e.description.split("\n")[0].trim() || e.summary;
   return {
     title: `${e.summary} — ${e.method} ${e.path}`,

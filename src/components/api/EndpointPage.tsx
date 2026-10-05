@@ -98,7 +98,7 @@ export async function EndpointPage({ endpoint: e }: { endpoint: Endpoint }) {
         <EndpointBadge method={e.method as "GET" | "POST" | "PUT"} path={e.path} />
         {e.description ? <Prose text={e.description} /> : null}
         <p className="!text-sm">
-          Authenticate with your key in the <code>{AUTH_HEADER}</code> header —{" "}
+          Send your API key in the <code>{AUTH_HEADER}</code> header. See{" "}
           <Link href="/authentication">Authentication</Link>.
         </p>
 
