@@ -81,6 +81,11 @@ SKIP = {
     "needs a paid third-party account (competitor 'before' example)": (
         "import assemblyai", "from deepgram import", "from openai import",
         "from elevenlabs", "from faster_whisper import", "whisper.cpp",
+        # the same examples in JavaScript, Go and C#
+        'from "assemblyai"', '"@deepgram/sdk"', 'from "openai"',
+        '"@elevenlabs/elevenlabs-js"', "assemblyai-go-sdk", "deepgram-go-sdk",
+        "github.com/openai/openai-go", "api.elevenlabs.io", "using AssemblyAI;",
+        "using Deepgram;", "using OpenAI.", "using Whisper.net;",
     ),
 }
 

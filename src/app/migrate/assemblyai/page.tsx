@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
-import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { MigrationCompare } from "@/components/MigrationCompare";
 import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -223,10 +223,11 @@ export default function MigrateAssemblyAIPage() {
       </p>
 
       <h2>Side by side</h2>
-      <CodeTabs
-        tabs={[
+      <MigrationCompare
+        from="AssemblyAI"
+        before={[
           {
-            label: "Before — AssemblyAI (Python)",
+            label: "Python",
             language: "python",
             filename: "assemblyai_transcribe.py",
             code: `import assemblyai as aai
@@ -244,7 +245,94 @@ for w in transcript.words:
     print(w.text, w.start, w.end)  # start/end in milliseconds`,
           },
           {
-            label: "After — Speech Revolutions (Python)",
+            label: "JavaScript",
+            language: "ts",
+            filename: "assemblyai-transcribe.ts",
+            code: `import { AssemblyAI } from "assemblyai";
+
+const client = new AssemblyAI({ apiKey: process.env.ASSEMBLYAI_API_KEY! });
+
+// uploads + polls
+const transcript = await client.transcripts.transcribe({
+  audio: "meeting.mp3",
+  speaker_labels: true,
+});
+
+console.log(transcript.text);
+for (const u of transcript.utterances ?? []) {
+  console.log(\`\${u.speaker}: \${u.text}\`);
+}
+for (const w of transcript.words ?? []) {
+  console.log(w.text, w.start, w.end); // start/end in milliseconds
+}`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "assemblyai_transcribe.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	aai "github.com/AssemblyAI/assemblyai-go-sdk"
+)
+
+func main() {
+	ctx := context.Background()
+	client := aai.NewClient(os.Getenv("ASSEMBLYAI_API_KEY"))
+
+	f, err := os.Open("meeting.mp3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	// uploads + polls
+	transcript, err := client.Transcripts.TranscribeFromReader(ctx, f, &aai.TranscriptOptionalParams{
+		SpeakerLabels: aai.Bool(true),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(aai.ToString(transcript.Text))
+	for _, u := range transcript.Utterances {
+		fmt.Printf("%s: %s\\n", aai.ToString(u.Speaker), aai.ToString(u.Text))
+	}
+	for _, w := range transcript.Words {
+		fmt.Println(aai.ToString(w.Text), aai.ToInt64(w.Start), aai.ToInt64(w.End)) // milliseconds
+	}
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using AssemblyAI;
+using AssemblyAI.Transcripts;
+
+var client = new AssemblyAIClient(Environment.GetEnvironmentVariable("ASSEMBLYAI_API_KEY")!);
+
+// uploads + polls
+var transcript = await client.Transcripts.TranscribeAsync(
+    new FileInfo("meeting.mp3"),
+    new TranscriptOptionalParams { SpeakerLabels = true });
+transcript.EnsureStatusCompleted();
+
+Console.WriteLine(transcript.Text);
+foreach (var u in transcript.Utterances!)
+    Console.WriteLine($"{u.Speaker}: {u.Text}");
+foreach (var w in transcript.Words!)
+    Console.WriteLine($"{w.Text} {w.Start} {w.End}"); // start/end in milliseconds`,
+          },
+        ]}
+        after={[
+          {
+            label: "Python",
             language: "python",
             filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions, TranscribeOptions
@@ -263,18 +351,80 @@ for w in result.words:
     print(w.text, w.start, w.end)  # start/end in seconds`,
           },
           {
-            label: "After — Speech Revolutions (JavaScript)",
+            label: "JavaScript",
             language: "ts",
-            filename: "stt-transcribe.mjs",
+            filename: "stt-transcribe.ts",
             code: `import { SpeechRevolutions } from "speechrevolutions";
 
-const client = new SpeechRevolutions();
+const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
 const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 
 console.log(result.text);
 for (const u of result.utterances) {
   console.log(\`\${u.speaker}: \${u.text}\`);
+}
+for (const w of result.words) {
+  console.log(w.text, w.start, w.end); // start/end in seconds
 }`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "stt_transcribe.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	stt "github.com/speechrevolutions/speechrevolutions-go"
+)
+
+func main() {
+	ctx := context.Background()
+	client, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// uploads + waits, like TranscribeFromReader
+	result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+		SpeakerLabels: stt.Bool(true),
+	}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(result.Text())
+	for _, u := range result.Utterances {
+		fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
+	}
+	for _, w := range result.Words {
+		if w.Start != nil && w.End != nil {
+			fmt.Println(w.Word, *w.Start, *w.End) // start/end in seconds
+		}
+	}
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using SpeechRevolutions;
+
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
+
+// uploads + waits; options object, like TranscriptOptionalParams
+var result = await client.TranscribeAsync(
+    "meeting.mp3",
+    new TranscribeOptions { SpeakerLabels = true });
+
+Console.WriteLine(result.Text);
+foreach (var u in result.Utterances)
+    Console.WriteLine($"{u.Speaker}: {u.Text}");
+foreach (var w in result.Words)
+    Console.WriteLine($"{w.Text} {w.Start} {w.End}"); // start/end in seconds`,
           },
         ]}
       />

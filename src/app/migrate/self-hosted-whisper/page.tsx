@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
-import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { MigrationCompare } from "@/components/MigrationCompare";
 import { SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -195,10 +195,11 @@ export default function MigrateSelfHostedWhisperPage() {
       </p>
 
       <h2>Side by side</h2>
-      <CodeTabs
-        tabs={[
+      <MigrationCompare
+        from="self-hosted Whisper"
+        before={[
           {
-            label: "Before — faster-whisper",
+            label: "Python",
             language: "python",
             filename: "faster_whisper_transcribe.py",
             code: `from faster_whisper import WhisperModel
@@ -219,19 +220,90 @@ print("language:", info.language)
 # diarization? bring your own pyannote pipeline and align it yourself.`,
           },
           {
-            label: "Before — whisper.cpp",
-            language: "bash",
-            filename: "whisper_cpp.sh",
-            code: `# convert to 16 kHz mono WAV first (whisper.cpp requirement)
-ffmpeg -i meeting.mp3 -ar 16000 -ac 1 -c:a pcm_s16le meeting.wav
+            label: "JavaScript",
+            language: "ts",
+            filename: "whisper-server.ts",
+            code: `import { readFileSync } from "node:fs";
 
-# run inference on the compiled binary; you manage the model files + build
-./main -m models/ggml-large-v3.bin -f meeting.wav \\
-    --output-srt --max-len 1
-# no built-in diarization`,
+// your whisper.cpp server: ./build/bin/whisper-server -m models/ggml-large-v3.bin
+const form = new FormData();
+form.append("file", new Blob([readFileSync("meeting.wav")]), "meeting.wav"); // 16 kHz mono WAV
+form.append("response_format", "json");
+
+const res = await fetch("http://localhost:8080/inference", { method: "POST", body: form });
+const { text } = await res.json();
+console.log(text);
+// no word timestamps in this format, no diarization: bring your own and align it yourself.`,
           },
           {
-            label: "After — Speech Revolutions (Python)",
+            label: "Go",
+            language: "go",
+            filename: "whisper_server.go",
+            code: `// Calls your own whisper.cpp server (whisper-server -m models/ggml-large-v3.bin).
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
+	"mime/multipart"
+	"net/http"
+	"os"
+)
+
+func main() {
+	audio, err := os.ReadFile("meeting.wav") // 16 kHz mono WAV
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var body bytes.Buffer
+	form := multipart.NewWriter(&body)
+	form.WriteField("response_format", "json")
+	part, _ := form.CreateFormFile("file", "meeting.wav")
+	part.Write(audio)
+	form.Close()
+
+	// you run this box: the GPU, the drivers, the model files, the restarts
+	res, err := http.Post("http://localhost:8080/inference", form.FormDataContentType(), &body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+
+	var resp struct {
+		Text string \`json:"text"\`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&resp); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp.Text)
+	// no word timestamps in this format, no diarization: bring your own and align it yourself.
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using Whisper.net;
+
+// loads weights into memory; you own the box, the runtime package and the model file
+using var factory = WhisperFactory.FromPath("ggml-large-v3.bin");
+using var processor = factory.CreateBuilder()
+    .WithLanguage("auto")
+    .Build();
+
+// Whisper.net reads 16 kHz WAV, so convert with ffmpeg first
+using var wav = File.OpenRead("meeting.wav");
+await foreach (var segment in processor.ProcessAsync(wav))
+    Console.WriteLine($"{segment.Start}->{segment.End}: {segment.Text}");
+// diarization? bring your own pipeline and align it yourself.`,
+          },
+        ]}
+        after={[
+          {
+            label: "Python",
             language: "python",
             filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions
@@ -246,7 +318,105 @@ for u in result.utterances:         # diarization built in
     print(f"{u.speaker}: {u.text}")
 print("languages:", result.languages)  # [{start, end, language}, ...]`,
           },
+          {
+            label: "JavaScript",
+            language: "ts",
+            filename: "stt-transcribe.ts",
+            code: `import { SpeechRevolutions } from "speechrevolutions";
+
+// no GPU, no model files, no server to keep up
+const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
+const result = await client.transcribe("meeting.mp3", { speakerLabels: true }); // MP3 as-is
+
+console.log(result.text);                     // already assembled
+for (const w of result.words) {               // word timestamps, in seconds
+  console.log(w.start, w.end, w.text);
+}
+for (const u of result.utterances) {          // diarization built in
+  console.log(\`\${u.speaker}: \${u.text}\`);
+}
+console.log("languages:", result.languages);  // [{ start, end, language }, ...]`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "stt_transcribe.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	stt "github.com/speechrevolutions/speechrevolutions-go"
+)
+
+func main() {
+	ctx := context.Background()
+	// no GPU, no model files, no server to keep up
+	client, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{ // MP3 as-is
+		SpeakerLabels: stt.Bool(true),
+	}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(result.Text())       // already assembled
+	for _, w := range result.Words { // word timestamps, in seconds
+		if w.Start != nil && w.End != nil {
+			fmt.Println(*w.Start, *w.End, w.Word)
+		}
+	}
+	for _, u := range result.Utterances { // diarization built in
+		fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
+	}
+	for _, l := range result.Languages { // language spans
+		fmt.Println(l.Start, l.End, l.Language)
+	}
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using SpeechRevolutions;
+
+// no GPU, no model files, no runtime package
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
+var result = await client.TranscribeAsync(
+    "meeting.mp3", // MP3 as-is, no WAV conversion
+    new TranscribeOptions { SpeakerLabels = true });
+
+Console.WriteLine(result.Text);          // already assembled
+foreach (var w in result.Words)          // word timestamps, in seconds
+    Console.WriteLine($"{w.Start} {w.End} {w.Text}");
+foreach (var u in result.Utterances)     // diarization built in
+    Console.WriteLine($"{u.Speaker}: {u.Text}");
+foreach (var l in result.Languages)      // language spans
+    Console.WriteLine($"{l.Start} {l.End} {l.Language}");`,
+          },
         ]}
+      />
+
+      <p>
+        If you call the <code>whisper.cpp</code> binary directly instead of its server,
+        this is the step the code above replaces, along with the WAV conversion:
+      </p>
+      <CodeBlock
+        language="bash"
+        filename="whisper_cpp.sh"
+        code={`# convert to 16 kHz mono WAV first (whisper.cpp requirement)
+ffmpeg -i meeting.mp3 -ar 16000 -ac 1 -c:a pcm_s16le meeting.wav
+
+# run inference on the compiled binary; you manage the model files + build
+./main -m models/ggml-large-v3.bin -f meeting.wav \\
+    --output-srt --max-len 1
+# no built-in diarization`}
       />
 
       <h2>What you stop maintaining</h2>

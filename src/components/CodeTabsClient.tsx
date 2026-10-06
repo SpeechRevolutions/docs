@@ -2,7 +2,7 @@
 
 import { CopyButton } from "@/components/CopyButton";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useLanguagePreference } from "@/lib/useLanguagePreference";
 
 export type RenderedTab = {
   label: string;
@@ -15,12 +15,9 @@ export type RenderedTab = {
   lineNumbers: boolean;
 };
 
-const STORAGE_KEY = "docs:preferred-language";
-const SYNC_EVENT = "docs:language-change";
-
 /**
  * Picking Python in one block switches every block on the page — and the choice
- * survives navigation. Matches the `groupId` behaviour on AssemblyAI's docs.
+ * survives navigation (see useLanguagePreference).
  */
 export function CodeTabsClient({
   tabs,
@@ -34,32 +31,10 @@ export function CodeTabsClient({
   sync?: boolean;
   title?: string;
 }) {
-  // Always start at 0 so the client's first paint matches the server HTML; the
-  // stored preference is applied after mount to avoid a hydration mismatch.
-  const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    if (!sync) return;
-    const apply = (lang: string | null) => {
-      if (!lang) return;
-      const i = tabs.findIndex((t) => t.langKey === lang);
-      if (i >= 0) setActive(i);
-    };
-
-    apply(window.localStorage.getItem(STORAGE_KEY));
-
-    const onSync = (e: Event) => apply((e as CustomEvent<string>).detail);
-    window.addEventListener(SYNC_EVENT, onSync);
-    return () => window.removeEventListener(SYNC_EVENT, onSync);
-  }, [tabs, sync]);
-
-  function select(i: number) {
-    setActive(i);
-    const lang = tabs[i]?.langKey;
-    if (!lang || !sync) return;
-    window.localStorage.setItem(STORAGE_KEY, lang);
-    window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: lang }));
-  }
+  const [active, select] = useLanguagePreference(
+    tabs.map((t) => t.langKey),
+    sync,
+  );
 
   const tab = tabs[active] ?? tabs[0];
   if (!tab) return null;

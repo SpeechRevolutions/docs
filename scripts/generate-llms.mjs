@@ -104,7 +104,7 @@ for await (const { file, route } of pages()) {
   const description =
     root.querySelector('meta[name="description"]')?.getAttribute("content") ?? "";
 
-  for (const chrome of prose.querySelectorAll("button, svg, [role=tablist]")) {
+  for (const chrome of prose.querySelectorAll("button, svg, [role=tablist], [data-docs-chrome]")) {
     chrome.remove();
   }
 

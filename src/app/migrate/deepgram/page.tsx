@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
-import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { MigrationCompare } from "@/components/MigrationCompare";
 import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -246,15 +246,18 @@ print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`}
 
       <h2>Side by side</h2>
       <p>
-        Diarized transcription, before and after. The &quot;before&quot; example uses{" "}
-        <code>deepgram-sdk</code> v3; v4 has the same shape. The v5 client is different, so
-        if you use v5 or newer, your existing code differs from this example. The Speech
-        Revolutions code is the same either way.
+        Diarized transcription, before and after. The &quot;before&quot; examples use{" "}
+        <code>deepgram-sdk</code> v3 for Python (v4 has the same shape),{" "}
+        <code>@deepgram/sdk</code> v4 for JavaScript, <code>deepgram-go-sdk</code> v3 for
+        Go, and the <code>Deepgram</code> 7.x package for .NET. The Python and JavaScript
+        v5 clients are different, so if you use v5 or newer, your existing code differs
+        from this example. The Speech Revolutions code is the same either way.
       </p>
-      <CodeTabs
-        tabs={[
+      <MigrationCompare
+        from="Deepgram"
+        before={[
           {
-            label: "Before — Deepgram (Python)",
+            label: "Python",
             language: "python",
             filename: "deepgram_transcribe.py",
             code: `from deepgram import DeepgramClient, PrerecordedOptions
@@ -273,7 +276,89 @@ for w in alt["words"]:
     print(w["speaker"], w["word"], w["start"], w["end"])`,
           },
           {
-            label: "After — Speech Revolutions (Python)",
+            label: "JavaScript",
+            language: "ts",
+            filename: "deepgram-transcribe.ts",
+            code: `import { createClient } from "@deepgram/sdk";
+import { readFileSync } from "node:fs";
+
+const deepgram = createClient(process.env.DEEPGRAM_API_KEY);
+
+const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
+  readFileSync("meeting.mp3"),
+  { model: "nova-3", diarize: true, smart_format: true },
+);
+if (error) throw error;
+
+const alt = result.results.channels[0].alternatives[0];
+console.log(alt.transcript);
+for (const w of alt.words) {
+  console.log(w.speaker, w.word, w.start, w.end);
+}`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "deepgram_transcribe.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	api "github.com/deepgram/deepgram-go-sdk/v3/pkg/api/listen/v1/rest"
+	interfaces "github.com/deepgram/deepgram-go-sdk/v3/pkg/client/interfaces"
+	client "github.com/deepgram/deepgram-go-sdk/v3/pkg/client/listen"
+)
+
+func main() {
+	ctx := context.Background()
+	client.InitWithDefault()
+
+	dg := api.New(client.NewRESTWithDefaults()) // DEEPGRAM_API_KEY
+	options := &interfaces.PreRecordedTranscriptionOptions{
+		Model:       "nova-3",
+		Diarize:     true,
+		SmartFormat: true,
+	}
+
+	resp, err := dg.FromFile(ctx, "meeting.mp3", options)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	alt := resp.Results.Channels[0].Alternatives[0]
+	fmt.Println(alt.Transcript)
+	for _, w := range alt.Words {
+		fmt.Println(*w.Speaker, w.Word, w.Start, w.End)
+	}
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using Deepgram;
+using Deepgram.Models.Listen.v1.REST;
+
+Library.Initialize();
+var dg = ClientFactory.CreateListenRESTClient(); // DEEPGRAM_API_KEY
+
+var response = await dg.TranscribeFile(
+    await File.ReadAllBytesAsync("meeting.mp3"),
+    new PreRecordedSchema { Model = "nova-3", Diarize = true, SmartFormat = true });
+
+var alt = response.Results!.Channels![0].Alternatives![0];
+Console.WriteLine(alt.Transcript);
+foreach (var w in alt.Words!)
+    Console.WriteLine($"{w.Speaker} {w.HeardWord} {w.Start} {w.End}");
+Library.Terminate();`,
+          },
+        ]}
+        after={[
+          {
+            label: "Python",
             language: "python",
             filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions
@@ -287,18 +372,27 @@ for w in result.words:
 
 # grouped speaker turns, no reconstruction needed
 for u in result.utterances:
-    print(f"{u.speaker}: {u.text}")`,
+    print(f"{u.speaker}: {u.text}")
+
+# keep your Deepgram parser working:
+dg = result.to_deepgram()
+print(dg["results"]["channels"][0]["alternatives"][0]["transcript"])`,
           },
           {
-            label: "After — Speech Revolutions (JavaScript)",
+            label: "JavaScript",
             language: "ts",
-            filename: "stt-transcribe.mjs",
+            filename: "stt-transcribe.ts",
             code: `import { SpeechRevolutions } from "speechrevolutions";
 
-const client = new SpeechRevolutions();
-const result = await client.transcribe("meeting.mp3", { diarize: true });
+const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
+const result = await client.transcribe("meeting.mp3", { diarize: true }); // same flag name
 
 console.log(result.text);
+for (const w of result.words) {
+  console.log(w.speaker, w.text, w.start, w.end);
+}
+
+// grouped speaker turns, no reconstruction needed
 for (const u of result.utterances) {
   console.log(\`\${u.speaker}: \${u.text}\`);
 }
@@ -306,6 +400,78 @@ for (const u of result.utterances) {
 // keep your Deepgram parser working:
 const dg = result.toDeepgram();
 console.log(dg.results.channels[0].alternatives[0].transcript);`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "stt_transcribe.go",
+            code: `package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+
+	stt "github.com/speechrevolutions/speechrevolutions-go"
+)
+
+func main() {
+	ctx := context.Background()
+	client, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
+		Diarize: stt.Bool(true), // same flag name
+	}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(result.Text())
+	for _, w := range result.Words {
+		if w.Start != nil && w.End != nil {
+			fmt.Println(w.Speaker, w.Word, *w.Start, *w.End)
+		}
+	}
+
+	// grouped speaker turns, no reconstruction needed
+	for _, u := range result.Utterances {
+		fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
+	}
+
+	// keep your Deepgram parser working: unmarshal this into the struct it reads
+	dg, err := json.Marshal(result.ToDeepgram())
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(dg))
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using System.Text.Json;
+using SpeechRevolutions;
+
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
+var result = await client.TranscribeAsync(
+    "meeting.mp3",
+    new TranscribeOptions { Diarize = true }); // same flag name
+
+Console.WriteLine(result.Text);
+foreach (var w in result.Words)
+    Console.WriteLine($"{w.Speaker} {w.Text} {w.Start} {w.End}");
+
+// grouped speaker turns, no reconstruction needed
+foreach (var u in result.Utterances)
+    Console.WriteLine($"{u.Speaker}: {u.Text}");
+
+// keep your Deepgram parser working: feed it this JSON
+Console.WriteLine(JsonSerializer.Serialize(result.ToDeepgram()));`,
           },
         ]}
       />

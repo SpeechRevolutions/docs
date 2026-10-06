@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
-import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { MigrationCompare } from "@/components/MigrationCompare";
 import { LIMITS, SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -208,10 +208,11 @@ export default function MigrateOpenAIWhisperPage() {
       </p>
 
       <h2>Side by side</h2>
-      <CodeTabs
-        tabs={[
+      <MigrationCompare
+        from="OpenAI"
+        before={[
           {
-            label: "Before — OpenAI (Python)",
+            label: "Python",
             language: "python",
             filename: "openai_transcribe.py",
             code: `from openai import OpenAI
@@ -229,7 +230,78 @@ print(resp.text)
 # no word timestamps, no speakers from gpt-4o-transcribe`,
           },
           {
-            label: "After — Speech Revolutions (Python)",
+            label: "JavaScript",
+            language: "ts",
+            filename: "openai-transcribe.ts",
+            code: `import OpenAI from "openai";
+import { createReadStream } from "node:fs";
+
+const client = new OpenAI(); // OPENAI_API_KEY
+
+const resp = await client.audio.transcriptions.create({
+  model: "gpt-4o-transcribe",
+  file: createReadStream("meeting.mp3"), // must be <= 25 MB
+  response_format: "json",
+});
+
+console.log(resp.text);
+// no word timestamps, no speakers from gpt-4o-transcribe`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "openai_transcribe.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/openai/openai-go"
+)
+
+func main() {
+	ctx := context.Background()
+	client := openai.NewClient() // OPENAI_API_KEY
+
+	f, err := os.Open("meeting.mp3") // must be <= 25 MB
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	resp, err := client.Audio.Transcriptions.New(ctx, openai.AudioTranscriptionNewParams{
+		Model: openai.AudioModelGPT4oTranscribe,
+		File:  f,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(resp.Text)
+	// no word timestamps, no speakers from gpt-4o-transcribe
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using OpenAI.Audio;
+
+var client = new AudioClient("gpt-4o-transcribe",
+    Environment.GetEnvironmentVariable("OPENAI_API_KEY")); // OPENAI_API_KEY
+
+AudioTranscription resp = await client.TranscribeAudioAsync("meeting.mp3"); // must be <= 25 MB
+
+Console.WriteLine(resp.Text);
+// no word timestamps, no speakers from gpt-4o-transcribe`,
+          },
+        ]}
+        after={[
+          {
+            label: "Python",
             language: "python",
             filename: "stt_transcribe.py",
             code: `from speechrevolutions import SpeechRevolutions
@@ -244,17 +316,73 @@ for u in result.utterances:            # speaker turns
     print(f"{u.speaker}: {u.text}")`,
           },
           {
-            label: "After — Speech Revolutions (JavaScript)",
+            label: "JavaScript",
             language: "ts",
-            filename: "stt-transcribe.mjs",
+            filename: "stt-transcribe.ts",
             code: `import { SpeechRevolutions } from "speechrevolutions";
 
-const client = new SpeechRevolutions();
-const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
+const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
+const result = await client.transcribe("meeting.mp3", { speakerLabels: true }); // any size
 
 console.log(result.text);
-for (const w of result.words) console.log(w.text, w.start, w.end);
-for (const u of result.utterances) console.log(\`\${u.speaker}: \${u.text}\`);`,
+for (const w of result.words) console.log(w.text, w.start, w.end); // word timestamps, in seconds
+for (const u of result.utterances) console.log(\`\${u.speaker}: \${u.text}\`); // speaker turns`,
+          },
+          {
+            label: "Go",
+            language: "go",
+            filename: "stt_transcribe.go",
+            code: `package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	stt "github.com/speechrevolutions/speechrevolutions-go"
+)
+
+func main() {
+	ctx := context.Background()
+	client, err := stt.NewClient("") // SPEECHREVOLUTIONS_API_KEY
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{ // any size
+		SpeakerLabels: stt.Bool(true),
+	}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(result.Text())
+	for _, w := range result.Words { // word timestamps, in seconds
+		if w.Start != nil && w.End != nil {
+			fmt.Println(w.Word, *w.Start, *w.End)
+		}
+	}
+	for _, u := range result.Utterances { // speaker turns
+		fmt.Printf("%s: %s\\n", u.Speaker, u.Text)
+	}
+}`,
+          },
+          {
+            label: "C#",
+            language: "csharp",
+            filename: "Program.cs",
+            code: `using SpeechRevolutions;
+
+using var client = new SpeechRevolutionsClient(); // SPEECHREVOLUTIONS_API_KEY
+var result = await client.TranscribeAsync(
+    "meeting.mp3", // any size
+    new TranscribeOptions { SpeakerLabels = true });
+
+Console.WriteLine(result.Text);
+foreach (var w in result.Words)          // word timestamps, in seconds
+    Console.WriteLine($"{w.Text} {w.Start} {w.End}");
+foreach (var u in result.Utterances)     // speaker turns
+    Console.WriteLine($"{u.Speaker}: {u.Text}");`,
           },
         ]}
       />

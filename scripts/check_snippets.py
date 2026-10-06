@@ -68,6 +68,18 @@ GO_EXTRA = {
 }
 CS_EXTRA = {"AWSSDK.S3": "Amazon.S3"}
 
+# The migration pages' "before" code, in the SDK each provider ships for .NET.
+# These are whole programs with their own client, so they get no Speech
+# Revolutions prelude. Pinned to the versions the snippets were written against:
+# a provider's new major should fail here on purpose, not on whichever day it lands.
+# package -> (namespace that proves it is needed, version)
+CS_THIRD_PARTY = {
+    "AssemblyAI": ("using AssemblyAI;", "1.2.2"),
+    "Deepgram": ("using Deepgram;", "7.1.2"),
+    "OpenAI": ("using OpenAI.", "2.14.0"),
+    "Whisper.net": ("using Whisper.net;", "1.9.1"),
+}
+
 # Names a page establishes in its first block and keeps using in later ones,
 # where the names are specific to that page rather than to the SDK.
 PAGE_PRELUDE = {
@@ -320,7 +332,8 @@ def cs_program(code: str, context: str = "", page: str = "") -> str:
             head.append(u)
 
     prelude = ""
-    if "new SpeechRevolutionsClient" not in body:
+    third_party = any(ns in code for ns, _v in CS_THIRD_PARTY.values())
+    if "new SpeechRevolutionsClient" not in body and not third_party:
         prelude = 'using var client = new SpeechRevolutionsClient("k");\n'
     for name, decl in (CS_PAGE_SCOPE.items() if prelude else []):
         used = re.search(r"(?<![\w.])" + name + r"(?![\w])", body)
@@ -356,6 +369,10 @@ def check_csharp(snips: list[Snippet], res: Result) -> None:
         for pkg, ns in CS_EXTRA.items():
             if any(ns in sn.code for sn in snips):
                 subprocess.run([DOTNET, "add", d, "package", pkg],
+                               env=env, capture_output=True, timeout=600)
+        for pkg, (ns, version) in CS_THIRD_PARTY.items():
+            if kind == "console" and any(ns in sn.code for sn in snips):
+                subprocess.run([DOTNET, "add", d, "package", pkg, "--version", version],
                                env=env, capture_output=True, timeout=600)
         ls = os.path.join(d, "Properties", "launchSettings.json")
         if os.path.exists(ls):
