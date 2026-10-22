@@ -2,6 +2,7 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
 import { docMeta } from "@/lib/metadata";
+import { SITE } from "@/lib/constants";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -29,7 +30,11 @@ export default function DiarizationGuidePage() {
           including OpenAI&apos;s <code>gpt-4o-transcribe</code> (as of July
           2026). See the{" "}
           <Link href="/benchmarks">benchmarks page</Link> for the full
-          provider-by-provider numbers and methodology.
+          provider-by-provider numbers and methodology, and{" "}
+          <a href={`${SITE.landingUrl}/best-speaker-diarization-api`}>
+            speaker diarization measured across five APIs
+          </a>{" "}
+          for interview and meeting audio side by side.
         </p>
       </Callout>
 
