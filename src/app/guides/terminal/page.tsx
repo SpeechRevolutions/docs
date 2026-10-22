@@ -1,14 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout, EndpointBadge } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Terminal & cURL",
   description:
     "For shell scripts and one-off jobs, use POST /api/v1/transcribe. You stream the raw audio bytes as the request body (options go in the query string); the…",
-};
+});
 
 export default function TerminalGuidePage() {
   return (

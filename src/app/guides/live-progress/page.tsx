@@ -1,13 +1,14 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Live progress for web apps",
   description:
     "Show a live progress bar for each upload and transcription by combining the SDK's two progress callbacks into one 0–100 value.",
-};
+});
 
 export default function LiveProgressGuidePage() {
   return (

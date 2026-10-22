@@ -1,14 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Timestamps",
   description:
     "Word-level start/end times in Speech Revolutions transcripts: where they live in .words, the JSON shape, and how the SDK parses them.",
-};
+});
 
 export default function TimestampsGuidePage() {
   return (

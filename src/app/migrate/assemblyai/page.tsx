@@ -2,14 +2,16 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
 import { MigrationCompare } from "@/components/MigrationCompare";
 import { LIMITS, SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Migrating from AssemblyAI to Speech Revolutions",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Migrating from AssemblyAI to Speech Revolutions" },
   description:
     "Move an AssemblyAI integration to Speech Revolutions: auth, the upload-submit-poll flow, response fields, and millisecond vs second timestamps.",
-};
+});
 
 export default function MigrateAssemblyAIPage() {
   return (

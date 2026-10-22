@@ -1,14 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Output formats & subtitles",
   description:
     "The six Speech Revolutions output_type values — txt, json, srt, vtt, docx, pdf — the JSON schema, and generating subtitles and documents.",
-};
+});
 
 export default function OutputFormatsGuidePage() {
   return (

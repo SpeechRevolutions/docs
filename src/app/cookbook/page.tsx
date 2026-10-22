@@ -1,13 +1,14 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Cookbook",
   description:
     "Short, copy-pasteable Speech Revolutions recipes: files and URLs, submit + poll, batching, webhooks, retries, speaker labels, multilingual, and subtitles.",
-};
+});
 
 export default function CookbookPage() {
   return (

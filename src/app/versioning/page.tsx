@@ -1,12 +1,13 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Versioning and deprecation",
   description:
     "How the Speech Revolutions API is versioned, what counts as a breaking change, and the notice you get before anything is removed.",
-};
+});
 
 export default function VersioningPage() {
   return (

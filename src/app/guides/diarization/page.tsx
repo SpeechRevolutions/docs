@@ -1,14 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Speaker diarization",
   description:
     "Turn on speaker_labels to label who spoke each segment: per-word speaker tags, .utterances speaker turns, and how to render them.",
-};
+});
 
 export default function DiarizationGuidePage() {
   return (

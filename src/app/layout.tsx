@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans";
 import localFont from "next/font/local";
 import { DocsShell } from "@/components/DocsShell";
 import { SITE } from "@/lib/constants";
+import { OG_IMAGE } from "@/lib/metadata";
 import { docsJsonLd } from "@/lib/structured-data";
 import { ThemeScript } from "@/components/theme/ThemeScript";
 import "./globals.css";
@@ -50,14 +51,7 @@ export const metadata: Metadata = {
     // Docs links are shared constantly — in tickets, in Slack, in answers on forums — and
     // without this every one of them rendered as a bare grey box. Set on the layout so every
     // page inherits it; a page that wants its own can still override.
-    images: [
-      {
-        url: "/brand/og-card.png",
-        width: 1200,
-        height: 630,
-        alt: "Speech Revolutions — batch speech-to-text API documentation",
-      },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",

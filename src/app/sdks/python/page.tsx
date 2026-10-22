@@ -1,13 +1,14 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Python SDK",
   description:
     "The official Python client for the Speech Revolutions STT API, with a synchronous SpeechRevolutions client and an asyncio AsyncSpeechRevolutions client.",
-};
+});
 
 export default function PythonSdkPage() {
   return (

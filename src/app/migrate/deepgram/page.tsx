@@ -2,14 +2,16 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
 import { MigrationCompare } from "@/components/MigrationCompare";
 import { LIMITS, SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Migrating from Deepgram to Speech Revolutions",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Migrating from Deepgram to Speech Revolutions" },
   description:
     "Move a Deepgram Nova-3 integration to Speech Revolutions: auth, endpoint mapping, response shapes, and the to_deepgram() escape hatch.",
-};
+});
 
 export default function MigrateDeepgramPage() {
   return (

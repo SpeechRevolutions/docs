@@ -1,13 +1,14 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "MCP server",
   description:
     "Let Claude, ChatGPT, or any MCP client transcribe audio with speaker labels, using your Speech Revolutions API key.",
-};
+});
 
 export default function McpPage() {
   return (

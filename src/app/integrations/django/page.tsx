@@ -1,13 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Using Speech Revolutions with Django",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Using Speech Revolutions with Django" },
   description:
     "Integrate Speech Revolutions into a Django app: a view that submits a file for transcription, a model that stores each job's status and progress, and a webhook view that verifies the signature and records the result.",
-};
+});
 
 export default function DjangoIntegrationPage() {
   return (

@@ -1,14 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Benchmarks & methodology",
   description:
     "Zephyr benchmark results and methodology: a reproducible, provider-agnostic suite built from public datasets, with instructions to run it yourself.",
-};
+});
 
 export default function BenchmarksPage() {
   return (

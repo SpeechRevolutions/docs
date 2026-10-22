@@ -1,13 +1,14 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { LIMITS, SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Uploading files",
   description: `Pass a file path or a URL to an SDK and it uploads the audio for you, up to ${LIMITS.sdkUploadMax} per file.`,
-};
+});
 
 /*
  * How audio gets in, by size and source. This page used to document the upload endpoints the

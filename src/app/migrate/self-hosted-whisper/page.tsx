@@ -2,14 +2,16 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
 import { MigrationCompare } from "@/components/MigrationCompare";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Migrating from self-hosted Whisper to Speech Revolutions",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Migrating from self-hosted Whisper to Speech Revolutions" },
   description:
     "Move a faster-whisper or whisper.cpp deployment to Speech Revolutions' hosted API: retire the GPU ops, keep word timestamps, and get built-in diarization.",
-};
+});
 
 export default function MigrateSelfHostedWhisperPage() {
   return (

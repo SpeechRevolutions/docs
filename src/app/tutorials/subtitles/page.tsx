@@ -1,14 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Generate subtitles automatically",
   description:
     "Set output_type to \"srt\" or \"vtt\" to get a finished, time-cued subtitle file instead of plain text.",
-};
+});
 
 export default function SubtitlesTutorialPage() {
   return (

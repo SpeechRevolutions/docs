@@ -1,13 +1,14 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Build a meeting-transcription app",
   description:
     "Build an app where a user uploads a meeting recording, watches a live progress bar, and gets a speaker-labeled transcript.",
-};
+});
 
 export default function MeetingAppTutorialPage() {
   return (

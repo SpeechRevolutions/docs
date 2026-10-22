@@ -1,14 +1,16 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Using Speech Revolutions with Supabase",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Using Speech Revolutions with Supabase" },
   description:
     "Transcribe audio in Supabase Storage without downloading it: create a signed URL, pass it to Speech Revolutions, write the transcript to a Postgres table, and stream progress over Realtime.",
-};
+});
 
 export default function SupabaseIntegrationPage() {
   return (

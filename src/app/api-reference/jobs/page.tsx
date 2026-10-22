@@ -1,13 +1,14 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout, EndpointBadge } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Jobs API",
   description:
     "Retrieve a job by ID, list recent jobs, follow a job to completion, or cancel one.",
-};
+});
 
 export default function JobsApiPage() {
   return (

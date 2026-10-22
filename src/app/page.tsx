@@ -1,10 +1,11 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
 import { LIMITS, SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   /*
    * Absolute, and not just "Introduction".
    *
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   },
   description:
     "Production speech-to-text for developers. Transcribe audio with speaker labels, word timestamps, and multiple output formats, via SDK or one terminal command.",
-};
+});
 
 export default function DocsHomePage() {
   return (

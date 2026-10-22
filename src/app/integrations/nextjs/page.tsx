@@ -1,14 +1,16 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Using Speech Revolutions with Next.js",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Using Speech Revolutions with Next.js" },
   description:
     "Call Speech Revolutions from the server side of your Next.js app (a Route Handler or a Server Action) so your API key never reaches the browser. Covers file upload, live progress, and a webhook Route Handler.",
-};
+});
 
 export default function NextjsIntegrationPage() {
   return (

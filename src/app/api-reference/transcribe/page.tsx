@@ -1,14 +1,15 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout, EndpointBadge } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Transcribe API",
   description:
     "Send audio in one request and get the transcript back on the same connection. For shells and simple scripts.",
-};
+});
 
 export default function TranscribeApiPage() {
   return (

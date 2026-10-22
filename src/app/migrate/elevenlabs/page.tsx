@@ -1,14 +1,16 @@
 import { Callout } from "@/components/DocsUI";
 import { MigrationCompare } from "@/components/MigrationCompare";
 import { LIMITS, SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Migrating from ElevenLabs to Speech Revolutions",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Migrating from ElevenLabs to Speech Revolutions" },
   description:
     "Move an ElevenLabs Scribe integration to Speech Revolutions: xi-api-key auth, multipart vs presigned upload, the spacing-token quirk, diarization, and timestamps.",
-};
+});
 
 export default function MigrateElevenLabsPage() {
   return (

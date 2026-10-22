@@ -2,13 +2,14 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Authentication",
   description:
     "Create an API key in the console and set SPEECHREVOLUTIONS_API_KEY; the SDKs read it automatically.",
-};
+});
 
 export default function AuthPage() {
   return (

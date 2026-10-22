@@ -3,6 +3,8 @@
  *
  *   out/<route>.md   clean Markdown for any page (append `.md` to its URL)
  *   out/llms.txt     an index of every page, with an instruction preamble
+ *   out/llms-full.txt  every page's Markdown in one file, for agents that load the
+ *                      whole reference into context instead of fetching page by page
  *
  * Both are conventions our competitors ship (developers.deepgram.com/llms.txt,
  * assemblyai.com/docs/llms.txt) and both are read by coding agents writing
@@ -143,7 +145,7 @@ for await (const { file, route } of pages()) {
   const target = route === "/" ? join(OUT, "index.md") : join(OUT, `${route.slice(1)}.md`);
   await writeFile(target, `${header}\n${markdown}\n`, "utf8");
 
-  index.push({ route, title, description });
+  index.push({ route, title, description, markdown });
 }
 
 index.sort((a, b) => a.route.localeCompare(b.route));
@@ -180,6 +182,8 @@ const llms = [
   `- Authenticate with the \`X-API-Key\` header against https://api.speechrevolutions.com — details in ${SITE}/auth.md`,
   "- SDKs: Python, JavaScript/TypeScript, Go, C#",
   "",
+  `- Every page below in one file: ${SITE}/llms-full.txt`,
+  "",
   "## Docs",
   "",
   ...index.map(
@@ -191,4 +195,23 @@ const llms = [
 
 await writeFile(join(OUT, "llms.txt"), llms, "utf8");
 
-console.log(`llms.txt + ${index.length} page markdown files written to out/`);
+// Same order as the index. Each page opens with its URL so a quoted passage can be traced
+// back to the page it came from.
+const full = [
+  "# Speech Revolutions Docs (full text)",
+  "",
+  `> Every page of ${SITE} as Markdown. Index: ${SITE}/llms.txt`,
+  "",
+  ...index.flatMap(({ route, markdown }) => [
+    "---",
+    "",
+    `Source: ${SITE}${route === "/" ? "/" : `${route}/`}`,
+    "",
+    markdown,
+    "",
+  ]),
+].join("\n");
+
+await writeFile(join(OUT, "llms-full.txt"), full, "utf8");
+
+console.log(`llms.txt, llms-full.txt + ${index.length} page markdown files written to out/`);

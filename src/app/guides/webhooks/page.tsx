@@ -2,14 +2,15 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Webhooks",
   description:
     "Get a signed POST when a job finishes instead of holding a connection open, and verify it with your organization's signing secret.",
-};
+});
 
 export default function WebhooksGuidePage() {
   return (

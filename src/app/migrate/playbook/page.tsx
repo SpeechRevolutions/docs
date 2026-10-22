@@ -1,13 +1,14 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Switching STT APIs in under 30 minutes",
   description:
     "A provider-agnostic playbook for switching speech-to-text APIs: put transcription behind an interface, compare on your own audio, and roll out gradually with a fallback.",
-};
+});
 
 export default function MigrationPlaybookPage() {
   return (

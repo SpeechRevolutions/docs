@@ -1,13 +1,14 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "JavaScript SDK",
   description:
     "The official JavaScript and TypeScript client for the Speech Revolutions STT API. Promise-based, and runs on Node 18+ using native fetch.",
-};
+});
 
 export default function JsSdkPage() {
   return (

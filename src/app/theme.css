@@ -136,7 +136,8 @@
 
   --c-code-bg: #111113;
   --c-code-fg: #e4e4e7;
-  --c-code-comment: #71717a;
+  /* 5.6:1 on code-bg; #71717a was 3.9, under the 4.5 body-text minimum. */
+  --c-code-comment: #8b8b93;
   --c-code-keyword: #f0abfc;
   --c-code-string: #86efac;
   --c-code-number: #fdba74;
@@ -185,7 +186,8 @@
 
   --c-code-bg: #f5f4f1;
   --c-code-fg: #1c1917;
-  --c-code-comment: #78716c;
+  /* 5.3:1 on code-bg; #78716c was 4.4. */
+  --c-code-comment: #6b645f;
   --c-code-keyword: #9d174d;
   --c-code-string: #166534;
   --c-code-number: #b45309;

@@ -1,14 +1,16 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Using Speech Revolutions with Amazon S3",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Using Speech Revolutions with Amazon S3" },
   description:
     "Transcribe audio stored in Amazon S3 without downloading it: presign a short-lived GET URL, pass it to Speech Revolutions, and write the JSON transcript back to a bucket.",
-};
+});
 
 export default function S3IntegrationPage() {
   return (

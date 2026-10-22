@@ -1,13 +1,14 @@
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Batch-transcribe thousands of files",
   description:
     "Transcribe a large backlog of files: submit each job with bounded concurrency, persist the job IDs, and collect the transcripts by polling or webhook.",
-};
+});
 
 export default function BatchTutorialPage() {
   return (

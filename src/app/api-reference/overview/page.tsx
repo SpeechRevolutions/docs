@@ -1,14 +1,15 @@
 import { Callout } from "@/components/DocsUI";
 import { LIMITS, RATE_LIMITS, SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ENDPOINTS, TAGS } from "@/lib/openapi";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "API overview",
   description:
     "Base URL, authentication, file-size limits, per-endpoint rate limits, supported audio formats and every error code for the Speech Revolutions speech-to-text API.",
-};
+});
 
 export default function ApiOverviewPage() {
   return (

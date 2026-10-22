@@ -2,14 +2,16 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
 import { MigrationCompare } from "@/components/MigrationCompare";
 import { LIMITS, SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Migrating from the OpenAI Whisper API to Speech Revolutions",
+export const metadata: Metadata = docMeta({
+  // Already names the brand; the layout template would add it a second time.
+  title: { absolute: "Migrating from the OpenAI Whisper API to Speech Revolutions" },
   description:
     "Move an OpenAI /v1/audio/transcriptions integration to Speech Revolutions: auth, multipart vs presigned upload, the 25 MB limit, and getting word timestamps + diarization in one call.",
-};
+});
 
 export default function MigrateOpenAIWhisperPage() {
   return (

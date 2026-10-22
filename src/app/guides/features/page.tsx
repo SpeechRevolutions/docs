@@ -1,12 +1,13 @@
 import { Callout } from "@/components/DocsUI";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Features & formats",
   description:
     "Every request can enable the full feature set — there are no paid add-ons.",
-};
+});
 
 export default function FeaturesPage() {
   return (

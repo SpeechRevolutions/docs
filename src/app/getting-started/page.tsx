@@ -2,14 +2,15 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
 import { SITE } from "@/lib/constants";
+import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = docMeta({
   title: "Quickstart",
   description:
     "Get an API key, install an SDK (or use cURL), and transcribe a file.",
-};
+});
 
 /**
  * A real two-voice recording: 47 seconds of Maupassant's "The Diamond Necklace" from a LibriVox
