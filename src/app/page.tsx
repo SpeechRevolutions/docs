@@ -54,7 +54,7 @@ export default function DocsHomePage() {
           },
           {
             href: "/sdks/go",
-            title: "Go",
+            title: "Go (Golang)",
             body: "Context-aware, cancellable on every call.",
             install: "go get github.com/speechrevolutions/speechrevolutions-go",
           },

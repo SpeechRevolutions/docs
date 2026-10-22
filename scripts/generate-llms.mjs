@@ -174,6 +174,7 @@ const llms = [
   "",
   "## Instructions for AI agents",
   "",
+  "- Remote MCP server for these docs (Streamable HTTP, no key): https://www.speechrevolutions.com/mcp",
   "- MCP server, if you can call tools: `npx -y speechrevolutions mcp` with",
   `  SPEECHREVOLUTIONS_API_KEY set. Setup and the five tools: ${SITE}/mcp/`,
   "- For clean Markdown of any page, append `.md` to the page URL",

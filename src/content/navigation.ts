@@ -73,7 +73,7 @@ export const NAV: NavSection[] = [
     items: [
       { title: "Python", href: "/sdks/python" },
       { title: "JavaScript", href: "/sdks/javascript" },
-      { title: "Go", href: "/sdks/go" },
+      { title: "Go (Golang)", href: "/sdks/go" },
       { title: "C#", href: "/sdks/csharp" },
     ],
   },

@@ -31,6 +31,17 @@
       ]
     },
     {
+      "identifier": "urn:air:speechrevolutions.com:mcp:docs",
+      "displayName": "Speech Revolutions docs MCP server",
+      "description": "Remote MCP server (Streamable HTTP, no key): search these docs, read a page, get pricing and measured diarization results.",
+      "type": "application/mcp-server-card+json",
+      "url": "https://www.speechrevolutions.com/mcp/server-card",
+      "representativeQueries": [
+        "Speech Revolutions documentation MCP",
+        "search Speech Revolutions docs"
+      ]
+    },
+    {
       "identifier": "urn:air:speechrevolutions.com:docs:index",
       "displayName": "Speech Revolutions Documentation",
       "description": "API reference, SDK guides and quickstarts. Every page has a Markdown twin at the same URL with .md appended.",
