@@ -1,6 +1,6 @@
 "use client";
 
-import { NAV } from "@/content/navigation";
+import { HUBS, NAV } from "@/content/navigation";
 import { SITE } from "@/lib/constants";
 import { usePathname } from "next/navigation";
 
@@ -29,21 +29,27 @@ export function Breadcrumbs() {
   // The home page is the root of the trail, not a page within it.
   if (path === "/") return null;
 
-  const section = NAV.find((s) => s.items.some((i) => i.href === path));
-  const item = section?.items.find((i) => i.href === path);
-  if (!section || !item) return null;
+  const hub = HUBS.find((h) => h.path === path);
+  const item = hub ?? NAV.flatMap((s) => s.items).find((i) => i.href === path);
+  if (!item) return null;
 
+  // Every URL ends in a slash (trailingSlash), so the crumbs do too: a crumb without one is a
+  // URL that 301s, and Google reports those as "Page with redirect".
   const base = `https://${SITE.docsDomain}`;
+  const url = (p: string) => `${base}${p}/`;
+  // Each folder above the page is a hub page of its own, so each is a clickable level.
+  const parents = HUBS.filter((h) => path.startsWith(`${h.path}/`)).sort(
+    (a, b) => a.path.length - b.path.length,
+  );
+  const crumbs = [
+    { name: `${SITE.name} Docs`, item: `${base}/` },
+    ...parents.map((h) => ({ name: h.title, item: url(h.path) })),
+    { name: item.title, item: url(path) },
+  ];
   const json = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: `${SITE.name} Docs`, item: base },
-      // The section is a grouping in the sidebar, not a page of its own, so it carries no
-      // `item` URL. A ListItem without one is valid and is how a non-clickable level is said.
-      { "@type": "ListItem", position: 2, name: section.title },
-      { "@type": "ListItem", position: 3, name: item.title, item: `${base}${path}` },
-    ],
+    itemListElement: crumbs.map((c, i) => ({ "@type": "ListItem", position: i + 1, ...c })),
   };
 
   return (

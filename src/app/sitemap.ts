@@ -1,4 +1,4 @@
-import { NAV } from "@/content/navigation";
+import { HUBS, NAV } from "@/content/navigation";
 import { SITE } from "@/lib/constants";
 import type { MetadataRoute } from "next";
 import { execFileSync } from "node:child_process";
@@ -39,7 +39,7 @@ function lastModified(href: string): Date | undefined {
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = `https://${SITE.docsDomain}`;
 
-  return NAV.flatMap((section) =>
+  const pages = NAV.flatMap((section) =>
     section.items.map((item) => ({
       // `trailingSlash: true` — match the canonical form exactly or the two compete.
       url: item.href === "/" ? `${base}/` : `${base}${item.href}/`,
@@ -54,4 +54,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             : 0.7,
     })),
   );
+  // Folder index pages: lists of the pages above, so below them in priority.
+  const hubs = HUBS.map((h) => ({
+    url: `${base}${h.path}/`,
+    lastModified: lastModified(h.path),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
+  }));
+  return [...pages, ...hubs];
 }

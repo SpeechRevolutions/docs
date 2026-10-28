@@ -116,3 +116,62 @@ export const NAV: NavSection[] = [
     ],
   },
 ];
+
+export type Hub = { path: string; title: string; description: string };
+
+/**
+ * Index pages for the URL folders. Crawlers trim a URL back to its folder (Google reported
+ * /guides/, /sdks/ and the rest as 404s on 2026-10-28), and a breadcrumb level is only a link
+ * when its folder is a page. Each hub lists the NAV pages under its path, so it can't go stale.
+ */
+export const HUBS: Hub[] = [
+  {
+    path: "/guides",
+    title: "Guides",
+    description:
+      "How-to guides for the Speech Revolutions API: the terminal, live progress, webhooks, timestamps, speaker diarization and output formats.",
+  },
+  {
+    path: "/api-reference",
+    title: "API reference",
+    description:
+      "The Speech Revolutions REST API: uploading files, one-request transcription, the job lifecycle, and every endpoint.",
+  },
+  {
+    path: "/api-reference/endpoints",
+    title: "Endpoints",
+    description:
+      "Every Speech Revolutions API endpoint, with its parameters, responses and request samples.",
+  },
+  {
+    path: "/sdks",
+    title: "SDKs",
+    description:
+      "Official Speech Revolutions clients for Python, JavaScript, Go and C#.",
+  },
+  {
+    path: "/migrate",
+    title: "Migrate",
+    description:
+      "Move to Speech Revolutions from Deepgram, AssemblyAI, the OpenAI Whisper API, ElevenLabs or self-hosted Whisper.",
+  },
+  {
+    path: "/tutorials",
+    title: "Tutorials",
+    description:
+      "End-to-end builds with the Speech Revolutions API: a meeting transcription app, batch jobs and subtitles.",
+  },
+  {
+    path: "/integrations",
+    title: "Integrations",
+    description:
+      "Use Speech Revolutions with Next.js, FastAPI, Django, Amazon S3 and Supabase.",
+  },
+];
+
+/** NAV pages that live under a hub's path, in sidebar order. */
+export function hubItems(path: string): NavItem[] {
+  return NAV.flatMap((s) => s.items).filter((i) =>
+    i.href.startsWith(`${path}/`),
+  );
+}
