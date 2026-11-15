@@ -62,6 +62,7 @@ export const NAV: NavSection[] = [
       { title: "Speaker diarization", href: "/guides/diarization" },
       { title: "Output formats & subtitles", href: "/guides/output-formats" },
       { title: "Features & formats", href: "/guides/features" },
+      { title: "Redaction, entities & summaries", href: "/guides/audio-intelligence" },
     ],
   },
   {
@@ -105,6 +106,7 @@ export const NAV: NavSection[] = [
       { title: "Django", href: "/integrations/django" },
       { title: "Amazon S3", href: "/integrations/s3" },
       { title: "Supabase", href: "/integrations/supabase" },
+      { title: "Deepgram & OpenAI compatible", href: "/integrations/compatible-endpoints" },
     ],
   },
   {
