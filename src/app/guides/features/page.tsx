@@ -84,6 +84,37 @@ export default function FeaturesPage() {
             </tr>
             <tr>
               <td>
+                <code>verbatim</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>
+                Transcribe exactly as spoken: fillers (um, uh) and repeats (&quot;I, I think&quot;)
+                stay in. <code>false</code> gives tidied text with neither — see{" "}
+                <a href="#transcript-style">transcript style</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>keep_repeats</code>
+              </td>
+              <td>
+                = <code>verbatim</code>
+              </td>
+              <td>Keep repeated words while still removing fillers</td>
+            </tr>
+            <tr>
+              <td>
+                <code>conservative_vote</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Favor the main model&apos;s reading of names when the models disagree</td>
+            </tr>
+            <tr>
+              <td>
                 <code>tier</code>
               </td>
               <td>
@@ -105,6 +136,53 @@ export default function FeaturesPage() {
           </tbody>
         </table>
       </div>
+
+      <h2 id="transcript-style">Transcript style</h2>
+      <p>
+        Three options set how literal the text is. They change only how the words are written,
+        never which audio is transcribed.
+      </p>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>You want</th>
+              <th>Send</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Exactly what was said (the default)</td>
+              <td>
+                nothing, or <code>verbatim: true</code>
+              </td>
+              <td>&quot;Um, but I&apos;m, I&apos;m unsure about how to, how to put it.&quot;</td>
+            </tr>
+            <tr>
+              <td>No fillers, repeats kept</td>
+              <td>
+                <code>verbatim: false, keep_repeats: true</code>
+              </td>
+              <td>&quot;But I&apos;m, I&apos;m unsure about how to, how to put it.&quot;</td>
+            </tr>
+            <tr>
+              <td>Fully tidied</td>
+              <td>
+                <code>verbatim: false</code>
+              </td>
+              <td>&quot;But I&apos;m unsure about how to put it.&quot;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Each transcript is a vote between three speech models. <code>conservative_vote: true</code> keeps
+        the main model&apos;s spelling of names and its confident words more often when the others
+        disagree. Use it when you compare our output word for word with a single-model transcript; it is
+        slightly less accurate overall. Accounts can have their own defaults for all three options; a value
+        you send always wins.
+      </p>
 
       <h2>Output types</h2>
       <div className="table-scroll">

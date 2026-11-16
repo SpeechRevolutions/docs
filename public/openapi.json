@@ -313,6 +313,30 @@
             "example": "Kubernetes,Grafana,Zephyr"
           },
           {
+            "name": "verbatim",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Transcribe exactly as spoken: fillers (um, uh) and repeats (\"I, I think\") stay in. Off gives tidied text with neither. Default: on (the most accurate setting on benchmarks), unless your account has been set up with a different default."
+          },
+          {
+            "name": "keep_repeats",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Keep repeated words (\"you know, you know\") while still removing fillers. Defaults to the value of `verbatim`, so you only need it for the in-between style: no um/uh, repeats kept."
+          },
+          {
+            "name": "conservative_vote",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Keep our main model's reading of names and confident words more often when the three models disagree. Useful when you compare our output word for word with a single-model transcript. Default: off; slightly less accurate overall."
+          },
+          {
             "name": "language",
             "in": "query",
             "schema": {
