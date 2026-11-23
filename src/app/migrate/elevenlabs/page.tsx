@@ -188,7 +188,7 @@ export default function MigrateElevenLabsPage() {
       <p>
         ElevenLabs diarizes with <code>diarize=true</code>, adding a{" "}
         <code>speaker_id</code> per word. Speech Revolutions uses the same <code>diarize</code>{" "}
-        flag (an alias for <code>speaker_labels</code>, on by default) and also groups
+        flag (an alias for <code>speaker_labels</code>, an add-on at +$0.02 per audio hour) and also groups
         words into <code>result.utterances</code>, so you don&apos;t need to rebuild turns
         from per-word IDs. Zephyr ranks #1 on diarization error rate (DER) on every
         benchmark subset. See the{" "}

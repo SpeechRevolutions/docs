@@ -40,16 +40,16 @@ export default function DiarizationGuidePage() {
 
       <h2 id="enable">Turn it on</h2>
       <p>
-        <code>speaker_labels</code> is on by default. <code>diarize</code> is a
-        Deepgram-compatible alias for the same option, so code ported from
-        Deepgram works unchanged.
+        Set <code>speaker_labels=true</code>. Diarization is an add-on, $0.02 per audio hour on
+        top of the base rate. <code>diarize</code> is a Deepgram-compatible alias for the same
+        option, so code ported from Deepgram works unchanged.
       </p>
       <CodeTabs
         tabs={[
           {
             label: "Python",
             language: "python",
-            code: `# speaker_labels defaults to True; shown explicitly here.
+            code: `# speaker_labels turns diarization on (+$0.02 per audio hour).
 result = client.transcribe("meeting.mp3", speaker_labels=True)
 
 # diarize is a Deepgram-compatible alias for speaker_labels
@@ -58,7 +58,7 @@ result = client.transcribe("meeting.mp3", diarize=True)`,
           {
             label: "JavaScript",
             language: "ts",
-            code: `// speakerLabels defaults to true; shown explicitly here.
+            code: `// speakerLabels turns diarization on (+$0.02 per audio hour).
 const result = await client.transcribe("meeting.mp3", { speakerLabels: true });
 
 // diarize is a Deepgram-compatible alias for speakerLabels
@@ -67,7 +67,7 @@ const r2 = await client.transcribe("meeting.mp3", { diarize: true });`,
           {
             label: "Go",
             language: "go",
-            code: `// SpeakerLabels defaults to on; shown explicitly here.
+            code: `// SpeakerLabels turns diarization on (+$0.02 per audio hour).
 result, err := client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
 	SpeakerLabels: stt.Bool(true),
 }, nil)
@@ -80,7 +80,7 @@ result, err = client.Transcribe(ctx, "meeting.mp3", stt.TranscribeOptions{
           {
             label: "C#",
             language: "csharp",
-            code: `// SpeakerLabels defaults to true; shown explicitly here.
+            code: `// SpeakerLabels turns diarization on (+$0.02 per audio hour).
 var result = await client.TranscribeAsync("meeting.mp3",
     new TranscribeOptions { SpeakerLabels = true });
 

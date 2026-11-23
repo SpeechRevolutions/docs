@@ -176,7 +176,7 @@ export default function MigrateOpenAIWhisperPage() {
       <p>
         <code>gpt-4o-transcribe</code> does not diarize; OpenAI offers the separate{" "}
         <code>gpt-4o-transcribe-diarize</code> model (as of July 2026). Speech Revolutions
-        diarizes in the same call: set <code>speaker_labels</code> (on by default) and read{" "}
+        diarizes in the same call: set <code>speaker_labels=true</code> (an add-on, +$0.02 per audio hour) and read{" "}
         <code>result.utterances</code>. Zephyr ranks #1 on diarization error rate on every
         benchmark subset. See the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}

@@ -9,9 +9,20 @@ export const SITE = {
     process.env.NEXT_PUBLIC_LANDING_URL ?? "https://www.speechrevolutions.com",
 } as const;
 
+/** Kept in step with landing/src/lib/constants.ts and with what the clusters bill. */
 export const PRICING = {
-  standardPerMinute: 0.003,
+  standardPerMinute: 0.0015,
+  standardPerHour: 0.09,
+  streamingPerHour: 0.15,
 } as const;
+
+/** Batch add-ons, per audio hour, charged only on requests that turn them on. */
+export const ADD_ONS = [
+  { option: "speaker_labels", name: "Speaker diarization", perHour: 0.02 },
+  { option: "custom_vocabulary", name: "Keyterms prompting", perHour: 0.05 },
+  { option: "summarize", name: "Summarization", perHour: 0.02 },
+  { option: "filter_profanity", name: "Profanity filter", perHour: 0.01 },
+] as const;
 
 /**
  * Request limits, mirroring the server. Keep in step with

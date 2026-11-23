@@ -1,6 +1,6 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { Callout } from "@/components/DocsUI";
-import { SITE } from "@/lib/constants";
+import { ADD_ONS, PRICING, SITE } from "@/lib/constants";
 import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 
@@ -134,8 +134,10 @@ can just communicate competently.
 
       <h2>Cost</h2>
       <p>
-        The same as any other API call: $0.003 per minute of audio, with diarization and
-        timestamps included. Tool calls that only check status or list jobs are free.
+        The same as any other API call: ${PRICING.standardPerHour.toFixed(2)} per audio hour,
+        plus any add-ons the call turns on (speaker diarization is $
+        {ADD_ONS[0].perHour.toFixed(2)} an hour more). Tool calls that only check status or list
+        jobs are free.
       </p>
 
       <h2>Troubleshooting</h2>

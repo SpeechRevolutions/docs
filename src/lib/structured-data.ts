@@ -77,10 +77,10 @@ export function docsJsonLd() {
         ],
         offers: {
           "@type": "Offer",
-          price: PRICING.standardPerMinute,
+          price: PRICING.standardPerHour,
           priceCurrency: "USD",
-          // Per minute of audio, which is the unit the pricing page quotes.
-          unitText: "audio minute",
+          // Per audio hour, the unit the pricing page quotes. Add-ons are extra.
+          unitText: "audio hour",
           url: `${SITE.landingUrl}/pricing`,
         },
         softwareHelp: {

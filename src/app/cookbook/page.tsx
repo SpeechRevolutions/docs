@@ -907,7 +907,7 @@ catch (RateLimitException e)
       />
       <h2 id="speakers">Speaker labels</h2>
       <p>
-        <code>speaker_labels</code> (on by default) labels who spoke each segment.{" "}
+        <code>speaker_labels=true</code> (an add-on, +$0.02 per audio hour) labels who spoke each segment.{" "}
         <code>diarize</code> is a Deepgram-compatible alias for the same flag. The
         result has <code>.utterances</code> (contiguous speaker turns), and
         every word in <code>.words</code> has a <code>speaker</code>. See the{" "}

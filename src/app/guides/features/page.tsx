@@ -1,4 +1,5 @@
 import { Callout } from "@/components/DocsUI";
+import { ADD_ONS, PRICING } from "@/lib/constants";
 import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -6,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = docMeta({
   title: "Features & formats",
   description:
-    "Every request can enable the full feature set — there are no paid add-ons.",
+    "Transcription options, output formats and add-on pricing: the base rate covers timestamps, punctuation, language detection and every output format; diarization, keyterms, summaries and the profanity filter are per-hour add-ons.",
 });
 
 export default function FeaturesPage() {
@@ -14,8 +15,10 @@ export default function FeaturesPage() {
     <>
       <h1>Features & formats</h1>
       <p>
-        Every request can enable the full feature set — there are no paid
-        add-ons.
+        The base rate (${PRICING.standardPerHour.toFixed(2)} per audio hour) covers word
+        timestamps, punctuation, language detection, paragraphs and every output format.
+        A few options are{" "}
+        <a href="#pricing">add-ons</a>, charged per audio hour only on requests that turn them on.
       </p>
 
       <h2>Transcription options</h2>
@@ -43,9 +46,11 @@ export default function FeaturesPage() {
                 <code>speaker_labels</code>
               </td>
               <td>
-                <code>true</code>
+                <code>false</code>
               </td>
-              <td>Speaker diarization (who spoke when)</td>
+              <td>
+                Speaker diarization (who spoke when). Add-on, +${ADD_ONS[0].perHour.toFixed(2)}/hr
+              </td>
             </tr>
             <tr>
               <td>
@@ -70,7 +75,10 @@ export default function FeaturesPage() {
                 <code>custom_vocabulary</code>
               </td>
               <td>—</td>
-              <td>Names and terms to recognize</td>
+              <td>
+                Names and terms to recognize, given to the model and matched by sound.
+                Add-on, +${ADD_ONS[1].perHour.toFixed(2)}/hr
+              </td>
             </tr>
             <tr>
               <td>
@@ -81,6 +89,42 @@ export default function FeaturesPage() {
                 ISO 639-1 code (e.g. <code>en</code>) to skip detection and transcribe the
                 whole file in that language — see{" "}
                 <Link href="/cookbook#pin-language">pinning the language</Link>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>summarize</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Adds <code>summary</code> (<code>text</code> and <code>bullets</code>) to the
+                JSON output. Add-on, +${ADD_ONS[2].perHour.toFixed(2)}/hr
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>filter_profanity</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Masks strong profanity (<code>s***</code>) in every output format. Add-on, +$
+                {ADD_ONS[3].perHour.toFixed(2)}/hr
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>paragraphs</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Adds <code>paragraphs</code> (speaker-aware, with their sentences and times) to the
+                JSON output
               </td>
             </tr>
             <tr>
@@ -106,6 +150,40 @@ export default function FeaturesPage() {
           </tbody>
         </table>
       </div>
+
+      <h2 id="pricing">Pricing</h2>
+      <p>
+        Batch transcription is ${PRICING.standardPerHour.toFixed(2)} per audio hour, billed by
+        the second from prepaid credit. Add-ons are charged per audio hour on top, only when the
+        request turns them on:
+      </p>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Add-on</th>
+              <th>Option</th>
+              <th>Per audio hour</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ADD_ONS.map((a) => (
+              <tr key={a.option}>
+                <td>{a.name}</td>
+                <td>
+                  <code>{a.option}</code>
+                </td>
+                <td>+${a.perHour.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p>
+        An hour with speaker labels costs $
+        {(PRICING.standardPerHour + ADD_ONS[0].perHour).toFixed(2)}. Full details:{" "}
+        <a href="https://www.speechrevolutions.com/pricing">pricing</a>.
+      </p>
 
       <h2>Output types</h2>
       <div className="table-scroll">

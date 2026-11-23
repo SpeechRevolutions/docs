@@ -170,7 +170,7 @@ export default function MigrateSelfHostedWhisperPage() {
         on its own. You run a separate pipeline (typically{" "}
         <code>pyannote.audio</code>) and align its speaker turns to the Whisper words
         yourself. Speech Revolutions diarizes in the same call: set{" "}
-        <code>speaker_labels</code> (on by default) and read{" "}
+        <code>speaker_labels=true</code> (an add-on, +$0.02 per audio hour) and read{" "}
         <code>result.utterances</code>. Zephyr ranks #1 on diarization error rate on every
         benchmark subset. See the{" "}
         <Link href="/benchmarks">benchmarks</Link> and the{" "}

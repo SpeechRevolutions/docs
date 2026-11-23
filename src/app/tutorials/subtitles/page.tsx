@@ -170,7 +170,7 @@ Console.WriteLine($"Wrote {path}");`,
       <p>
         Cues follow standard captioning rules: one speaker per cue, at most two lines of 42
         characters, at most 7 seconds, and a break at pauses longer than a second and at
-        sentence ends. With speaker labels on (the default), the first line of each cue starts
+        sentence ends. With speaker labels on, the first line of each cue starts
         with the speaker, like <code>SPEAKER_1: </code>; turn <code>speaker_labels</code> off
         for captions without it. The full rules are in{" "}
         <Link href="/guides/output-formats#cues">Output formats</Link>.
