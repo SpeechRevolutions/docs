@@ -228,7 +228,7 @@ await vtt.SaveAsync("meeting");   // -> meeting.vtt`,
       </ul>
       <p>
         A cue runs from its first word&apos;s start to its last word&apos;s end. With speaker
-        labels on (the default), the cue&apos;s first line starts with the speaker, for example{" "}
+        labels on, the cue&apos;s first line starts with the speaker, for example{" "}
         <code>SPEAKER_1: </code>. Turn <code>speaker_labels</code> off for captions without
         speaker names. SRT times are <code>HH:MM:SS,mmm</code>; VTT times are{" "}
         <code>HH:MM:SS.mmm</code>, after a <code>WEBVTT</code> header.

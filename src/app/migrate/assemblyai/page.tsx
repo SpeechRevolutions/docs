@@ -197,7 +197,7 @@ export default function MigrateAssemblyAIPage() {
       <h2>Diarization</h2>
       <p>
         AssemblyAI enables diarization with <code>speaker_labels: true</code>.
-        Speech Revolutions uses the same <code>speaker_labels</code> flag (on by default) and
+        Speech Revolutions uses the same <code>speaker_labels</code> flag (an add-on, +$0.02 per audio hour) and
         returns <code>utterances</code> in the same way, so speaker-turn code ports with
         few changes. Zephyr ranks #1 on diarization error rate on every benchmark subset:
         9.7% on AMI, against 25.3% for AssemblyAI. See the{" "}
