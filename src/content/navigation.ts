@@ -30,6 +30,7 @@ export const ENDPOINT_NAV: NavItem[] = [
   { title: "Get job", href: "/api-reference/endpoints/get-job", method: "GET" },
   { title: "Stream progress", href: "/api-reference/endpoints/stream-job-progress", method: "GET" },
   { title: "Cancel job", href: "/api-reference/endpoints/cancel-job", method: "POST" },
+  { title: "Delete job", href: "/api-reference/endpoints/delete-job", method: "DELETE" },
   { title: "Check failed jobs", href: "/api-reference/endpoints/check-failed-jobs", method: "POST" },
   { title: "Transcribe", href: "/api-reference/endpoints/transcribe", method: "POST" },
 ];
@@ -65,8 +66,19 @@ export const NAV: NavSection[] = [
     ],
   },
   {
+    title: "Real-time streaming",
+    items: [
+      { title: "Streaming", href: "/streaming" },
+      { title: "Deepgram-compatible", href: "/api-reference/deepgram-compatible" },
+    ],
+  },
+  {
     title: "API reference",
-    items: [{ title: "Overview", href: "/api-reference/overview" }, ...ENDPOINT_NAV],
+    items: [
+      { title: "Overview", href: "/api-reference/overview" },
+      ...ENDPOINT_NAV,
+      { title: "OpenAI-compatible", href: "/api-reference/openai-compatible" },
+    ],
   },
   {
     title: "SDKs",
@@ -105,6 +117,9 @@ export const NAV: NavSection[] = [
       { title: "Django", href: "/integrations/django" },
       { title: "Amazon S3", href: "/integrations/s3" },
       { title: "Supabase", href: "/integrations/supabase" },
+      { title: "LiveKit Agents", href: "/integrations/livekit" },
+      { title: "Pipecat", href: "/integrations/pipecat" },
+      { title: "Vapi", href: "/integrations/vapi" },
     ],
   },
   {

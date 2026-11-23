@@ -134,9 +134,9 @@ result = client.transcribe(
                 <code>bool</code>
               </td>
               <td>
-                <code>True</code>
+                <code>False</code>
               </td>
-              <td>Label who spoke each segment</td>
+              <td>Speaker diarization. Add-on, +$0.02/hr</td>
             </tr>
             <tr>
               <td>
@@ -239,6 +239,66 @@ result = client.transcribe(
                 <code>False</code>
               </td>
               <td>Render live console bars</td>
+            </tr>
+                      <tr>
+              <td>
+                <code>summarize</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>False</code>
+              </td>
+              <td>Add-on, +$0.02/hr: <code>result.summary</code> (<code>text</code>, <code>bullets</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>filter_profanity</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>False</code>
+              </td>
+              <td>Add-on, +$0.01/hr: strong profanity masked (<code>s***</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>paragraphs</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>False</code>
+              </td>
+              <td><code>result.paragraphs</code>: speaker-aware, with sentences and times. Free</td>
+            </tr>
+            <tr>
+              <td>
+                <code>verbatim</code>
+              </td>
+              <td>
+                <code>bool | None</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>Keep (<code>True</code>) or drop (<code>False</code>) fillers and false starts; <code>None</code> uses the server default</td>
+            </tr>
+            <tr>
+              <td>
+                <code>extra</code>
+              </td>
+              <td>
+                <code>dict | None</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>Any other API option, sent as given</td>
             </tr>
           </tbody>
         </table>
@@ -493,6 +553,14 @@ except RateLimitError as e:
 except AuthenticationError as e:
     print(e.status_code, e.request_id)`}
       />
+
+      <h2>Real-time streaming</h2>
+      <p>
+        <code>client.stream()</code> and <code>client.stream_file()</code> (install{" "}
+        <code>speechrevolutions[streaming]</code>) open a live transcription session: send PCM16 mono 16 kHz audio as it is
+        produced and get partials and finals back. Dropped connections are resumed for you. See 
+        <Link href="/streaming">Real-time streaming</Link> for the events and options.
+      </p>
 
       <h2>Authentication</h2>
       <p>The SDK reads your API key from the environment:</p>

@@ -696,6 +696,11 @@ def main() -> int:
     os.makedirs(WORKSPACE, exist_ok=True)
 
     snippets = extract(os.path.join(REPO, "src", "app"))
+    # SR_SNIPPET_PAGES=streaming,openai-compatible runs only the pages whose path contains one of
+    # these, for checking new pages without re-running (and re-billing) every page.
+    pages = [x for x in os.environ.get("SR_SNIPPET_PAGES", "").split(",") if x]
+    if pages:
+        snippets = [s for s in snippets if any(x in s.page for x in pages)]
     by_lang: dict[str, list[Snippet]] = {}
     for s in snippets:
         if s.language in RUNNERS and s.language in wanted:

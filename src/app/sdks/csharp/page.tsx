@@ -113,9 +113,9 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
                 <code>bool</code>
               </td>
               <td>
-                <code>true</code>
+                <code>false</code>
               </td>
-              <td>Label who spoke each segment</td>
+              <td>Speaker diarization. Add-on, +$0.02/hr</td>
             </tr>
             <tr>
               <td>
@@ -208,6 +208,66 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
                 <code>null</code>
               </td>
               <td>Upload-progress callback</td>
+            </tr>
+                      <tr>
+              <td>
+                <code>Summarize</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.02/hr: <code>result.Summary</code> (<code>Text</code>, <code>Bullets</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>FilterProfanity</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.01/hr: strong profanity masked (<code>s***</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Paragraphs</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td><code>result.Paragraphs</code>: speaker-aware, with sentences and times. Free</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Verbatim</code>
+              </td>
+              <td>
+                <code>bool?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>Keep or drop fillers and false starts; <code>null</code> uses the server default</td>
+            </tr>
+            <tr>
+              <td>
+                <code>Extra</code>
+              </td>
+              <td>
+                <code>IDictionary&lt;string, object?&gt;?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>Any other API option, sent as given</td>
             </tr>
           </tbody>
         </table>
@@ -382,6 +442,13 @@ else if (status.IsFailed)
     Console.WriteLine($"{status.FailedStage}: {status.Reason}");
 }`}
       />
+
+      <h2>Real-time streaming</h2>
+      <p>
+        <code>client.StreamAsync()</code> and <code>client.StreamFileAsync()</code> open a live transcription session: send PCM16 mono 16 kHz audio as it is
+        produced and get partials and finals back. Dropped connections are resumed for you. See 
+        <Link href="/streaming">Real-time streaming</Link> for the events and options.
+      </p>
 
       <h2>Authentication</h2>
       <p>The SDK reads your API key from the environment:</p>

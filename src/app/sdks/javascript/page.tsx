@@ -121,17 +121,9 @@ const result2 = await client.transcribeUrl("https://example.com/audio.mp3");`}
                 <code>boolean</code>
               </td>
               <td>
-                <code>true</code>
+                <code>false</code>
               </td>
-            </tr>
-            <tr>
-              <td>
-                <code>diarize</code>
-              </td>
-              <td>
-                <code>boolean</code> (alias for <code>speakerLabels</code>)
-              </td>
-              <td>—</td>
+              <td>Speaker diarization. Add-on, +$0.02/hr</td>
             </tr>
             <tr>
               <td>
@@ -209,6 +201,66 @@ const result2 = await client.transcribeUrl("https://example.com/audio.mp3");`}
               <td>
                 <code>false</code>
               </td>
+            </tr>
+                      <tr>
+              <td>
+                <code>summarize</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.02/hr: <code>result.summary</code> (<code>text</code>, <code>bullets</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>filterProfanity</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.01/hr: strong profanity masked (<code>s***</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>paragraphs</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td><code>result.paragraphs</code>: speaker-aware, with sentences and times. Free</td>
+            </tr>
+            <tr>
+              <td>
+                <code>verbatim</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>server default</code>
+              </td>
+              <td>Keep or drop fillers and false starts</td>
+            </tr>
+            <tr>
+              <td>
+                <code>extra</code>
+              </td>
+              <td>
+                <code>Record&lt;string, unknown&gt;</code>
+              </td>
+              <td>
+                <code>—</code>
+              </td>
+              <td>Any other API option, sent as given</td>
             </tr>
           </tbody>
         </table>
@@ -459,6 +511,14 @@ try {
   }
 }`}
       />
+
+      <h2>Real-time streaming</h2>
+      <p>
+        <code>client.stream()</code> and <code>client.streamFile()</code> (on Node 18/20 also{" "}
+        install <code>ws</code>) open a live transcription session: send PCM16 mono 16 kHz audio as it is
+        produced and get partials and finals back. Dropped connections are resumed for you. See 
+        <Link href="/streaming">Real-time streaming</Link> for the events and options.
+      </p>
 
       <h2>Authentication</h2>
       <p>The SDK reads your API key from the environment:</p>
