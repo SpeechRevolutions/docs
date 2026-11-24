@@ -7,7 +7,7 @@ import Link from "next/link";
 export const metadata: Metadata = docMeta({
   title: "Features & formats",
   description:
-    "Transcription options, output formats and add-on pricing: the base rate covers timestamps, punctuation, language detection and every output format; diarization, keyterms, summaries and the profanity filter are per-hour add-ons.",
+    "Transcription options, output formats and add-on pricing: the base rate covers timestamps, punctuation, language detection and every output format; diarization, keyterms, summaries and chapters, the profanity filter, speaker identification, PII redaction and entity detection are per-hour add-ons.",
 });
 
 export default function FeaturesPage() {
@@ -117,6 +117,50 @@ export default function FeaturesPage() {
             </tr>
             <tr>
               <td>
+                <code>auto_chapters</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Adds <code>chapters</code> (<code>start</code>, <code>end</code>, <code>headline</code>, <code>gist</code>) covering the whole recording. Billed with summarization, once for either or both
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>known_speakers</code>
+              </td>
+              <td>
+                —
+              </td>
+              <td>
+                Names or roles who may be speaking (up to 20), e.g. <code>Agent,Customer</code>. Each speaker is matched to one, or left unnamed rather than guessed; adds <code>speaker_names</code>. Needs <code>speaker_labels</code>. Add-on, +${ADD_ONS[4].perHour.toFixed(2)}/hr
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>redact_pii</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Replaces names, organisations, places, addresses, dates of birth and other dates, account, card, phone, SSN and IP numbers with their type (<code>[PERSON_NAME]</code>) or <code>####</code> (<code>redact_pii_sub=hash</code>), in every format. Narrow with <code>redact_pii_policies</code>. Add-on, +${ADD_ONS[5].perHour.toFixed(2)}/hr
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>entity_detection</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Adds <code>entities</code> (type, text, start, end) to the JSON output. Add-on, +${ADD_ONS[6].perHour.toFixed(2)}/hr
+              </td>
+            </tr>
+            <tr>
+              <td>
                 <code>paragraphs</code>
               </td>
               <td>
@@ -181,7 +225,11 @@ export default function FeaturesPage() {
       </div>
       <p>
         An hour with speaker labels costs $
-        {(PRICING.standardPerHour + ADD_ONS[0].perHour).toFixed(2)}. Full details:{" "}
+        {(PRICING.standardPerHour + ADD_ONS[0].perHour).toFixed(2)}. An add-on that could not be
+        delivered is not charged: a summary that failed, or a PII pass that fell back to patterns
+        only (the JSON then says <code>pii_status: &quot;patterns_only&quot;</code>). Requests from
+        SDK 1.0.x, which always send <code>speaker_labels=true</code>, get speaker labels without
+        the diarization charge. Full details:{" "}
         <a href="https://www.speechrevolutions.com/pricing">pricing</a>.
       </p>
 

@@ -387,6 +387,63 @@
             "description": "Mask strong profanity (`s***`) in every output format. Add-on, +$0.01 per audio hour."
           },
           {
+            "name": "auto_chapters",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Add `chapters` (`start`, `end`, `headline`, `gist`) covering the whole recording to the JSON output. Billed with summarization: +$0.02 per audio hour, once, with or without `summarize`."
+          },
+          {
+            "name": "known_speakers",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated names or roles that may be speaking (up to 20, 60 characters each), e.g. `Agent,Customer`. Each diarized speaker is matched to one of them, or left unnamed; the JSON gains `speaker_names`. Needs `speaker_labels`. Add-on, +$0.02 per audio hour.",
+            "example": "Agent,Customer"
+          },
+          {
+            "name": "redact_pii",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Replace personal information in every output format with its type (`[PERSON_NAME]`) or `####`. Add-on, +$0.08 per audio hour. If the detection model is unavailable, only the pattern types (email, phone, card, SSN, IP) are redacted, the JSON says `pii_status: \"patterns_only\"`, and the add-on is not charged."
+          },
+          {
+            "name": "redact_pii_policies",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated types to redact; default all: person_name, organization, location, address, date_of_birth, date, account_number, email_address, phone_number, credit_card_number, us_social_security_number, ip_address."
+          },
+          {
+            "name": "redact_pii_sub",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "entity_name",
+                "hash"
+              ],
+              "default": "entity_name"
+            },
+            "description": "`entity_name` replaces with `[TYPE]`, `hash` with `####`."
+          },
+          {
+            "name": "entity_detection",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Add `entities` (`entity_type`, `text`, `start`, `end`) to the JSON output: people, organisations, places, addresses, dates and identifying numbers. Add-on, +$0.08 per audio hour."
+          },
+          {
             "name": "paragraphs",
             "in": "query",
             "schema": {

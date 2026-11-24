@@ -22,6 +22,15 @@ export const ADD_ONS = [
   { option: "custom_vocabulary", name: "Keyterms prompting", perHour: 0.05 },
   { option: "summarize", name: "Summarization", perHour: 0.02 },
   { option: "filter_profanity", name: "Profanity filter", perHour: 0.01 },
+  { option: "known_speakers", name: "Speaker identification", perHour: 0.02 },
+  { option: "redact_pii", name: "PII redaction", perHour: 0.08 },
+  { option: "entity_detection", name: "Entity detection", perHour: 0.08 },
+] as const;
+
+/** Streaming add-ons, per session hour (session options in session.update). */
+export const STREAMING_ADD_ONS = [
+  { option: "redact_pii", name: "PII redaction", perHour: 0.12 },
+  { option: "voiceprint", name: "Voice focus", perHour: 0.1 },
 ] as const;
 
 /**

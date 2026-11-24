@@ -1,7 +1,7 @@
 import { CodeBlock } from "@/components/CodeBlock";
 import { CodeTabs } from "@/components/CodeTabs";
 import { Callout } from "@/components/DocsUI";
-import { PRICING } from "@/lib/constants";
+import { PRICING, STREAMING_ADD_ONS } from "@/lib/constants";
 import { docMeta } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -245,6 +245,11 @@ Console.WriteLine($"{result.JobId} {result.Text}");`,
               <td>The language, when you didn&apos;t set one. Earlier finals are revised into it.</td>
             </tr>
             <tr>
+              <td><code>voice_focus</code></td>
+              <td><code>active</code></td>
+              <td>Answer to a <code>voiceprint</code> or <code>capture_voiceprint</code> option: whether the stream is locked to the voice.</td>
+            </tr>
+            <tr>
               <td><code>transcription.done</code></td>
               <td><code>text</code></td>
               <td>All finals joined. The session is over.</td>
@@ -288,6 +293,28 @@ Console.WriteLine($"{result.JobId} {result.Text}");`,
               <td><code>vocabulary</code></td>
               <td>—</td>
               <td>Names and terms to recognise (up to 200). Included in the streaming price.</td>
+            </tr>
+            <tr>
+              <td><code>redact_pii</code></td>
+              <td><code>false</code></td>
+              <td>
+                Redact personal information in finals before they reach you (same types and{" "}
+                <code>redact_pii_policies</code> / <code>redact_pii_sub</code> as batch). Partials are
+                not sent while it is on, unless you set <code>include_partials: true</code>, in which case
+                they arrive unredacted. +${STREAMING_ADD_ONS[0].perHour.toFixed(2)} per session hour.
+              </td>
+            </tr>
+            <tr>
+              <td><code>voiceprint</code></td>
+              <td>—</td>
+              <td>
+                Voice focus: lock the stream to one enrolled voice, so other people and background voices
+                are left out. Get a voiceprint by sending <code>capture_voiceprint: true</code> in an
+                earlier session (<code>transcription.done</code> returns it with a quality rating; capture
+                again until it is <code>ok</code>). You keep the voiceprint; we keep none after the session. A{" "}
+                <code>voice_focus</code> event says whether the lock is active, and only an active lock is
+                billed: +${STREAMING_ADD_ONS[1].perHour.toFixed(2)} per session hour.
+              </td>
             </tr>
             <tr>
               <td><code>turn_detection</code></td>
