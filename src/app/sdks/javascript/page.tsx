@@ -228,6 +228,78 @@ const result2 = await client.transcribeUrl("https://example.com/audio.mp3");`}
             </tr>
             <tr>
               <td>
+                <code>autoChapters</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td><code>result.chapters</code>: sections covering the whole recording. Billed with <code>summarize</code>, once</td>
+            </tr>
+            <tr>
+              <td>
+                <code>knownSpeakers</code>
+              </td>
+              <td>
+                <code>string[]</code>
+              </td>
+              <td>
+                <code>undefined</code>
+              </td>
+              <td>Add-on, +$0.02/hr: speaker identification; <code>result.speakerNames</code> maps each speaker to one of these names or roles, or leaves it unnamed. Needs <code>speakerLabels</code></td>
+            </tr>
+            <tr>
+              <td>
+                <code>redactPii</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.08/hr: names, organisations, places, addresses, dates and identifying numbers replaced in every format</td>
+            </tr>
+            <tr>
+              <td>
+                <code>redactPiiPolicies</code>
+              </td>
+              <td>
+                <code>PiiPolicy[]</code>
+              </td>
+              <td>
+                <code>undefined</code>
+              </td>
+              <td>Types to redact (<code>PII_POLICIES</code>); default all</td>
+            </tr>
+            <tr>
+              <td>
+                <code>redactPiiSub</code>
+              </td>
+              <td>
+                <code>&quot;entity_name&quot; | &quot;hash&quot;</code>
+              </td>
+              <td>
+                <code>undefined</code>
+              </td>
+              <td><code>&quot;entity_name&quot;</code> (<code>[PERSON_NAME]</code>, default) or <code>&quot;hash&quot;</code> (<code>####</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>entityDetection</code>
+              </td>
+              <td>
+                <code>boolean</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.08/hr: <code>result.entities</code> (type, text, start, end)</td>
+            </tr>
+            <tr>
+              <td>
                 <code>paragraphs</code>
               </td>
               <td>

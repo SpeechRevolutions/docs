@@ -266,6 +266,78 @@ result = client.transcribe(
             </tr>
             <tr>
               <td>
+                <code>auto_chapters</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>False</code>
+              </td>
+              <td><code>result.chapters</code>: sections covering the whole recording. Billed with <code>summarize</code>, once</td>
+            </tr>
+            <tr>
+              <td>
+                <code>known_speakers</code>
+              </td>
+              <td>
+                <code>list[str] | None</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>Add-on, +$0.02/hr: speaker identification; <code>result.speaker_names</code> maps each speaker to one of these names or roles, or leaves it unnamed. Needs <code>speaker_labels</code></td>
+            </tr>
+            <tr>
+              <td>
+                <code>redact_pii</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>False</code>
+              </td>
+              <td>Add-on, +$0.08/hr: names, organisations, places, addresses, dates and identifying numbers replaced in every format</td>
+            </tr>
+            <tr>
+              <td>
+                <code>redact_pii_policies</code>
+              </td>
+              <td>
+                <code>list[str] | None</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td>Types to redact (<code>PII_POLICIES</code>); default all</td>
+            </tr>
+            <tr>
+              <td>
+                <code>redact_pii_sub</code>
+              </td>
+              <td>
+                <code>str | None</code>
+              </td>
+              <td>
+                <code>None</code>
+              </td>
+              <td><code>&quot;entity_name&quot;</code> (<code>[PERSON_NAME]</code>, default) or <code>&quot;hash&quot;</code> (<code>####</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>entity_detection</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>False</code>
+              </td>
+              <td>Add-on, +$0.08/hr: <code>result.entities</code> (type, text, start, end)</td>
+            </tr>
+            <tr>
+              <td>
                 <code>paragraphs</code>
               </td>
               <td>

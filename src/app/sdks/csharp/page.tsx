@@ -235,6 +235,78 @@ var same = await client.TranscribeAsync("https://example.com/audio.mp3");`}
             </tr>
             <tr>
               <td>
+                <code>AutoChapters</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td><code>result.Chapters</code>: sections covering the whole recording. Billed with <code>Summarize</code>, once</td>
+            </tr>
+            <tr>
+              <td>
+                <code>KnownSpeakers</code>
+              </td>
+              <td>
+                <code>IReadOnlyList&lt;string&gt;?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>Add-on, +$0.02/hr: speaker identification; <code>result.SpeakerNames</code> maps each speaker to one of these names or roles, or leaves it unnamed. Needs <code>SpeakerLabels</code></td>
+            </tr>
+            <tr>
+              <td>
+                <code>RedactPii</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.08/hr: names, organisations, places, addresses, dates and identifying numbers replaced in every format</td>
+            </tr>
+            <tr>
+              <td>
+                <code>RedactPiiPolicies</code>
+              </td>
+              <td>
+                <code>IReadOnlyList&lt;string&gt;?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td>Types to redact (<code>PiiPolicies.All</code>); default all</td>
+            </tr>
+            <tr>
+              <td>
+                <code>RedactPiiSub</code>
+              </td>
+              <td>
+                <code>string?</code>
+              </td>
+              <td>
+                <code>null</code>
+              </td>
+              <td><code>&quot;entity_name&quot;</code> (<code>[PERSON_NAME]</code>, default) or <code>&quot;hash&quot;</code> (<code>####</code>)</td>
+            </tr>
+            <tr>
+              <td>
+                <code>EntityDetection</code>
+              </td>
+              <td>
+                <code>bool</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>Add-on, +$0.08/hr: <code>result.Entities</code> (type, text, start, end)</td>
+            </tr>
+            <tr>
+              <td>
                 <code>Paragraphs</code>
               </td>
               <td>
