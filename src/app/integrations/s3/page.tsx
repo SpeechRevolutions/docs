@@ -92,7 +92,7 @@ const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
 const SRC_BUCKET = "my-audio";
 const OUT_BUCKET = "my-transcripts";
 
-export async function transcribeS3Object(key: string): Promise<string> {
+export async function transcribeS3Object(key) {
   // 1. Presign a short-lived GET so Speech Revolutions can read the object.
   const audioUrl = await getSignedUrl(
     s3,

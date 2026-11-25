@@ -140,7 +140,12 @@ def substitutions() -> list[tuple[str, str]]:
     return subs
 
 
+#: getting-started renders `${SAMPLE}` (a JSX constant) as this hosted sample: the reader sees the URL.
+SAMPLE_URL = "https://docs.speechrevolutions.com/samples/diamond-necklace.mp3"
+
+
 def apply_subs(code: str) -> str:
+    code = code.replace("${SAMPLE}", SAMPLE_URL)
     for old, new in substitutions():
         code = code.replace(old, new)
     return code
@@ -566,6 +571,11 @@ def bash_fixtures(work: str) -> None:
     src = os.path.join(WORKSPACE, "meeting.mp3")
     for name in ("meeting.mp3", "audio.mp3"):
         shutil.copy(src, os.path.join(work, name))
+    # every other fixture the pages name (sample.mp3, talk.mp3, files.txt ...): the shell runs in its own dir
+    for name in os.listdir(WORKSPACE):
+        p = os.path.join(WORKSPACE, name)
+        if os.path.isfile(p) and not os.path.exists(os.path.join(work, name)):
+            shutil.copy(p, os.path.join(work, name))
     # /tutorials/subtitles burns captions.srt into talk.mp4.
     with io.open(os.path.join(work, "captions.srt"), "w", encoding="utf-8") as fh:
         fh.write("1\n00:00:00,000 --> 00:00:02,000\nhello\n\n")
@@ -692,6 +702,8 @@ RUNNERS = {"python": run_python, "ts": run_ts, "go": run_go,
 
 
 def main() -> int:
+    # the webhooks page tells the reader to `export SPEECHREVOLUTIONS_WEBHOOK_SECRET=...` first
+    os.environ.setdefault("SPEECHREVOLUTIONS_WEBHOOK_SECRET", "whsec_snippet_runner")
     wanted = set(sys.argv[1:]) or set(RUNNERS)
     os.makedirs(WORKSPACE, exist_ok=True)
 
