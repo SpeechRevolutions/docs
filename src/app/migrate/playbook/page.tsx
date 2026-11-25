@@ -118,12 +118,12 @@ def transcribe(audio: str) -> dict:
           {
             label: "JavaScript",
             language: "ts",
-            code: `// transcription.ts — the ONE place your app calls
+            code: `// transcription.js — the ONE place your app calls
 import { SpeechRevolutions } from "speechrevolutions";
 
 const client = new SpeechRevolutions(); // SPEECHREVOLUTIONS_API_KEY
 
-export async function transcribe(audio: string) {
+export async function transcribe(audio) {
   const r = await client.transcribe(audio, { speakerLabels: true, wordTimestamps: true });
   return {
     text: r.text,

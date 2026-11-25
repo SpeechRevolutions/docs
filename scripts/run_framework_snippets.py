@@ -46,6 +46,9 @@ PY_SRC = os.path.join(SIBLING, "python-sdk", "src")
 NODE_DIR = os.path.join(SIBLING, "node-sdk")
 WORKSPACE = R.WORKSPACE
 SECRET = "whsec_framework_runner"
+# The pages name the secret SPEECHREVOLUTIONS_WEBHOOK_SECRET (renamed after this runner was written; the old names stay
+# for the snippets that still read them). Every server env below spreads os.environ, so this reaches all of them.
+os.environ["SPEECHREVOLUTIONS_WEBHOOK_SECRET"] = SECRET
 
 
 def free_port() -> int:
@@ -673,6 +676,7 @@ USE_TZ = True
 MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]
 TEMPLATES = []
 STT_WEBHOOK_SECRET = "%s"
+SPEECHREVOLUTIONS_WEBHOOK_SECRET = STT_WEBHOOK_SECRET  # the name the Django page reads
 '''
 
 
