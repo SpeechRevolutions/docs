@@ -17,6 +17,9 @@ react, undici, @aws-sdk/client-s3, @aws-sdk/s3-request-presigner beside node-sdk
 3. `scripts/sweep/run_sdk_readmes.py` -- the SDK README blocks + examples/ (copy beside the SDKs)
 4. `scripts/sweep/run_cookbook_live.py` -- every cookbook recipe's usage line (SR_BUCKET = the scratch bucket);
    plus `pytest tests` in the cookbook (against the mock)
+5. `scripts/sweep/run_landing.py` -- every landing-site sample (samples.ts quickstart + install lines, use-case
+   pages, blog code blocks); LANDING = a landing checkout, read at origin/main
 
 2026-11-24 result: docs 232 ran / 2 failed (a fragment; a shell call to a receiver it expects running) / 58 skipped
 by design; framework 16/16; SDK READMEs 41/43 (two fragments) + examples 12/12; cookbook 15/15 live + 60/60 mock.
+2026-11-25: landing 15/15 (published 1.0.0 SDKs).
